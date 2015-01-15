@@ -1,0 +1,30 @@
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="col-md-6">
+          <h3>Heading</h3>
+          <button class="btn">New</button>
+          <div ng-controller="MyController">
+            <ul class="list-group">
+              <li class="list-group-item" ng-repeat="task in visibleTasks">{{task.Description}}</li>
+            </ul>
+            
+          </div>
+        </div>
+        <div class="col-md-6">
+          <h2>Heading</h2>
+          <p>
+            <div id='messagesDiv'></div>
+            <input type='text' id='nameInput' placeholder='Name'>
+            <input type='text' id='messageInput' placeholder='Message'>
+          </p>
+       </div>
+       
+      </div>
+
+      <hr>
+
+      <footer>
+        <p>&copy; Andrew Buchan 2015</p>
+      </footer>
+    </div> <!-- /container -->
