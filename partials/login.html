@@ -1,3 +1,27 @@
+
+
 <div>
-  Login
+  <div ng-show="user">
+    <p>Hello, {{ user.facebook.displayName }}</p>
+    <button ng-click="auth.$unauth()">Logout</button>
+  </div>
+  <div ng-hide="user">
+    <p>Welcome, please log in.</p>
+     <form class="navbar-form" novalidate>
+      <div class="form-group">
+        <input type="text" ng-model="email" placeholder="email" class="form-control" name="uName" required="" />
+      </div>
+      <div class="form-group">
+        <input type="text" ng-model="password" placeholder="password" class="form-control" required="" />
+      </div>
+      <button ng-click="login(email, password)" class="btn btn-success">Sign in</button>
+    </form>
+  </div>
 </div>
+
+<!--
+TODO: 
+Create register form
+Make this form work using examples in Notes of Forms.
+
+-->

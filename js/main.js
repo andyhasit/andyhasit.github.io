@@ -1,83 +1,87 @@
-/*
 
-
-'use strict';
- 
-var myApp = angular.module('myApp', [
-    'ngRoute',
-    'myApp.home'           // Newly added home module
-]).config(['$routeProvider', function($routeProvider) {
-    // Set defualt view of our app to home
-     
-    $routeProvider.otherwise({
-        redirectTo: '/home'
-    });
-}]);
-
-*/
-
-var MyObject = function MyObject(name) {
-  this.name = name;
-}
-
-MyObject.prototype.go = function(){
-  alert(self.name);
-}
-
-var myDataRef = new Firebase('https://glowing-torch-7948.firebaseio.com/');
+//var myDataRef = new Firebase('https://glowing-torch-7948.firebaseio.com/');
 
 var app = angular.module('myApp', ['firebase', 'ngRoute']);
 
-app.config(['$routeProvider',
-  function($routeProvider) {
+// let's create a re-usable factory that generates the $firebaseAuth instance
+app.factory("Auth", ["$firebaseAuth", function($firebaseAuth) {
+  var myDataRef = new Firebase('https://glowing-torch-7948.firebaseio.com/');
+  return $firebaseAuth(myDataRef);
+}]);
+
+app.run(["$rootScope", "$location", function($rootScope, $location) {
+  $rootScope.$on("$routeChangeError", function(event, next, previous, error) {
+    // We can catch the error thrown when the $requireAuth promise is rejected
+    // and redirect the user back to the home page
+    console.log('changed route ');
+    if (error === "AUTH_REQUIRED") {
+      $location.path("/login");
+    } else {
+      $location.path("/home");
+    }
+  });
+}]);
+
+app.config(['$routeProvider', function($routeProvider) {
     $routeProvider.
       when('/tasks', {
         templateUrl: 'partials/tasks.html',
-        controller: 'MyController'
+        controller: 'MyController',
+        resolve: {
+          // controller will not be loaded until $waitForAuth resolves
+          // Auth refers to our $firebaseAuth wrapper in the example above
+          "currentAuth": ["Auth", function(Auth) {
+            // $waitForAuth returns a promise so the resolve waits for it to complete
+            return Auth.$requireAuth();
+          }]
+        }
       }).
       when('/phones/:phoneId', {
         templateUrl: 'partials/phone-detail.html',
         controller: 'PhoneDetailCtrl'
       }).
+      when('/login', {
+        templateUrl: 'partials/login.html',
+        controller: 'Login'
+      }).
       otherwise({
-        redirectTo: '/tasks'
+        redirectTo: '/login'
       });
   }]);
 
-app.controller("MyController", function($scope, $firebase) {
+
+app.controller("MyController", ["$scope", '$location', '$firebase', "currentAuth", function($scope, $location, $firebase, currentAuth) {
+//app.controller("MyController", ["$scope", '$location', '$firebase',  function($scope, $location, $firebase) {
   //Gonna have to incorporate the user name in this.
   var ref = new Firebase('https://glowing-torch-7948.firebaseio.com/tasks');
   var sync = $firebase(ref);
-  a = new MyObject('me');
-  //a.go();
+  if (currentAuth === null){
+    $location.path("/login");
+  } 
+  else {
+    $scope.auth = currentAuth;
+    console.log(currentAuth.$authWithPassword);
+    $scope.user = $scope.auth.uid;
+  }
+  
   // download the data into a local object
   $scope.visibleTasks = sync.$asArray();
+}]);
 
-  // synchronize the object with a three-way data binding
-  // click on `index.html` above to see it used in the DOM!
-  // syncObject.$bindTo($scope, "data");
-});
-
-
-$('#messageInput').keypress(function (e) {
-  if (e.keyCode == 13) {
-    var name = $('#nameInput').val();
-    var text = $('#messageInput').val();
-    myDataRef.push({name: name, text: text});
-    $('#messageInput').val('');
+app.controller('Login', ["$scope", "Auth",
+  function($scope, Auth) {
+    $scope.auth = Auth;
+    $scope.login = function(email, password) {
+      $scope.auth.$authWithPassword({
+        email: email,
+        password: password
+      }).then(function(authData) {
+        console.log("Logged in as:", authData.uid);
+      }).catch(function(error) {
+        console.error("Authentication failed:", error);
+      });
+    };
   }
-});
-  
-myDataRef.on('child_added', function(snapshot) {
-  var message = snapshot.val();
-  displayChatMessage(message.name, message.text);
-});
+]);
 
-function displayChatMessage(name, text) {
-  $('<div/>').text(text).prepend($('<em/>').text(name+': ')).appendTo($('#messagesDiv'));
-  $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
-};
-  
-  
-  
-  
+
