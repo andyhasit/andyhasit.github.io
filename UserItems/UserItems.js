@@ -1,0 +1,64 @@
+
+
+var UserItems = angular.module('UserItems', ['firebase']);
+
+
+UserItems.factory('UserItems', ['$firebase', 'Auth', function($firebase, Auth){
+  //I think this is a correctly built factory which returns the user tasks.
+  var ref = new Firebase('https://glowing-torch-7948.firebaseio.com/tasks');
+  var sync = $firebase(ref);
+  return {
+    tasks : sync.$asArray(),
+    newTask : function(title, offset, tag){
+    //sync.add(); //?
+    },
+    
+  }  
+}]);
+
+
+/*
+
+Or create a UserItems service, which has:
+tasks //sync.$asArray();
+newTask
+editTask
+deleteTask
+newTag
+editTag
+deleteTag
+
+It looks at the Auth service, from which it gets the uid.
+
+Then implement a watch of auth or session in the main controller linked to body to see if user ever logs out.
+
+Auth advice:
+http://stackoverflow.com/questions/20969835/angularjs-login-and-authentication-in-each-route-and-controller
+https://medium.com/opinionated-angularjs/techniques-for-authentication-in-angularjs-applications-7bbf0346acec
+
+Check batarang and karma too.
+
+*/
+
+
+UserItems.controller("MyController", ['$scope', 'UserItems', 'Auth', function($scope, UserItems, Auth){
+  /*Gonna have to incorporate the user name in this.
+  var ref = new Firebase('https://glowing-torch-7948.firebaseio.com/tasks');
+  var sync = $firebase(ref);
+  console.log($scope.auth);
+  */
+  $scope.auth = Auth.firebaseAuthObj;
+  $scope.user = $scope.auth.uid;
+  // download the data into a local object
+  $scope.visibleTasks = UserItems.tasks;
+}]);
+
+UserItems.controller('NewTask', ['$scope', 'UserItems', 'Auth', function($scope, UserItems, Auth){
+  /*Create scope variables, and a function which wraps the function on UserItems.
+  Also move this to a separate module, which will also have a pushTask directive, which can
+  also be used when pushing a batch of tasks.
+  */
+  $scope.newTask = UserItems.newTask;
+}]);
+
+

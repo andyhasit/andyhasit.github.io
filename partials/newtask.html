@@ -1,0 +1,19 @@
+<div class="container">    
+  <div class="row">
+  <form class="form-inline" novalidate>
+      <div class="form-group">
+        <label for="title">Task:</label>
+        <input type="text" ng-model="title" placeholder="task..." class="form-control" name="title" required="" />
+      </div>
+      <div class="form-group">
+        <label for="offset">Offset:</label>
+        <input type="text" ng-model="offset" class="form-control" name="offset" required="" />
+      </div>
+      <div class="form-group">
+        <label for="offset">Tag:</label>
+        <input type="text" ng-model="tag" class="form-control" name="tag" required="" />
+      </div>
+      <input type="submit" ng-click="newtask(title, offset, tag)" class="btn btn-success" value="Save"/>
+    </form>
+  </div>
+<div>
