@@ -1,5 +1,3 @@
-
-
 <div>
   <div ng-show="user">
     <p>Hello, {{ user.facebook.displayName }}</p>
@@ -9,10 +7,10 @@
     <p>Welcome, please log in.</p>
      <form class="navbar-form" novalidate>
       <div class="form-group">
-        <input type="text" ng-model="email" placeholder="email" class="form-control" name="uName" required="" />
+        <input type="text" ng-model="email" placeholder="email" class="form-control" name="email" required="" />
       </div>
       <div class="form-group">
-        <input type="text" ng-model="password" placeholder="password" class="form-control" required="" />
+        <input type="text" ng-model="password" placeholder="password" class="form-control" name="password" required="" />
       </div>
       <button ng-click="login(email, password)" class="btn btn-success">Sign in</button>
     </form>
@@ -21,7 +19,9 @@
 
 <!--
 TODO: 
-Create register form
+Create register form . 
+
+Remove reference to scope user as not used, or make use of it.
 Make this form work using examples in Notes of Forms.
 
 -->
