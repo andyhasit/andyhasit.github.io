@@ -2,9 +2,18 @@
 
 /* ==========================================================================
    Author's custom styles
-   ========================================================================== */
+   =========================================================================
+ */
+ 
+.taskListContainer {
+  padding:5px;
+  border: 2px solid grey;
+  border-radius:5px;
+}
 
-
+#taskListTable>thead>tr>th, #taskListTable>tbody>tr>th, #taskListTable>tfoot>tr>th, #taskListTable>thead>tr>td, #taskListTable>tbody>tr>td, #taskListTable>tfoot>tr>td {
+  padding:2px;
+}
 
 
 

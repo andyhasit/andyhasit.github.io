@@ -2,21 +2,51 @@
 
 var UserItems = angular.module('UserItems', ['firebase']);
 
-
-
-
-
-UserItems.factory('UserItems', ['$firebase', '$location', 'Auth', function($firebase, $location, Auth){
-  //I think this is a correctly built factory which returns the user tasks.
+UserItems.factory('UserItems', [
+  '$firebase', 
+  'DateService', 
+  '$location', 
+  'Auth', 
+  function($firebase, DateService, $location, Auth){
   
   var uid = Auth.authObj.$getAuth().uid;
   var usersRef = new Firebase('https://glowing-torch-7948.firebaseio.com/fuzzcal/users');
   var userNode = usersRef.child(uid);
   var tasksRef = userNode.child('tasks');
   var tagsRef = userNode.child('tags');
-  var tasks = $firebase(tasksRef).$asArray();
+  var tasks = $firebase(tasksRef.orderByChild('datetime')).$asArray();
   
-  //This bit tests if data exists, else adds it.
+  //Assign incremental handles to each object.
+  var tmpTask = {};
+  var taskByHandle = {};
+  var handleOfTask = {};
+  
+  tasksRef.on("value", function(snapshot) {
+    var handle = 1;
+    snapshot.forEach(function(childSnapshot){
+      tmpTask = childSnapshot.val()
+      taskByHandle[handle] = tmpTask;
+      handleOfTask[childSnapshot.key()] = handle;
+      handle++;
+      console.log(tmpTask);
+    });
+  });
+  
+  /*
+  tasksRef.on("child_added", function(snapshot) {
+    tmpTask = snapshot.val()
+    //tmpTask["handle"] = handle;
+    taskByHandle[handle] = tmpTask;
+    handleOfTask[snapshot.key()] = handle;
+    handle++;
+    console.log(tmpTask);
+  }, function (errorObject) {
+    console.log("The read failed: " + errorObject.code);
+  });
+  */
+  
+  
+  //Create user data if it doesn't exist.
   usersRef.once('value', function(snapshot) {
     if (!snapshot.hasChild(uid)) {
       usersRef.set({
@@ -27,31 +57,6 @@ UserItems.factory('UserItems', ['$firebase', '$location', 'Auth', function($fire
       });
     }
   });
-  
-  var offsetCalculator = function(str){
-    var now = new Date();
-    var diff =  parseInt(str.substr(0, str.length - 1));
-    var marker = str.charAt(str.length - 1);
-    if (marker == 'm'){
-      var newTime = new Date(now.getTime() + diff*60000);
-    } else if (marker == 'h'){
-      var newTime = new Date(now.getTime() + diff*3600000);
-    } else if (marker == 'd'){
-      var newTime = new Date();
-      newTime.setDate(now.getDate() + diff);
-      newTime.setHours(0,0,0,0);
-    } else if (marker == 'w'){
-      var newTime = new Date();
-      newTime.setDate(now.getDate() + diff*7);
-      newTime.setHours(0,0,0,0);
-    } else {
-      alert('Bad offset format'); //TODO: change all this into a promise?
-    }
-    
-    console.log(newTime);
-    console.log(newTime.toJSON());
-    return newTime.toJSON();
-  };
   
   var tagFinder = function(str){
     //Creates the tag, will change this to using references instead (in case name changes)
@@ -67,36 +72,25 @@ UserItems.factory('UserItems', ['$firebase', '$location', 'Auth', function($fire
     return str;
   };
   
-  
   return {
     tasks : tasks,
+    getTaskByHandle : function(x){
+      return taskByHandle[x];
+    },
+    getHandleOfTask : function(task){
+      return handleOfTask[tasks.$keyAt(task)];
+    },
     newTask : function(title, offset, tag){
       task = {
         'title': title,
-        'datetime': offsetCalculator(offset),
+        'datetime': DateService.offsetCalculator(offset),
         //'tag': tagFinder(tag)
         };
-        console.log(task);
         tasks.$add(task).then(function(ref) {
-          var id = ref.key();
-          console.log("added record with id " + id);
           $location.path('/tasks');
         });
     },
-    formatDateTime : function(jsonDate) {
-      date = new Date(jsonDate),
-      datevalues = [
-      date.getFullYear(),
-      date.getMonth()+1,
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds(),
-      ];
-      return date.toUTCString();
-      //date.getDate() + date.getHours() + date.getMinutes(),
-    }
-    
+    formatDateTime : DateService.formatDateTime
   }
 }]);
 
@@ -133,6 +127,7 @@ UserItems.controller('TaskPage', ['$scope', 'UserItems', 'Auth', function($scope
   // download the data into a local object
   $scope.tasks = UserItems.tasks;
   $scope.formatDateTime = UserItems.formatDateTime;
+  $scope.getHandleOfTask = UserItems.getHandleOfTask;
 }]);
 
 UserItems.controller('NewTask', ['$scope', 'UserItems', function($scope, UserItems){

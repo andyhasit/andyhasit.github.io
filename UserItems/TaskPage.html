@@ -1,23 +1,48 @@
 <div class="container">
   <!-- Example row of columns -->
   <div class="row">
+    <div class="col-md-8">
+      <form class="form" novalidate>
+        <div class="form-group">
+          <input type="text" ng-model="command" class="form-control" />
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="row">
     <div class="col-md-6">
-      <h3>Heading</h3>
       <a class="btn" href="#/newtask">New</a>
-      <div>
-      <b>{{user}}</b>
-      <ul class="list-group">
-        <li class="list-group-item" ng-repeat="task in tasks">{{task.title}}  -- {{formatDateTime(task.datetime)}}</li>
-      </ul>
+      <div class="taskListContainer">
+        <table id="taskListTable" class="table table-responsive table-striped ">
+          <tr ng-repeat="task in tasks "><!--| orderBy:'datetime'-->
+            <td>
+              {{formatDateTime(task.datetime)}}
+            </td>
+            <td>
+              {{task.title}}<br/>{{getHandleOfTask(task)}}
+            </td>
+            <td>
+              <button class="btn btn-default" type="button">Toggle</button>
+            </td>
+          </tr>
+        </table>
+        <!--<div class="list-group taskList">
+          <div class="list-group-item" ng-repeat="task in tasks">
+            {{task.title}}  -- {{formatDateTime(task.datetime)}}
+          </div>
+        </div>
+        -->
       </div>
     </div>
     <div class="col-md-6">
-      <h2>Heading</h2>
-      <p>
-        <div id='messagesDiv'></div>
-        <input type='text' id='nameInput' placeholder='Name'>
-        <input type='text' id='messageInput' placeholder='Message'>
-      </p>
+      <br/>
+      <div ng-show="currentTag">
+        <h3>{{currentTag.title}}</h3>
+        <textarea ng-model="currentTag.note" ng-change=""></textarea>
+      </div>
+      <div ng-hide="currentTag">
+      No Tag selected.
+      </div>
     </div>
   </div>
 </div>

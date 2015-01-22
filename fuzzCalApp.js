@@ -5,7 +5,8 @@ var app = angular.module('myApp', [
   'firebase',
   'ngRoute',
   'UserItems',
-  'Login'
+  'Login',
+  'DateService'
   ]);
 
 
