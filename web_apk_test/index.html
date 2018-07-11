@@ -29,6 +29,16 @@
       message: 'You loaded this page on ' + new Date().toLocaleString()
       }
     })
+
+    if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./static/service-worker.js', {scope: '/web_apk_test/'})
+      .then(function(registration) {
+        console.log('Registration successful, scope is:', registration.scope);
+      })
+      .catch(function(error) {
+        console.log('Service worker registration failed, error:', error);
+      });
+    }
     /*
     var doc = document;
     var currentdate = new Date();
