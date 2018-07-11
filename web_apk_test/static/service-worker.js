@@ -17,6 +17,8 @@ var filesToCache = [
 
 ];
 
+var staticCacheName = 'ddkjkkajlskas';
+
 self.addEventListener('install', function(event) {
   console.log('Attempting to install service worker and cache static assets');
   event.waitUntil(
