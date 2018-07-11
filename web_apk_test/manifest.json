@@ -14,8 +14,8 @@
     }
   ],
   "start_url": "/web_apk_test/index.html",
-  "background_color": "#3367D6",
+  "background_color": "#fff",
   "scope": "/web_apk_test/",
   "display": "standalone",
-  "theme_color": "#3367D6"
+  "theme_color": "#fff"
 }
