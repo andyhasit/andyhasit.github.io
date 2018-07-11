@@ -70,3 +70,10 @@ nm._updateDOM = function(){
 nm.addToDo = function(data) {
     nm._save('todo', data).then(nm._updateDOM);
 }
+
+function watcherArrayChanged(items) {
+    newDisplayData = buildDisplayData(items);
+    if (newDisplayData != _this.displayData) {
+        newDisplayData
+    }
+}
