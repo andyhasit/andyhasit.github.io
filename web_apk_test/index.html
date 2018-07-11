@@ -31,7 +31,7 @@
     })
 
     if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./static/service-worker.js', {scope: '/web_apk_test/'})
+    navigator.serviceWorker.register('./static/service-worker.js')
       .then(function(registration) {
         console.log('Registration successful, scope is:', registration.scope);
       })
