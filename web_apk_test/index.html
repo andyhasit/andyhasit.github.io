@@ -6,6 +6,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="./manifest.json">
     <link href="static/style.css" rel="stylesheet">
+    <script type="text/javascript">
+      var timerStart = Date.now();
+    </script>
 </head>
 <body>
   Hello!!!
@@ -39,6 +42,14 @@
         console.log('Service worker registration failed, error:', error);
       });
     }
+
+    $(document).ready(function() {
+       console.log("Time until DOMready: ", Date.now()-timerStart);
+   });
+   $(window).load(function() {
+       console.log("Time until everything loaded: ", Date.now()-timerStart);
+   });
+             
     /*
     var doc = document;
     var currentdate = new Date();
