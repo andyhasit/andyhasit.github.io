@@ -8,9 +8,10 @@
     <link href="static/style.css" rel="stylesheet">
 </head>
 <body>
-
+  <button id="btnAdd">Add to homescreen</button>
 <script>
   let deferredPrompt;
+  btnAdd = $('#btnAdd');
 
   window.addEventListener('beforeinstallprompt', (e) => {
     // Prevent Chrome 67 and earlier from automatically showing the prompt
@@ -18,12 +19,12 @@
     // Stash the event so it can be triggered later.
     deferredPrompt = e;
     // Update UI notify the user they can add to home screen
-    // btnAdd.style.display = 'block';
+    btnAdd.style.display = 'block';
   });
 
   btnAdd.addEventListener('click', (e) => {
     // hide our user interface that shows our A2HS button
-    // btnAdd.style.display = 'none';
+    btnAdd.style.display = 'none';
     // Show the prompt
     deferredPrompt.prompt();
     // Wait for the user to respond to the prompt
