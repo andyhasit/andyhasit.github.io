@@ -16,6 +16,12 @@
   
   <script>
     var doc = document;
+    var currentdate = new Date();
+
+    var ts = '' + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
+
 
     var fragment = doc.createDocumentFragment();
 
@@ -24,7 +30,7 @@
 
         for (j = 0; j < 5; j++) {
           var td = doc.createElement("td");
-          td.innerHTML = "content";
+          td.innerHTML = ts;
           tr.appendChild(td);
         }
         //does not trigger reflow
