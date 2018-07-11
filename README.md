@@ -11,15 +11,20 @@ I use it as a hosting space + rapid development platform for various front end a
 3. Edit locally
 4. Install any index page to mobile by clicking "Add to homepage"
 
+### Links:
 
+https://andyhasit.github.io/pointy
 
-#### Develop, push, refresh!
+https://andyhasit.github.io/web_apk_test
 
+http://zeptojs.com
 
+https://www.html5rocks.com/en/tutorials/webcomponents/customelements
 
-
-
-http://zeptojs.com/
-https://www.html5rocks.com/en/tutorials/webcomponents/customelements/
 https://developer.chrome.com/multidevice/android/installtohomescreen
+
 https://developer.okta.com/blog/2017/07/20/the-ultimate-guide-to-progressive-web-applications
+
+http://appiconmaker.co/
+
+http://www.xiconeditor.com/
