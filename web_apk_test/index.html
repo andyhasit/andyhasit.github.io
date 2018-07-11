@@ -13,7 +13,7 @@
   <script src="static/zepto.min.js"></script>
   <script>
     let deferredPrompt;
-    let btnAdd = $('#btnAdd');
+    let btnAdd = document.getElementById('btnAdd');
 
     window.addEventListener('beforeinstallprompt', (e) => {
       // Prevent Chrome 67 and earlier from automatically showing the prompt
