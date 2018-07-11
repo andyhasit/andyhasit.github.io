@@ -21,7 +21,9 @@
   -->
 
   <div id="app">
-    {{ message }}
+    {{ message }}<br/>
+    {{ msg1 }}<br/>
+    {{ msg2 }}
   </div>
   <script src="https://cdn.jsdelivr.net/npm/vue"></script>
   
@@ -29,7 +31,9 @@
     var app = new Vue({
     el: '#app',
     data: {
-      message: 'You loaded this page on ' + new Date().toLocaleString()
+      message: 'You loaded this page on ' + new Date().toLocaleString(),
+      msg1: '',
+      msg2: '',
       }
     })
 
@@ -44,12 +48,17 @@
     }
 
     $(document).ready(function() {
-       console.log("Time until DOMready: ", Date.now()-timerStart);
+        s = "Time until DOMready: ", Date.now()-timerStart;
+       console.log(s);
+
+       app.msg1 = s;
    });
    $(window).load(function() {
-       console.log("Time until everything loaded: ", Date.now()-timerStart);
+       s = "Time until everything loaded: ", Date.now()-timerStart;
+       console.log(s);
+       app.msg2 = s;
    });
-             
+
     /*
     var doc = document;
     var currentdate = new Date();
