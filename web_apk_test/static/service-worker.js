@@ -13,7 +13,7 @@ var filesToCache = [
 ];
 
 var filesToCache = [
-  'https://cdn.jsdelivr.net/npm/vue'
+  'https://cdn.jsdelivr.net/npm/vue/dist/vue.js'
 
 ];
 

@@ -75,7 +75,24 @@ This is the kind of boiler plate which angular automates. But the problem is tha
 
 The **_updateDOM()** function is provided by NM, and is the only place where magic occurs. For it to do anything, you need to add watchers to the registry.
 
+The way it works is `change observable data` > `change computed data` > `update dom`. The difference between NM and other frameworks is that NM waits for you to say when to move on to each step. The observable approach is for you to tack on watchers.
 
+So instead of lots of little self-updating DOM components with watchers flying everywhere, we have one big registry of ....
+
+##### Scenario: adding to a filtered list.
+
+1. Item gets added to observable data (array)
+2. Watcher gets notified of this change.
+3. Determines if change affects it.
+4. Applies DOM change.
+
+
+
+
+
+Doing it any other way makes it hard to know how often the DOM is updated.
+
+The difference is that we don't use 100's of independent watchers. There is one load of data
 
 It determines what data has changed,
 

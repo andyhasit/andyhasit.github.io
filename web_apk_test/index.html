@@ -6,129 +6,14 @@
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="./manifest.json">
     <link href="static/style.css" rel="stylesheet">
-    <script type="text/javascript">
-      var timerStart = Date.now();
-    </script>
 </head>
 <body>
-  Hello!!!
  
-  <table id="here_table"></table>
-  <!--
-  <script src="static/zepto.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-
-  -->
-
   <div id="app">
-    {{ message }}<br/>
-    {{ msg1 }}<br/>
-    {{ msg2 }}
+    {{ message }}
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="./static/app.js"></script>
   
-  <script>
-    var app = new Vue({
-    el: '#app',
-    data: {
-      message: 'You loaded this page on ' + new Date().toLocaleString(),
-      msg1: '',
-      msg2: '',
-      }
-    })
-
-    if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./static/service-worker.js')
-      .then(function(registration) {
-        console.log('Registration successful, scope is:', registration.scope);
-      })
-      .catch(function(error) {
-        console.log('Service worker registration failed, error:', error);
-      });
-    }
-
-    $(document).ready(function() {
-        s = "Time until DOMready: ", Date.now()-timerStart;
-       console.log(s);
-
-       app.msg1 = s;
-   });
-   $(window).load(function() {
-       s = "Time until everything loaded: ", Date.now()-timerStart;
-       console.log(s);
-       app.msg2 = s;
-   });
-
-    /*
-    var doc = document;
-    var currentdate = new Date();
-
-    var ts = '' + currentdate.getHours() + ":"  
-                + currentdate.getMinutes() + ":" 
-                + currentdate.getSeconds();
-
-
-    var fragment = doc.createDocumentFragment();
-
-    for (i = 0; i < 300; i++) {
-        var tr = doc.createElement("tr");
-
-        for (j = 0; j < 5; j++) {
-          var td = doc.createElement("td");
-          td.innerHTML = ts;
-          tr.appendChild(td);
-        }
-        //does not trigger reflow
-        fragment.appendChild(tr);
-    }
-
-    var table = doc.createElement("table");
-
-    table.appendChild(fragment);
-
-    doc.getElementById("here_table").appendChild(table);
-
-
-    var app = new Vue({
-      el: '#app',
-      data: {
-        message: 'Bawjaws!'
-      }
-    })
-    <button id="btnAdd">Add to homescreen</button>
-
-    let deferredPrompt;
-    let btnAdd = document.getElementById('btnAdd');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
-      e.preventDefault();
-      // Stash the event so it can be triggered later.
-      deferredPrompt = e;
-      // Update UI notify the user they can add to home screen
-      btnAdd.style.display = 'block';
-    });
-
-    btnAdd.addEventListener('click', (e) => {
-      // hide our user interface that shows our A2HS button
-      btnAdd.style.display = 'none';
-      // Show the prompt
-      deferredPrompt.prompt();
-      // Wait for the user to respond to the prompt
-      deferredPrompt.userChoice
-        .then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User accepted the A2HS prompt');
-          } else {
-            console.log('User dismissed the A2HS prompt');
-          }
-          deferredPrompt = null;
-        });
-    });
-
-    window.addEventListener('appinstalled', (evt) => {
-      console.log('a2hs', 'installed');
-    });
-    */
   </script>
 </body>

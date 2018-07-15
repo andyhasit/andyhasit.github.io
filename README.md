@@ -25,6 +25,8 @@ https://developer.chrome.com/multidevice/android/installtohomescreen
 
 https://developer.okta.com/blog/2017/07/20/the-ultimate-guide-to-progressive-web-applications
 
-http://appiconmaker.co/
+http://appiconmaker.co
 
-http://www.xiconeditor.com/
+http://www.xiconeditor.com
+
+https://gist.github.com/austinhyde/4321f22a476e1cbee65f
