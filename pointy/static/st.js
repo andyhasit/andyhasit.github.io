@@ -77,3 +77,113 @@ function watcherArrayChanged(items) {
         newDisplayData
     }
 }
+
+
+dom.def('<div></div>', {
+    watch: nm.etc,
+
+});
+
+pageSwapper = new Controller()
+
+dom.link('app', appController)
+
+dom = [
+    menu,
+    pageSwapper
+]
+
+function redraw(e, newDom) {
+
+}
+
+root.redraw()
+
+
+function Updater(e) {
+   
+}
+
+Updater.prototype.redraw = function() {
+    var newInner = this.inner();
+    if (this.$oldInner === newInner) {
+        this.$oldInner = newInner;
+        this.$e.innerHTML = newInner; // TODO: smooth this out
+    }
+};
+
+Updater.prototype.attributes = function() {
+    return {};
+};
+
+// Generate end list of elements
+RepeatUpdater.prototype.inner = function() {
+    return this.users.map(function(user) {
+        return `<li>${user.name}</li>`
+    });
+};
+
+/*
+Problem is that it only controls one level of depth
+
+
+
+
+on load:
+    build model
+    bind & register updaters (order is important)
+
+
+
+All we need is:
+
+- a model
+- all changes go via the model
+- a system of objects linked to DOM elements which update the HTML when the model changes.
+
+Additionally, it would be good 
+
+
+https://davidwalsh.name/watch-object-changes
+
+and 
+
+function isHidden(el) {
+    return (el.offsetParent === null)
+}
+
+
+*/
+
+
+ui = {
+    tag: function(type, atts) {
+        //atts -- conver obj to key pairs
+        return `<${type} ` + atts + '>'
+    },
+    wrap: function(type, inner, atts) {
+        return self.tag(type, atts) + inner + `</${type}>`
+    },
+    modal: function(inner, atts) {
+        return `<div id="${id}" class="${css}">` + inner + '</div>'
+    },
+    modal: function(inner, id, css) {
+        return `<div id="modal-add-item" class="modal-background">` + inner + '</div>'
+    },
+
+
+        <!-- Modal Content -->
+        <form class="modal-content modal-animate">
+            <label for="nnn">
+                <b>Username</b>
+                <input type="text" placeholder="Details" name="task_name">
+            </label>
+            <label for="task">
+                <b>Task</b>
+                <select name="task"></select>
+            </label>
+            
+            <button type="button" class="btn-ok btn-modal-submit">OK</button >
+            <button type="button" onclick="nav.hideModal()" class="btn-cancel">Cancel</button>         
+        </form>
+    </div>

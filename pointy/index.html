@@ -4,7 +4,6 @@
     <title>Hello</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
-    <link rel="manifest" href="./manifest.json">
     <link href="static/style.css" rel="stylesheet">
 </head>
 <body>
@@ -42,7 +41,10 @@
 
         <section id="home">
             Main
-            <button onclick="nav.showModal('modal-add-item')">Add Record</button>
+            <button onclick="nav.showModal('modal-add-item')">Show modal</button>
+            <button onclick="vm.addToDo()">Add Record</button>
+
+            <ul id="my-list"></ul>
         </section>
 
         <section id="about" hidden="true">
@@ -52,15 +54,8 @@
         </section>
 
     </div>
-
-    <div id="app">
-        {{ message }}
-    </div>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
-    <script src="static/nav.js"></script>
+    <script src="static/zepto.min.js"></script>
+    <script src="../js2k/dist/js2k.js"></script>
     <script src="static/app.js"></script>
 </body>
 </html>

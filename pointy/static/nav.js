@@ -1,6 +1,5 @@
-function navPrototype() { var self = this;
+function Navigator() { var self = this;
   var activeModal, activeModalElement, handlers = {};
-
 
   function gbi(id) {return $('#' + id);}
 
@@ -29,7 +28,6 @@ function navPrototype() { var self = this;
   self.hideMenu = function() {
     gbi('menu').width("0%");
   }
-
 
   self.showSection = function(sectionId) {
     $('body').find('section').each(function() {
@@ -62,7 +60,7 @@ function navPrototype() { var self = this;
   }
 
   // When the user clicks anywhere outside of the modal, close it
-  // TODO: allow modal stacking
+  // TODO: allow modal stacking?
   window.onclick = function(event) {
     if (event.target == activeModalElement) {
       activeModal.hide();
