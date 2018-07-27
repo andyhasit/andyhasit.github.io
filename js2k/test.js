@@ -7,12 +7,21 @@ function UiToolkit() {var _ui = this;
     }
   }
 
-  _ui.apply = function(element, vdom) {_this = this;
+  _ui.createElement = function(type) {
+    return document.createElement(type);
+  }
+
+  _ui.apply = function(element, vdom) {
+    if (element.tagName !== vdom.type) {
+      var newElement = _ui.createElement(vdom.type);
+      element.parentNode.replaceChild(element, newElement);
+      element = newElement;
+    }
     if (Array.isArray(vdom.inner)) {
       element.innerHTML = '';
       var fragment = document.createDocumentFragment();
       vdom.inner.forEach(function(child) {
-        var childElement = document.createElement(child.type);
+        var childElement = _ui.createElement(child.type);
         _ui.apply(childElement, child);
         fragment.appendChild(childElement);
       });
@@ -65,14 +74,14 @@ function UiToolkit() {var _ui = this;
   */
 }
 
-  _ui._createElement = function(type, inner, atts) {
+  _ui._virtualDomElement = function(type, inner, atts) {
     return {type: type, inner: inner, atts: atts};
   }
 
   _ui.map = function(target, elements) {
     elements.forEach(function(type) {
       target[type] = function(inner, atts) {
-        return _ui._createElement(type, inner, atts)
+        return _ui._virtualDomElement(type.toUpperCase(), inner, atts)
       }
     })
   }
@@ -81,6 +90,8 @@ function UiToolkit() {var _ui = this;
 
 var ui = new UiToolkit();
 ui.map(window, ['a', 'div', 'li', 'table', 'td', 'th', 'tr', 'ul', 'span']);
+
+// TEST CODE
 
 function choose(choices) {
   var index = Math.floor(Math.random() * choices.length);
