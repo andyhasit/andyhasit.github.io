@@ -40,7 +40,7 @@ function Navigator() { var self = this;
     var handler = handlers['section-load:' + sectionId];
     handler.call();
     self.hideMenu();
-  };
+  }
 
   self.showModal = function(modalId) {
     activeModal = gbi(modalId);

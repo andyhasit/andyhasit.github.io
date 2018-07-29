@@ -1,5 +1,6 @@
 c = console;
 
+
 function UiToolkit() {var _ui = this;
   _ui._setAttributes = function(e, atts) {
     for (var key in atts) {
@@ -11,68 +12,34 @@ function UiToolkit() {var _ui = this;
     return document.createElement(type);
   }
 
-  _ui.apply = function(element, vdom) {
-    if (element.tagName !== vdom.type) {
-      var newElement = _ui.createElement(vdom.type);
+  // naive: rebuilds everything
+  _ui.apply = function(element, def) {
+    // if it is a controller, make sure it is bound
+    
+    // if different type, replace (but let's reuse sub elements?)
+    if (element.tagName !== def.type) {
+      var newElement = _ui.createElement(def.type);
       element.parentNode.replaceChild(element, newElement);
       element = newElement;
     }
-    if (Array.isArray(vdom.inner)) {
+    // if it's an array, recurse
+    if (Array.isArray(def.inner)) {
       element.innerHTML = '';
       var fragment = document.createDocumentFragment();
-      vdom.inner.forEach(function(child) {
-        var childElement = _ui.createElement(child.type);
-        _ui.apply(childElement, child);
+      def.inner.forEach(function(child) {
+        if (child.isController) {
+          var childElement = child.element();
+        } else {
+          var childElement = _ui.createElement(child.type);
+          _ui.apply(childElement, child);
+        }
         fragment.appendChild(childElement);
       });
       element.appendChild(fragment);
     } else {
-      element.innerHTML = vdom.inner;
+      element.innerHTML = def.inner;
     }
   }
-
-  _ui.zip1 = function(element, vdom) {_this = this;
-    if (oldDom.type == newDom.type) {
-      if (oldDom.atts == newDom.atts) {
-        this.setAtts(e, newDom.atts)
-      } 
-      if (Array.isArray(oldDom.inner) && Array.isArray(newDom.inner)) {
-        /*
-        The structure is unlikely to have changed much.
-        Could use ids to drive re-ordering:
-          Get ids, compare lists to do ordering and deletions, then update them in place.
-
-        */
-        for (var i=0; i<newDom.inner.length; i++) {
-          if (i > oldDom.inner.length) {
-            var oldInner = oldDom.inner[i];
-            var newInner = newDom.inner[i];
-            if (oldInner !== newInner) {
-              _this.zip(e.childNodes[i], oldInner, newInner);
-            }
-          } 
-        }
-      } else {
-        e.innerHTML = newDom.inner;
-      }
-    } else {
-      //raise not allowed to change element type, at least on top level
-    }
-  /*
-  }
-  c.log(newDom);
-  if (Array.isArray(newDom.inner)) {
-    var fragment = document.createDocumentFragment();
-    newDom.inner.forEach(function(child) {
-      fragment.appendChild(_this.zip(fragment, child));
-    });
-    e.appendChild(fragment);
-  } else {
-    e.innerHTML = newDom.inner;
-  }
-  return e
-  */
-}
 
   _ui._virtualDomElement = function(type, inner, atts) {
     return {type: type, inner: inner, atts: atts};
@@ -114,7 +81,7 @@ function generateData() {
   }
 }
 
-function genVirtualTable(){
+function genVirtualTable() {
   var header = tr(['id', 'firstName', 'lastName', 'weight'].map(th));
   var rows = data.map(row);
   rows.unshift(header);
@@ -122,12 +89,18 @@ function genVirtualTable(){
   virtualTable = table(rows);
 }
 
-function row(obj){
+function MyController(){
+  this.element = ui.createElement('TD');
+
+}
+
+function row(obj) {
   return tr([
     td(obj.id),
     td(obj.firstName),
     td(obj.lastName),
-    td(obj.weight)
+    td(obj.weight),
+    new MyController()
     ]);
 }
 
