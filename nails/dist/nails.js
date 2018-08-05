@@ -18,7 +18,6 @@ Selling points:
 
 */
 
-c = console;
 
 function VirtualNode(tag, atts, inner) {
   this.tag = tag.toUpperCase();
@@ -37,8 +36,8 @@ function Box(props) {
 
 var box = Box.prototype;
 
-box.isBox = true;
-box.ping = function(vm, changes) {
+Box.prototype.isBox = true;
+Box.prototype.ping = function(vm, changes) {
   if (this.shouldRedraw(vm, changes)) {
     this.redraw(vm, changes);
   }
@@ -47,21 +46,21 @@ box.ping = function(vm, changes) {
   })
 }
 
-box.shouldRedraw = function(vm, changes) {
+Box.prototype.shouldRedraw = function(vm, changes) {
   return this.dirty || true; // TODO: find out if triggered.
 }
 
-box.activeBoxes = function(vm, changes) {
+Box.prototype.activeBoxes = function(vm, changes) {
   return this.childBoxes.filter(function(box){
     return box.isActive();
   });
 }
 
-box.isActive = function() {
+Box.prototype.isActive = function() {
   return true;
 }
 
-box.redraw = function(vm, changes) {
+Box.prototype.redraw = function(vm, changes) {
   this.childBoxes.length = 0;
   this.applyChanges(
     this.boundNode(), 
@@ -74,23 +73,23 @@ box.redraw = function(vm, changes) {
   this.dirty = false;
 }
 
-box.inner = function(vm, changes) {
+Box.prototype.inner = function(vm, changes) {
   return ''
 }
 
-box.atts = function(vm, changes) {
+Box.prototype.atts = function(vm, changes) {
   return {}
 }
 
 // Returns root element
-box.boundNode = function() {
+Box.prototype.boundNode = function() {
   if (this.element == undefined) {
     this.element = document.createElement(this.tag);
   }
   return this.element;
 }
 
-box.setAttributes = function(element, atts) {
+Box.prototype.setAttributes = function(element, atts) {
   for (var key in atts) {
     element.setAttribute(key, atts[key]);
   }
@@ -102,43 +101,9 @@ Definition can be:
   - Box
   - VirtualNode
   - 
-
 */
-box.applyChanges = function(element, definition, boxCollector) {
-  // definition
-  var _this = this;
 
-  this.setAttributes(element, definition.atts);
-  //c.log(definition);
-  var innerDef = definition.inner;
-  if (Array.isArray(innerDef)) {
-    element.innerHTML = '';
-    var fragment = document.createDocumentFragment();
-    innerDef.forEach(function(child) {
-      if (child.isBox) {
-        var childElement = child.boundNode();
-        boxCollector.push(child);
-      } else {
-        var childElement = document.createElement(child.tag);
-        _this.applyChanges(childElement, child, boxCollector);
-      }
-      fragment.appendChild(childElement);
-    });
-    element.appendChild(fragment);
-  }
-  else if (innerDef !== undefined && innerDef.isVirtualNode) {
-    _this.applyChanges(element, innerDef, boxCollector)
-  }
-  /*
-  Maybe create text element?
-  */
-  else {
-    element.innerHTML = innerDef;
-  }
-}
-
-
-box.applyChanges = function(element, definition, boxCollector) {
+Box.prototype.applyChanges = function(element, definition, boxCollector) {
   // definition
   var _this = this;
   
@@ -167,13 +132,26 @@ box.applyChanges = function(element, definition, boxCollector) {
     _this.applyChanges(element, innerDef, boxCollector)
   }
   else {
-
     element.innerHTML = innerDef;
   }
 }
 
 
-function boxy(target, elements) {
+ViewModel = function() {
+  this.watchers = [];
+  this.changes = [];
+}
+
+ViewModel.prototype.flush = function() { 
+  var _this = this;
+  this.watchers.forEach(function(watcher){
+    watcher.ping(_this, changes);
+  });
+  this.changes.length = [];
+}
+
+
+function UiUtils(target, elements) {
   function extractInner(args) {
     var inner = Array.prototype.slice.call(args, 1);
     if (inner.length == 1) {

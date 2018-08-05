@@ -1,11 +1,12 @@
 
 /////////////////////////////
 
-boxy(window, ['a', 'b', 'br', 'div', 'li', 'table', 'td', 'th', 'tr', 'ul', 'section', 'span']);
 
-function noatts() {
-  return {}
-}
+c = console;
+
+UiUtils(window, ['a', 'b', 'br', 'div', 'li', 'table', 'td', 'th', 'tr', 'ul', 'section', 'span']);
+
+
 
 function subBox() {
   return new Box({
@@ -69,7 +70,7 @@ b1 = new Box({
 vm = {
   score: 0
 }
-b1.ping(vm);
+//b1.ping(vm);
 
 
 
@@ -80,7 +81,22 @@ sections = [
   {name: 'section3', text: '<i>section3</i>'},
 ]
 
-var menu = new Box({
+
+
+vm2 = {
+  navigation: 'section1',
+}
+//menu.ping(vm2);
+
+
+nav = {
+  boxes: [],
+  flush: function() {
+    
+  }
+}
+
+nav = new Box({
   tag: 'div',
   element: document.getElementById('menu'),
   inner: function(vm) {
@@ -94,23 +110,3 @@ var menu = new Box({
     })
   }
 });
-c.log(menu);
-
-
-vm2 = {
-  navigation: 'section1',
-}
-menu.ping(vm2);
-
-
-
-function go() {
-  vm.score += 1;
-  b1.ping(vm);
-  c.log('-----');
-  c.log(evenScoreBox.element.parentElement);
-  c.log(oddScoreBox.element.parentElement);
-
-  vm2.navigation = 'section3';
-  menu.ping(vm2);
-}
