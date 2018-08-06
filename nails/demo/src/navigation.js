@@ -1,3 +1,4 @@
+/*
 <section id="home">
             Main
             <button onclick="nav.showModal('modal-add-item')">Add Record</button>
@@ -8,15 +9,15 @@
             <p>Click on the element below to open the fullscreen overlay navigation menu.</p>
             <p>In this example, the navigation menu will slide in, from left to right:</p>
         </section>
-
+*/
 
 (function() {
   var attsHidden = {style: 'display: none;'};
   var attsShown = {style: 'display: block;'};
 
-  var pages = {
-    {name: 'home', 
-  }
+  var pages = [
+    {name: 'home'},
+  ]
   var navBox = new Box({
     tag: 'div',
     element: document.getElementById('page-content'),

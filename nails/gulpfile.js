@@ -17,7 +17,7 @@ gulp.task('concat_src', function(){
 
 gulp.task('concat_demo', function(){
   return gulp.src(['demo/src/*.js'])
-    .pipe(concat('nails.js'))
+    .pipe(concat('app.js'))
     .pipe(gulp.dest('demo/dist'))
     .pipe(uglify())
     .on('error', function (err) { console.log(err.toString()); })

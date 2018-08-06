@@ -21,7 +21,7 @@ Selling points:
 
 function Box(props) {
   this.dirty = true;
-  this.childBoxes = [];
+  this._nestedBoxes = [];
   for (var key in props) {
     this[key] = props[key];
   }
@@ -30,11 +30,15 @@ function Box(props) {
 var box = Box.prototype;
 
 Box.prototype.isBox = true;
+
+Box.prototype.init = function(){};
+
 Box.prototype.ping = function(vm, changes) {
   if (this.shouldRedraw(vm, changes)) {
     this.redraw(vm, changes);
   }
-  this.activeBoxes().forEach(function(box) {
+  //todo: cancel this if current element is not visible.
+  this._nestedBoxes.forEach(function(box) {
     box.ping(vm, changes);
   })
 }
@@ -43,43 +47,18 @@ Box.prototype.shouldRedraw = function(vm, changes) {
   return this.dirty || true; // TODO: find out if triggered.
 }
 
-Box.prototype.activeBoxes = function(vm, changes) {
-  return this.childBoxes.filter(function(box){
-    return box.isActive();
-  });
-}
-
 Box.prototype.isActive = function() {
   return true;
 }
 
 Box.prototype.redraw = function(vm, changes) {
-  this.childBoxes.length = 0;
-  this.applyChanges(
-    this.boundNode(), 
-    new VirtualNode(
-      this.tag, 
-      this.atts(vm, changes),
-      this.inner(vm, changes)
-    ),
-    this.childBoxes);
-  this.dirty = false;
-}
-
-Box.prototype.inner = function(vm, changes) {
-  return ''
-}
-
-Box.prototype.atts = function(vm, changes) {
-  return {}
-}
-
-// Returns root element
-Box.prototype.boundNode = function() {
+  var virtual = this.render();
   if (this.element == undefined) {
-    this.element = document.createElement(this.tag);
+    this.element = document.createElement(virtual.tag);
   }
-  return this.element;
+  this._nestedBoxes.length = 0;
+  this.applyChanges(this.element, virtual, this._nestedBoxes);
+  this.dirty = false;
 }
 
 Box.prototype.setAttributes = function(element, atts) {
@@ -96,35 +75,36 @@ Definition can be:
   - 
 */
 
-Box.prototype.applyChanges = function(element, definition, boxCollector) {
-  // definition
-  var _this = this;
-  
-  this.setAttributes(element, definition.atts);
-  //c.log(definition);
-  var innerDef = definition.inner;
-  if (Array.isArray(innerDef)) {
-    element.innerHTML = '';
-    var fragment = document.createDocumentFragment();
-    innerDef.forEach(function(child) {
-      if (child.isBox) {
-        var childElement = child.boundNode();
-        boxCollector.push(child);
-      } else if (child.isVirtualNode) {
-        var childElement = document.createElement(child.tag);
-        _this.applyChanges(childElement, child, boxCollector);
+Box.prototype.applyChanges = function(element, virtual, nestedBoxes) {
+  var nestedElement, fragment, _this = this, inner = virtual.inner;
+  c.log(element);
+  this.setAttributes(element, virtual.atts);
+  if (Array.isArray(inner)) {
+    fragment = document.createDocumentFragment();
+    inner.forEach(function(nested) {
+      if (nested.isBox) {
+        if (nested.element == undefined) { 
+          // if nested box was never bound, render it now.
+          nested.redraw();
+        } else {
+          // else add to nestedBoxes to be pinged once done here.
+          nestedBoxes.push(nested);
+        }
+        nestedElement = nested.element;
+      } else if (nested.isVirtualNode) {
+        nestedElement = document.createElement(nested.tag);
+        _this.applyChanges(nestedElement, nested, nestedBoxes);
+      } else {
+        nestedElement = document.createTextNode(nested);
       }
-      else {
-        childElement = document.createTextNode(child);
-      }
-      fragment.appendChild(childElement);
+      c.log(nestedElement);
+      fragment.appendChild(nestedElement);
     });
+    element.innerHTML = '';
     element.appendChild(fragment);
-  }
-  else if (innerDef !== undefined && innerDef.isVirtualNode) {
-    _this.applyChanges(element, innerDef, boxCollector)
-  }
-  else {
-    element.innerHTML = innerDef;
+  } else if (inner !== undefined && inner.isVirtualNode) {
+    _this.applyChanges(element, inner, nestedBoxes);
+  } else {
+    element.innerHTML = inner;
   }
 }
