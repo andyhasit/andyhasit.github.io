@@ -1,0 +1,16 @@
+/*
+TODO:
+
+    Fix box inheritance. Look at classes.
+
+  - different types of triggers, not just string but watchers.
+  - sort shouldChange when element is reactivated.
+  - wrap for namespace
+
+  Redraw mechanism:
+
+      Explicit events
+      Watch objects
+      Compare
+
+*/

@@ -2,7 +2,7 @@
 
 function BoxRegister() {
   this._types = {};
-  this._reg = {};
+  this._register = {};
 }
 
 
@@ -13,45 +13,42 @@ function copyProps(src, target) {
 };
 
 
+BoxRegister.prototype.getBox = function(name, arguments) {
+  
+  var register = this._register[name];
+  var constructor = this._types[name];
+  var key = constructor.prototype.getKey.apply(constructor.prototype, arguments);
+  if (register.hasOwnProperty(key)) {
+    c.log('reusing ' + name + ' ' + key);
+    var box = register[key];
+    box.update.apply(box, arguments);
+    return box;
+  } else {
+    c.log('building a new ' + name);
+    var box = new constructor();
+    register[key] = box;
+    Box.call(box); // TODO: change this.
+    box.init.apply(box, arguments);
+    return box
+  }
+}
+
 BoxRegister.prototype.new = function(name, mixins, definition) {
   //build prototype from mixins
   var _this = this;
   this._types[name] = function(){};
+  this._register[name] = {};
   var foo = this._types[name];
   copyProps(Box.prototype, foo.prototype);
   mixins.forEach(function(mixin) {
     copyProps(_this._types[mixin].prototype, foo.prototype);
   });
   copyProps(definition, foo.prototype);
+  // The actual function
   this[name] = function() {
-    // todo: get from register
-    var box = new this._types[name]();
-    Box.call(box);
-    box.init.apply(box, arguments);
-    return box
+    return _this.getBox(name, arguments);
   }
 };
-/*
-TODO:
-
-  - different types of triggers, not just string but watchers.
-  - sort shouldChange when element is reactivated.
-  - wrap for namespace
-  - consider doing everything by setting innerHTML & comparing strings
-
-
-  Names:
-    ssjf
-    NoMarkup
-    uok (Under One Kilobyte)
-
-Selling points:
-
-  There is no complicated code in the framework.
-
-*/
-
-
 function Box(props) {
   this.dirty = true;
   this._nestedBoxes = [];
@@ -64,27 +61,48 @@ var box = Box.prototype;
 
 Box.prototype.isBox = true;
 
-Box.prototype.init = function(){};
+/*
+Gets called once when the box is first created with whatever arguments are passed.
+*/
+Box.prototype.init = function(data) {
+  this.data = data;
+};
 
-Box.prototype.ping = function(vm, changes) {
-  if (this.shouldRedraw(vm, changes)) {
-    this.redraw(vm, changes);
+/*
+Gets used by Box register to establish the key
+Note that this function has no access to the object itself.
+'this' resolves to the prototype (like a static method)
+*/
+Box.prototype.getKey = function() {
+  if (this.trackBy !== undefined && arguments.length > 0) {
+    return arguments[0][this.trackBy];
+  }
+  return 'singleton'
+};
+
+/*
+Gets called whenever the box is requested during parent redraw.
+Arguments will be same as init but with changes pushed in front.
+
+This implementation only checks if data has changed.
+*/
+Box.prototype.update = function(data) {
+  //this.dirty = this.data == data;
+  this.data = data;
+  this.dirty = true;
+}
+
+Box.prototype.flush = function() {
+  if (this.dirty) {
+    this.redraw();
   }
   //todo: cancel this if current element is not visible.
   this._nestedBoxes.forEach(function(box) {
-    box.ping(vm, changes);
+    box.flush();
   })
 }
 
-Box.prototype.shouldRedraw = function(vm, changes) {
-  return this.dirty || true; // TODO: find out if triggered.
-}
-
-Box.prototype.isActive = function() {
-  return true;
-}
-
-Box.prototype.redraw = function(vm, changes) {
+Box.prototype.redraw = function() {
   var virtual = this.render();
   if (this.element == undefined) {
     this.element = document.createElement(virtual.tag);
@@ -108,9 +126,15 @@ Definition can be:
   - 
 */
 
+function htmlToElement(html) {
+    var template = document.createElement('template');
+    html = html.trim(); // Never return a text node of whitespace as the result
+    template.innerHTML = html;
+    return template.content.firstChild;
+}
+
 Box.prototype.applyChanges = function(element, virtual, nestedBoxes) {
   var nestedElement, fragment, _this = this, inner = virtual.inner;
-  c.log(element);
   this.setAttributes(element, virtual.atts);
   if (Array.isArray(inner)) {
     fragment = document.createDocumentFragment();
@@ -120,7 +144,7 @@ Box.prototype.applyChanges = function(element, virtual, nestedBoxes) {
           // if nested box was never bound, render it now.
           nested.redraw();
         } else {
-          // else add to nestedBoxes to be pinged once done here.
+          // else add to nestedBoxes to be flushed once done here.
           nestedBoxes.push(nested);
         }
         nestedElement = nested.element;
@@ -128,9 +152,11 @@ Box.prototype.applyChanges = function(element, virtual, nestedBoxes) {
         nestedElement = document.createElement(nested.tag);
         _this.applyChanges(nestedElement, nested, nestedBoxes);
       } else {
-        nestedElement = document.createTextNode(nested);
+        //nestedElement = document.createTextNode(nested);
+        //Maybe https://developer.mozilla.org/en-US/docs/Web/API/range/createContextualFragment
+        nestedElement = document.createElement('div');
+        nestedElement.innerHTML = nested;
       }
-      c.log(nestedElement);
       fragment.appendChild(nestedElement);
     });
     element.innerHTML = '';
@@ -143,17 +169,28 @@ Box.prototype.applyChanges = function(element, virtual, nestedBoxes) {
 }
 
 
-ViewModel = function() {
-  this.watchers = [];
-  this.changes = [];
+ViewModel = function(props) {
+  this._watchers = [];
+  this._changes = [];
+  for (var key in props) {
+    this[key] = props[key];
+  }
 }
 
 ViewModel.prototype.flush = function() { 
   var _this = this;
-  this.watchers.forEach(function(watcher){
-    watcher.ping(_this, changes);
+  this._watchers.forEach(function(watcher){
+    watcher.update(_this);
+    watcher.flush();
   });
-  this.changes.length = [];
+  this._changes.length = [];
+}
+
+ViewModel.prototype.action = function(name, fn) {
+  this[name] = function() {
+    fn.apply(this, arguments);
+    this.flush();
+  }
 }
 
 

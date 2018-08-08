@@ -4,92 +4,39 @@ UiUtils(window, ['a', 'b', 'br', 'div', 'li', 'table', 'td', 'th', 'tr', 'ul', '
 
 app = {
   box: new BoxRegister(),
-  vm: new ViewModel(),
-  nav: {
-    current: 'home',
+  vm: new ViewModel({
+    currentPage: 'home',
     pages: [
       ['home', 'HomePage'],
       ['page2', 'Page2'],
       ['page3', 'Page3']
     ]
-  }
+  }),
+};
+
+app.vm.action('showMenu', function() {
+  this.menuOpen = true;
+});
+
+app.vm.action('hideMenu', function() {
+  this.menuOpen = false;
+});
+
+app.vm.action('showSection', function(section) {
+  this.currentPage = section;
+  this.menuOpen = false;
+});
+
+app.load = function() {
+  var vm = this.vm;
+  var topLevelBoxes = [
+    ['PageContainer', 'page-content'],
+    ['Menu', 'menu'],
+  ]
+  topLevelBoxes.forEach(function(pair) {
+    var box = app.box[pair[0]](vm);
+    box.element = document.getElementById(pair[1]);
+    vm._watchers.push(box);
+  });
+  vm.flush();
 }
-
-app.box.new('TodoList', [], {
-  init: function(todos) {
-    this.todos = todos;
-  },
-  render: function() {
-    var items = this.todos.map(function(todo) {
-      return app.box.TodoItem(todo);
-    });
-    return div({}, ul({}, items));
-  }
-});
-
-app.box.new('TodoItem', [], {
-  init: function(todo) {
-    this.todo = todo;
-  },
-  render: function() {
-    return li({}, this.todo.text);
-  }
-});
-
-/*
-app.box.new('Page', [], {
-  init: function(active) {
-    this.active = active;
-  },
-  render: function() {
-    return div({disabled: !this.active}, this.content());
-  }
-});
-
-app.box.new('HomePage', ['Page'], {
-  content: function() {
-    return 'The home page';
-  }
-});
-*/
-
-app.box.new('Page', [], {
-  init: function(nav, page) {
-    this.nav = nav;
-    this.route = page[0];
-    this.name = page[1];
-  },
-  attsHidden:  {style: 'display: none;'},
-  attsVisible: {style: 'display: block;'},
-  render: function() {
-    var atts = this.nav.current == this.route? this.attsVisible : this.attsHidden;
-    return div(atts, this.name);
-  }
-});
-
-/*
-Switches visibility of child elements.
-Could unmount, in which case just need to find current page.
-Could hide, in which case:
-  state should be handled in child elements, but then we need to include inactive ones.
-*/
-app.box.new('PageContainer', [], {
-  element: document.getElementById('page-content'),
-  init: function(nav) {
-    this.nav = nav;
-  },
-  render: function() {
-    var _this = this;
-    var pages = this.nav.pages.map(function(page) {
-      //Todo: make this more sophisticated.
-      return app.box.Page(_this.nav, page);
-    });
-    return div({}, pages);
-  }
-});
-
-
-app.box.PageContainer(app.nav).ping();
-/*
-c.log(app.box.TodoItem({text: 'heeey'}).render());
-*/
