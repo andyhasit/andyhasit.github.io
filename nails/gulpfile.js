@@ -1,7 +1,7 @@
 var gulp = require('gulp'),
   concat = require('gulp-concat'),
   rename = require('gulp-rename'),
-  uglify = require('gulp-uglify');
+  uglify = require('gulp-uglifyes');
   watch = require('gulp-watch');
 
 gulp.task('concat_src', function(){

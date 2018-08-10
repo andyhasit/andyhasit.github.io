@@ -1,9 +1,8 @@
 
 c = console;
-UiUtils(window, ['a', 'b', 'br', 'div', 'li', 'table', 'td', 'th', 'tr', 'ul', 'section', 'span']);
+mop.helpers(window, ['a', 'b', 'br', 'div', 'li', 'table', 'td', 'th', 'tr', 'ul', 'section', 'span']);
 
 app = {
-  box: new BoxRegister(),
   vm: new ViewModel({
     currentPage: 'home',
     pages: [
@@ -30,13 +29,14 @@ app.vm.action('showSection', function(section) {
 app.load = function() {
   var vm = this.vm;
   var topLevelBoxes = [
-    ['PageContainer', 'page-content'],
-    ['Menu', 'menu'],
+    [PageContainer, 'page-content'],
+    [Menu, 'menu'],
   ]
   topLevelBoxes.forEach(function(pair) {
-    var box = app.box[pair[0]](vm);
+    var box = mop.box(pair[0], vm);
     box.element = document.getElementById(pair[1]);
     vm._watchers.push(box);
   });
   vm.flush();
 }
+

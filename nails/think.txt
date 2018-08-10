@@ -1,7 +1,14 @@
 /*
 TODO:
 
-    Fix box inheritance. Look at classes.
+    Big tickets:
+        Fix box inheritance
+            Look at classes instead.
+            https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
+            https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf
+
+        Use virtual DOM to patch
+            https://github.com/Matt-Esch/virtual-dom
 
   - different types of triggers, not just string but watchers.
   - sort shouldChange when element is reactivated.
