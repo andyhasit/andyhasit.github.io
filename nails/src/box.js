@@ -7,7 +7,7 @@ How it works:
   The redraw identifies all the child boxes to be shown.
   The flush then cascades to them.
 
-
+  The box object has 4 public methods: constructor, push, flush and getKey (which is static). All the other methods start with _ and are internal.
 
 
 
@@ -28,7 +28,7 @@ class Box {
       return arguments[0][this.trackBy]
     }
   }
-  update(data) {
+  push(data) {
     this._data = data
     this._dirty = true
   }
@@ -42,22 +42,75 @@ class Box {
     })
   }
   _redraw() {
-    let virtual = this.render();
+    let virtual = this.render()
     if (this.element == undefined) {
       this.element = document.createElement(virtual.tag)
     }
     this._childBoxes.length = 0
-    this._applyChanges(this.element, virtual, this._childBoxes)
+    this._updateNode(this.element, virtual, this._childBoxes)
     this._dirty = false
   }
-  _setAtts(element, atts) {
+  _updateNode(element, virtual, childBoxes) {
+    let inner = virtual.inner;
+    this._updateElement(element, virtual.atts)
+    if (Array.isArray(inner)) {
+      this._updateChildren(element, inner, childBoxes)
+    } else if (inner !== undefined && inner.isVirtualNode) {
+      this._updateNode(element, inner, childBoxes)
+    } else {
+      // maybe convert to string first?
+      if (element.innerHTML !== inner) {
+        let old = element.innerHTML
+        element.innerHTML = inner
+        //c.log(`updated "${old}" to "${inner}"`)
+      }
+    }
+  }
+  _updateChildren(element, children, childBoxes) {
+    /*
+    This function gets called when inner is an array.
+
+    */
+    let _this = this
+    let fragment = document.createDocumentFragment()
+    children.forEach(function(child) {
+      let childElement
+      if (child instanceof mop.Box) {
+        if (child.element == undefined) { 
+          // if child box was never bound, render it now.
+          child._redraw()
+        } else {
+          // else add to childBoxes to be flushed once done here.
+          childBoxes.push(child)
+        }
+        childElement = child.element
+      } else if (child.isVirtualNode) {
+        childElement = document.createElement(child.tag)
+        _this._updateNode(childElement, child, childBoxes)
+      } else {
+        //childElement = document.createTextNode(child);
+        //Maybe https://developer.mozilla.org/en-US/docs/Web/API/range/createContextualFragment
+        childElement = document.createElement('div')
+        childElement.innerHTML = child
+      }
+      fragment.appendChild(childElement)
+    });
+    element.innerHTML = ''
+    element.appendChild(fragment)
+    /*
+    element.style.display = 'none';
+    element.style.display = 'block';
+    c.log(fragment)
+    */
+  }
+  _updateElement(element, atts) {
     for (var key in atts) {
       element.setAttribute(key, atts[key]);
     }
   }
-  _applyChanges(element, virtual, childBoxes) {
+  _updateNodeOld(element, virtual, childBoxes) {
     var childElement, fragment, _this = this, inner = virtual.inner;
-    this._setAtts(element, virtual.atts)
+    this._updateElement(element, virtual.atts)
     if (Array.isArray(inner)) {
       fragment = document.createDocumentFragment()
       inner.forEach(function(child) {
@@ -72,7 +125,7 @@ class Box {
           childElement = child.element
         } else if (child.isVirtualNode) {
           childElement = document.createElement(child.tag)
-          _this._applyChanges(childElement, child, childBoxes)
+          _this._updateNode(childElement, child, childBoxes)
         } else {
           //childElement = document.createTextNode(child);
           //Maybe https://developer.mozilla.org/en-US/docs/Web/API/range/createContextualFragment
@@ -84,8 +137,9 @@ class Box {
       element.innerHTML = ''
       element.appendChild(fragment)
     } else if (inner !== undefined && inner.isVirtualNode) {
-      _this._applyChanges(element, inner, childBoxes)
+      _this._updateNode(element, inner, childBoxes)
     } else {
+      c.log(element.innerHTML)
       element.innerHTML = inner
     }
   }

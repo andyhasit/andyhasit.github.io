@@ -10,7 +10,7 @@ ViewModel = function(props) {
 ViewModel.prototype.flush = function() { 
   var _this = this;
   this._watchers.forEach(function(watcher){
-    watcher.update(_this);
+    watcher.push(_this);
     watcher.flush();
   });
   this._changes.length = [];

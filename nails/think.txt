@@ -2,13 +2,15 @@
 TODO:
 
     Big tickets:
-        Fix box inheritance
-            Look at classes instead.
-            https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
-            https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf
+        Make boxes have their own stash
 
         Use virtual DOM to patch
             https://github.com/Matt-Esch/virtual-dom
+
+FastDom:
+
+    https://github.com/wilsonpage/fastdom/blob/master/fastdom-strict.js
+
 
   - different types of triggers, not just string but watchers.
   - sort shouldChange when element is reactivated.
