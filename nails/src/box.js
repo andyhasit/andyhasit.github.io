@@ -26,11 +26,22 @@ How it works:
   }*/
 
 
+class VirtualNode {
+  constructor(tag, atts, inner, listeners) {
+    this.tag = tag.toUpperCase()
+    this.inner = inner
+    this.atts = atts
+    this.listeners = listeners
+  }
+}
+
+
 class Box {
   constructor(data) {
     this._data = data
     this._dirty = true
     this._childBoxes = []
+    this._boxCache = {}
   }
   static getKey() {
     if (this.singleton) {
@@ -65,9 +76,12 @@ class Box {
   _updateNode(element, virtual, childBoxes) {
     let inner = virtual.inner;
     this._updateElement(element, virtual.atts)
+    if (virtual.listeners) {
+      this._updateListeners(element, virtual.listeners)
+    }
     if (Array.isArray(inner)) {
       this._updateChildren(element, inner, childBoxes)
-    } else if (inner !== undefined && inner.isVirtualNode) {
+    } else if (inner !== undefined && inner instanceof VirtualNode) {
       this._updateNode(element, inner, childBoxes)
     } else {
       // maybe convert to string first?
@@ -81,13 +95,12 @@ class Box {
   _updateChildren(element, children, childBoxes) {
     /*
     This function gets called when inner is an array.
-
     */
     let _this = this
     let fragment = document.createDocumentFragment()
     children.forEach(function(child) {
       let childElement
-      if (child instanceof mop.Box) {
+      if (child instanceof Box) {
         if (child.element == undefined) { 
           // if child box was never bound, render it now.
           child._redraw()
@@ -96,7 +109,7 @@ class Box {
           childBoxes.push(child)
         }
         childElement = child.element
-      } else if (child.isVirtualNode) {
+      } else if (child instanceof VirtualNode) {
         childElement = document.createElement(child.tag)
         _this._updateNode(childElement, child, childBoxes)
       } else {
@@ -111,6 +124,95 @@ class Box {
     element.appendChild(fragment)
   }
   _updateElement(element, atts) {
+    for (let key in atts) {
+      element.setAttribute(key, atts[key])
+    }
+  }
+  _updateListeners(element, listeners) {
+    for (let key in listeners) {
+      element.addEventListener(key, listeners[key])
+    }
+  }
+  _(cls, ...args) {
+    className = cls.name
+    let key = cls.getKey.apply(cls, args)
+    if (key == undefined) {
+      return new cls(...args)
+    }
+    if (!this._boxCache.hasOwnProperty(className)) {
+      this._boxCache[className] = {}
+    }
+    let register = this._boxCache[className]
+    if (register.hasOwnProperty(key)) {
+      let box = register[key]
+      box.push.apply(box, args)
+      return box
+    } else {
+      let box = new cls(...args)
+      box._key = key
+      register[key] = box
+      return box
+    }
+  }
+}
+
+function extractInner(args) {
+  var inner = Array.prototype.slice.call(args, 1);
+  if (inner.length == 1) {
+    return inner[0];
+  }
+  return inner;
+  //TODO: could also return '' instead, which removes an extra check in applyChanges
+}
+
+var mop = {
+  Box: Box,
+  _boxRegister: {},
+  box: function(cls, ...args) {
+    className = cls.name
+    let key = cls.getKey.apply(cls, args)
+    if (key == undefined) {
+      return new cls(...args)
+    }
+    if (!this._boxRegister.hasOwnProperty(className)) {
+      this._boxRegister[className] = {}
+    }
+    let register = this._boxRegister[className]
+    if (register.hasOwnProperty(key)) {
+      let box = register[key]
+      box.push.apply(box, args)
+      return box
+    } else {
+      let box = new cls(...args)
+      box._key = key
+      register[key] = box
+      return box
+    }
+  },
+  _box: function(cls, key) {
+    let register = this._boxRegister[cls.name]
+    return register[key]
+  },
+  helpers: function(target, elements) {
+    elements.forEach(function(tag) {
+      target[tag] = function(atts, inner, listeners) {
+        return new VirtualNode(tag, atts, inner, listeners);
+        //return new VirtualNode(tag, arguments[0], extractInner(arguments));
+      }
+    })
+  },
+  html: {}
+}
+
+
+mop.helpers(window, ['a', 'b', 'button', 'br', 'div', 'li', 'input', 'h1', 'table', 'td', 'th', 'tr', 'ul', 'section', 'span']);
+
+
+
+/*
+
+
+_updateElement(element, atts) {
     for (var key in atts) {
       let val = atts[key]
       if (key.startsWith('on') && val.startsWith('@')) {
@@ -127,45 +229,9 @@ class Box {
     }
     return this._eventPrefixStr
   }
-  _updateNodeOld(element, virtual, childBoxes) {
-    var childElement, fragment, _this = this, inner = virtual.inner;
-    this._updateElement(element, virtual.atts)
-    if (Array.isArray(inner)) {
-      fragment = document.createDocumentFragment()
-      inner.forEach(function(child) {
-        if (child instanceof mop.Box) {
-          if (child.element == undefined) { 
-            // if child box was never bound, render it now.
-            child._redraw()
-          } else {
-            // else add to childBoxes to be flushed once done here.
-            childBoxes.push(child)
-          }
-          childElement = child.element
-        } else if (child.isVirtualNode) {
-          childElement = document.createElement(child.tag)
-          _this._updateNode(childElement, child, childBoxes)
-        } else {
-          //childElement = document.createTextNode(child);
-          //Maybe https://developer.mozilla.org/en-US/docs/Web/API/range/createContextualFragment
-          childElement = document.createElement('div')
-          childElement.innerHTML = child
-        }
-        fragment.appendChild(childElement)
-      });
-      element.innerHTML = ''
-      element.appendChild(fragment)
-    } else if (inner !== undefined && inner.isVirtualNode) {
-      _this._updateNode(element, inner, childBoxes)
-    } else {
-      c.log(element.innerHTML)
-      element.innerHTML = inner
-    }
-  }
-}
 
 
-/*
+
 Gets used by Box register to establish the key
 Note that this function has no access to the object itself.
 'this' resolves to the prototype (like a static method)

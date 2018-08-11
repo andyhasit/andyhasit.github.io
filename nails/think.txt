@@ -2,13 +2,13 @@
 TODO:
 
     Big tickets:
-        Make boxes have their own stashes
-            Means @ function needs to change
-
+        Top level box register
             use:
                 this._(ToDo, todo)
                 h.div({}, todo.text)
 
+        Composition for input fields - code reuse & save state
+        Restore focus
 
         Use virtual DOM to patch
             https://github.com/Matt-Esch/virtual-dom

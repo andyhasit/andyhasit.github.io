@@ -1,15 +1,10 @@
 
 c = console;
 
-mop.helpers(window, ['a', 'b', 'button', 'br', 'div', 'li', 'input', 'h1', 'table', 'td', 'th', 'tr', 'ul', 'section', 'span']);
-
-
 class TodoList extends mop.Box {
   render() {
-    var items = this._data.map(function(todo) {
-      return mop.box(TodoItem, todo);
-    });
-    return div({}, ul({}, items));
+    var items = this._data.map(todo => this._(TodoItem, todo))
+    return div({}, ul({}, items))
   }
 }
 
@@ -49,20 +44,36 @@ class HomePage extends Page {
     ]
   }
   addToDo(text) {
-    //let text = document.getElementById('add-todo-txt').value
-    this.todos.push({id: this.todos.length + 1, text: text})
+    this.todos.push({id: this.todos.length + 1, text: this.text})
+    this.text = ''
     this.flush(true)
   }
   renderAddBtn() {
-    return button({onClick:"@addToDo('yo')"}, 'Add')
+    return button({}, 'Add', {click: () => this.addToDo('yo')})
+  }
+  renderInput() {
+    let b = this
+    return input({value: this.text}, null, {
+      keyup: function(event) {
+        b.setText(event)
+      }
+    })
+  }
+  setText(e) {
+    e.preventDefault()
+    if (e.keyCode == 13) {
+      this.addToDo()
+    } else {
+      this.text = e.target.value
+    }
   }
   render() {
     let atts = app.currentPage == this.route? Page.attsVisible : Page.attsHidden;
     return div(atts, [
       h1({}, this.name),
-      //input({id:'add-todo-txt'}, this.text),
+      this.renderInput(),
       this.renderAddBtn(),
-      mop.box(TodoList, this.todos)
+      this._(TodoList, this.todos)
     ]);
   }
 }
@@ -74,10 +85,8 @@ class PageContainer extends mop.Box {
     this._dirty = true
   }
   render() {
-    var pages = app.pages.map(function(page) {
-      return mop.box(page.cls, page);
-    });
-    return div({}, pages);
+    var pages = app.pages.map(page => this._(page.cls, page))
+    return div({}, pages)
   }
 }
 
@@ -95,9 +104,7 @@ MenuEntry.trackBy = 'route';
 
 class Menu extends mop.Box {
   render() {
-    var menuEntries = app.pages.map(function(page) {
-      return mop.box(MenuEntry, page);
-    });
+    var menuEntries = app.pages.map(page => this._(MenuEntry, page))
     let width = app.menuOpen? "70%" : "0%";
     return div(
       {id:"menu", class:"overlay", style:"width: " + width}, 
