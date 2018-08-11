@@ -33,10 +33,12 @@ class Box {
     this._childBoxes = []
   }
   static getKey() {
+    if (this.singleton) {
+      return 'singleton'
+    }
     if (this.trackBy !== undefined && arguments.length > 0) {
       return arguments[0][this.trackBy]
     }
-    return 'singleton'
   }
   push(data) {
     this._data = data

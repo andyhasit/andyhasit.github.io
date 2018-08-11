@@ -5,15 +5,6 @@ mop.helpers(window, ['a', 'b', 'button', 'br', 'div', 'li', 'input', 'h1', 'tabl
 
 
 class TodoList extends mop.Box {
-  /*constructor(todos) {
-    super()
-    this.todos = todos
-  }
-  push(todos) {
-    this.todos = todos
-    this._dirty = true
-  }
-  */
   render() {
     var items = this._data.map(function(todo) {
       return mop.box(TodoItem, todo);
@@ -21,22 +12,13 @@ class TodoList extends mop.Box {
     return div({}, ul({}, items));
   }
 }
-//TodoList.singleton = true
 
 class TodoItem extends mop.Box {
-  /*constructor(todo) {
-    super()
-    this.todo = todo
-  }
-  push(todo) {
-    this.todo = todo
-    this._dirty = true
-  }*/
   render() {
     return li({}, this._data.text);
   }
 }
-TodoItem.trackBy = 'id';
+//TodoItem.trackBy = 'id';
 
 
 class Page extends mop.Box {
@@ -58,7 +40,6 @@ Page.attsVisible = {style: 'display: block;'};
 class HomePage extends Page {
   constructor(page) {
     super(page)
-    let _this = this;
     this.text = '';
     this.todos = [
       {id:1, text:'wash car'},
@@ -67,19 +48,19 @@ class HomePage extends Page {
       {id:4, text:'Buy crickets'},
     ]
   }
-  addToDo() {
-    let text = document.getElementById('add-todo-txt').value
+  addToDo(text) {
+    //let text = document.getElementById('add-todo-txt').value
     this.todos.push({id: this.todos.length + 1, text: text})
     this.flush(true)
   }
   renderAddBtn() {
-    return button({onClick:'@addToDo()'}, 'Add')
+    return button({onClick:"@addToDo('yo')"}, 'Add')
   }
   render() {
     let atts = app.currentPage == this.route? Page.attsVisible : Page.attsHidden;
     return div(atts, [
       h1({}, this.name),
-      input({id:'add-todo-txt'}, this.text),
+      //input({id:'add-todo-txt'}, this.text),
       this.renderAddBtn(),
       mop.box(TodoList, this.todos)
     ]);
@@ -89,6 +70,9 @@ HomePage.trackBy = 'route';
 
 
 class PageContainer extends mop.Box {
+  push() {
+    this._dirty = true
+  }
   render() {
     var pages = app.pages.map(function(page) {
       return mop.box(page.cls, page);
@@ -96,7 +80,6 @@ class PageContainer extends mop.Box {
     return div({}, pages);
   }
 }
-PageContainer.singleton = true;
 
 class MenuEntry extends mop.Box {
   constructor(page) {
@@ -131,7 +114,7 @@ app = new ViewModel({
   currentPage: 'home',
   pages: [
     {cls: HomePage, route: 'home', name: 'HomePage'},
-    //{cls: HomePage, route: 'page2', name: 'Page2'},
+    {cls: HomePage, route: 'page2', name: 'Page2'},
     //{cls: HomePage, route: 'page3', name: 'Page3'},
   ]
 });
@@ -160,6 +143,7 @@ app.load = function() {
     box.element = document.getElementById(pair[1]);
     _this._watchers.push(box);
   });
+  c.log(mop._boxRegister)
   _this.flush();
 }
 

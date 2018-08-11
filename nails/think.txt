@@ -2,7 +2,13 @@
 TODO:
 
     Big tickets:
-        Make boxes have their own stash
+        Make boxes have their own stashes
+            Means @ function needs to change
+
+            use:
+                this._(ToDo, todo)
+                h.div({}, todo.text)
+
 
         Use virtual DOM to patch
             https://github.com/Matt-Esch/virtual-dom
