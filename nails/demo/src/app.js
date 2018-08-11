@@ -1,16 +1,28 @@
 
-c = console;
+c = console
+c.log(mop)
+var h = mop.html
 
 class TodoList extends mop.Box {
   render() {
     var items = this._data.map(todo => this._(TodoItem, todo))
-    return div({}, ul({}, items))
+    return h.div({}, h.ul({}, items))
   }
 }
 
 class TodoItem extends mop.Box {
   render() {
-    return li({}, this._data.text);
+    let text = this._data.text
+    let first = text[0]
+    let color
+    switch(first) {
+      case 'r': color = 'red'; break;
+      case 'b': color = 'blue'; break;
+      case 'y': color = 'yellow'; break;
+      case 'g': color = 'green'; break;
+      default: color = 'black'
+    }
+    return h.li({style:`color: ${color}`}, text);
   }
 }
 //TodoItem.trackBy = 'id';
@@ -24,24 +36,25 @@ class Page extends mop.Box {
   }
   render() {
     let atts = app.currentPage == this.route? Page.attsVisible : Page.attsHidden;
-    return div(atts, this.name);
+    return h.div(atts, this.name);
   }
 }
 Page.trackBy = 'route';
-Page.attsHidden = {style: 'display: none;'};
-Page.attsVisible = {style: 'display: block;'};
+Page.attsHidden = {style: 'display: none; padding: 20px'};
+Page.attsVisible = {style: 'display: block; padding: 20px'};
 
 
 class HomePage extends Page {
   constructor(page) {
     super(page)
     this.text = '';
-    this.todos = [
+    this.todos = []
+    /*
       {id:1, text:'wash car'},
       {id:2, text:'book flights'},
       {id:3, text:'call Dave'},
       {id:4, text:'Buy crickets'},
-    ]
+    ]*/
   }
   addToDo(text) {
     this.todos.push({id: this.todos.length + 1, text: this.text})
@@ -49,11 +62,11 @@ class HomePage extends Page {
     this.flush(true)
   }
   renderAddBtn() {
-    return button({}, 'Add', {click: () => this.addToDo('yo')})
+    return h.button({}, 'Add', {click: () => this.addToDo('yo')})
   }
   renderInput() {
     let b = this
-    return input({value: this.text}, null, {
+    return h.input({value: this.text}, null, {
       keyup: function(event) {
         b.setText(event)
       }
@@ -69,8 +82,8 @@ class HomePage extends Page {
   }
   render() {
     let atts = app.currentPage == this.route? Page.attsVisible : Page.attsHidden;
-    return div(atts, [
-      h1({}, this.name),
+    return h.div(atts, [
+      h.h1({}, this.name),
       this.renderInput(),
       this.renderAddBtn(),
       this._(TodoList, this.todos)
@@ -86,7 +99,7 @@ class PageContainer extends mop.Box {
   }
   render() {
     var pages = app.pages.map(page => this._(page.cls, page))
-    return div({}, pages)
+    return h.div({}, pages)
   }
 }
 
@@ -97,7 +110,7 @@ class MenuEntry extends mop.Box {
     this.name = page.name;
   }
   render() {
-    return a({href:"#", onclick:"app.showSection('"+ this.route +"')"}, this.name);
+    return h.a({href:"#", onclick:"app.showSection('"+ this.route +"')"}, this.name);
   }
 }
 MenuEntry.trackBy = 'route';
@@ -106,21 +119,21 @@ class Menu extends mop.Box {
   render() {
     var menuEntries = app.pages.map(page => this._(MenuEntry, page))
     let width = app.menuOpen? "70%" : "0%";
-    return div(
+    return h.div(
       {id:"menu", class:"overlay", style:"width: " + width}, 
       [
-        a({href:"#", class:"closebtn", onclick:"app.hideMenu()"}, '&times;'),
-        div({class:"overlay-content"}, menuEntries)
+        h.a({href:"#", class:"closebtn", onclick:"app.hideMenu()"}, '&times;'),
+        h.div({class:"overlay-content"}, menuEntries)
       ]
     );
   }
 }
 Menu.singleton = true;
 
-app = new ViewModel({
+app = new mop.ViewModel({
   currentPage: 'home',
   pages: [
-    {cls: HomePage, route: 'home', name: 'HomePage'},
+    {cls: HomePage, route: 'home', name: 'Sophie holiday list'},
     {cls: HomePage, route: 'page2', name: 'Page2'},
     //{cls: HomePage, route: 'page3', name: 'Page3'},
   ]
@@ -140,17 +153,7 @@ app.action('showSection', function(section) {
 });
 
 app.load = function() {
-  let _this = this;
-  let topLevelBoxes = [
-    [PageContainer, 'page-content'],
-    [Menu, 'menu'],
-  ]
-  topLevelBoxes.forEach(function(pair) {
-    var box = mop.box(pair[0], _this);
-    box.element = document.getElementById(pair[1]);
-    _this._watchers.push(box);
-  });
-  c.log(mop._boxRegister)
-  _this.flush();
+  this.bind(PageContainer, 'page-content')
+  this.bind(Menu, 'menu')
+  this.flush()
 }
-

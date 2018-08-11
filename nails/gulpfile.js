@@ -6,7 +6,7 @@ var gulp = require('gulp'),
 
 gulp.task('concat_src', function(){
   return gulp.src(['src/*.js'])
-    .pipe(concat('nails.js'))
+    .pipe(concat('mop.js'))
     .pipe(gulp.dest('dist'))
     .pipe(uglify())
     .on('error', function (err) { console.log(err.toString()); })

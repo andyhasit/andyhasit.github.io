@@ -2,7 +2,6 @@
 TODO:
 
     Big tickets:
-        Top level box register
             use:
                 this._(ToDo, todo)
                 h.div({}, todo.text)
