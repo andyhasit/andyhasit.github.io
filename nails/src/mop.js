@@ -9,26 +9,31 @@ function extractInner(args) {
 
 var mop = {
   Box: Box,
-  boxRegister: {},
+  _boxRegister: {},
   box: function(cls, ...args) {
     className = cls.name
     let key = cls.getKey.apply(cls, args)
     if (key == undefined) {
       return new cls(...args)
     }
-    if (!this.boxRegister.hasOwnProperty(className)) {
-      this.boxRegister[className] = {}
+    if (!this._boxRegister.hasOwnProperty(className)) {
+      this._boxRegister[className] = {}
     }
-    let register = mop.boxRegister[className]
+    let register = this._boxRegister[className]
     if (register.hasOwnProperty(key)) {
       let box = register[key]
       box.push.apply(box, args)
       return box
     } else {
       let box = new cls(...args)
+      box._key = key
       register[key] = box
       return box
     }
+  },
+  _box: function(cls, key) {
+    let register = this._boxRegister[cls.name]
+    return register[key]
   },
   helpers: function(target, elements) {
     elements.forEach(function(tag) {

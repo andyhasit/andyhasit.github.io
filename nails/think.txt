@@ -9,8 +9,7 @@ TODO:
 
 FastDom:
 
-    https://github.com/wilsonpage/fastdom/blob/master/fastdom-strict.js
-
+    https://github.com/wilsonpage/fastdom
 
   - different types of triggers, not just string but watchers.
   - sort shouldChange when element is reactivated.
@@ -21,5 +20,24 @@ FastDom:
       Explicit events
       Watch objects
       Compare
+
+Scopes.
+
+Currently the only way to have actions is by placing them in the vm/app
+this means that flush will be 
+
+There is no binding.
+
+This makes it a bit inefficient as the redraw trigger is propagated to the full app.
+
+Options:
+    retrospectively watch the elements
+    keep track of elements and the boxes they are bound to, so that events
+
+
+    trigger:
+        onClick="mop.find(13422).addToDo()"
+        find will either track the id, or climb up the tree and call the function on the component.
+        Use code shortcuts.        
 
 */

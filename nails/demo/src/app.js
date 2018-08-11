@@ -36,7 +36,7 @@ class TodoItem extends mop.Box {
     return li({}, this._data.text);
   }
 }
-//TodoItem.trackBy = 'id';
+TodoItem.trackBy = 'id';
 
 
 class Page extends mop.Box {
@@ -66,13 +66,14 @@ class HomePage extends Page {
       {id:3, text:'call Dave'},
       {id:4, text:'Buy crickets'},
     ]
-    app.action('saveTodo', function() {
-      let text = document.getElementById('add-todo-txt').value
-      _this.todos.push({id: _this.todos.length + 1, text: text});
-    })
+  }
+  addToDo() {
+    let text = document.getElementById('add-todo-txt').value
+    this.todos.push({id: this.todos.length + 1, text: text})
+    this.flush(true)
   }
   renderAddBtn() {
-    return button({onClick: "app.saveTodo()"}, 'add')
+    return button({onClick:'@addToDo()'}, 'Add')
   }
   render() {
     let atts = app.currentPage == this.route? Page.attsVisible : Page.attsHidden;

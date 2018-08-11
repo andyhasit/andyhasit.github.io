@@ -10,7 +10,7 @@
     <!-- The menu -->
     <div id="menu" class="overlay"></div>
     <!-- The menu button -->
-    <span class="menu-button" onclick="app.vm.showMenu()">&#9776;</span>
+    <span class="menu-button" onclick="app.showMenu()">&#9776;</span>
 
     <!-- The Modals -->
     <div id="modal-add-item" class="modal-background">
@@ -26,7 +26,7 @@
             </label>
             
             <button type="button" class="btn-ok btn-modal-submit">OK</button >
-            <button type="button" onclick="vm.hideModal()" class="btn-cancel">Cancel</button>         
+            <button type="button" onclick="app.hideModal()" class="btn-cancel">Cancel</button>         
         </form>
     </div>
 
@@ -94,6 +94,9 @@
 
     */
 
+    function here(e){
+        c.log(e)
+    }
     app.load();
 
     </script>

@@ -13,6 +13,18 @@ How it works:
 
 */
 
+  /*
+  _event(event, callback) {
+    let m = this
+    let eventName = 'on' + event
+    let fn = function() {
+      m[fn].apply(this, arguments);
+    }
+    return {
+      eventName: 
+    }
+  }*/
+
 
 class Box {
   constructor(data) {
@@ -21,19 +33,17 @@ class Box {
     this._childBoxes = []
   }
   static getKey() {
-    if (this.singleton) {
-      return 'singleton'
-    }
     if (this.trackBy !== undefined && arguments.length > 0) {
       return arguments[0][this.trackBy]
     }
+    return 'singleton'
   }
   push(data) {
     this._data = data
     this._dirty = true
   }
-  flush() {
-    if (this._dirty) {
+  flush(force) {
+    if (force || this._dirty) {
       this._redraw()
     }
     //todo: cancel this if current element is not visible.
@@ -97,16 +107,23 @@ class Box {
     });
     element.innerHTML = ''
     element.appendChild(fragment)
-    /*
-    element.style.display = 'none';
-    element.style.display = 'block';
-    c.log(fragment)
-    */
   }
   _updateElement(element, atts) {
     for (var key in atts) {
-      element.setAttribute(key, atts[key]);
+      let val = atts[key]
+      if (key.startsWith('on') && val.startsWith('@')) {
+        let call = val.slice(1)
+        val = `${this._eventPrefix()}.${call}`
+      }
+      element.setAttribute(key, val);
     }
+  }
+  _eventPrefix() {
+    if (this._eventPrefixStr == undefined) {
+      let c = this.constructor
+      this._eventPrefixStr = `mop._box(${c.name}, '${this._key}')`
+    }
+    return this._eventPrefixStr
   }
   _updateNodeOld(element, virtual, childBoxes) {
     var childElement, fragment, _this = this, inner = virtual.inner;
