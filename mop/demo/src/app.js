@@ -115,11 +115,19 @@ class MenuEntry extends mop.Box {
 MenuEntry.trackBy = 'route';
 
 class Menu extends mop.Box {
+  update(vm) {
+  }
+  _patches() {
+    this.renderAtts()
+  }
+  renderAtts() {
+    let width = app.menuOpen? "70%" : "0%"
+    return {id:"menu", class:"overlay", style:"width: " + width}
+  }
   render() {
     var menuEntries = app.pages.map(page => this._(MenuEntry, page))
-    let width = app.menuOpen? "70%" : "0%";
     return h.div(
-      {id:"menu", class:"overlay", style:"width: " + width}, 
+      this.renderAtts(), 
       [
         h.a({href:"#", class:"closebtn", onclick:"app.hideMenu()"}, '&times;'),
         h.div({class:"overlay-content"}, menuEntries)
@@ -156,97 +164,8 @@ app.action('newTask', function(task) {
 })
 */
 
-class DataStore {
-  constructor(dbName) {
-    this.dbName = dbName
-  }
-  load() {
-    return this.dbPromise = idb.open(this.dbName, 1, upgradeDb => {
-      // Note: we don't use 'break' in this switch statement,
-      // the fall-through behaviour is what we want.
-      /*
-      if (!upgradeDb.objectStoreNames.contains('store3')) {
-        upgradeDb.createObjectStore('store3')
-      }
-      */
-      c.log(upgradeDb.oldVersion)
-      switch (upgradeDb.oldVersion) {
-        case 0:
-          upgradeDb.createObjectStore('task', {keyPath: 'id', autoIncrement: true})
-          upgradeDb.createObjectStore('keyStore', {keyPath: 'table'})
-      }
-    })
-    /*
-    this.dbName = dbName
-    this.keyStore = new idbKeyval.Store(this.dbName, 'keyStore')
-    this.tables = {}
-    */
-  }
-  getAll(tableName) {
-    return this.dbPromise.then(db => {
-      return db.transaction(tableName).objectStore(tableName).getAll()
-    })
-  }
-  get(tableName, id) {
-    return this.dbPromise.then((db) => {
-      const tx = db.transaction(tableName)
-      tx.objectStore(tableName).get(id)
-      return tx.complete
-    })
-  }
-  _put(tableName, record) {
-    return this.dbPromise.then((db) => {
-      const tx = db.transaction(tableName, 'readwrite')
-      tx.objectStore(tableName).put(record)
-      return tx.complete
-    })
-  }
-  _nextId(tableName) {
-    let ks = 'keyStore'
-    return this.get(ks, tableName).then(record => {
-      c.log(record)
-      if (record == undefined) {
-        return this._put(ks, {table: tableName, seed:1}).then(() => 1)
-      } else {
-        record.seed ++
-        return this._put(ks, record).then(() => record.seed)
-      }
-    })
-  }
-  new(tableName, object) {
-    return this.dbPromise.then((db) => {
-      const tx = db.transaction(tableName, 'readwrite')
-      tx.objectStore(tableName).add(object)
-      return tx.complete
-    })
-    .then((x) => {c.log(x); return this.getAll(tableName)})
-    e.target.result
-  }
-  save(tableName, object) {
-    return this.dbPromise.then((db) => {
-      const tx = db.transaction(tableName, 'readwrite')
-      tx.objectStore(tableName).put(object)
-      return tx.complete
-    })
-    .then((x) => {c.log(x); return this.getAll(tableName)})
-
-    /*
-    let store = this.tables[tableName]
-    if (object.hasOwnProperty('_id')) {
-      return idbKeyval.set(object._id, object, store)
-    } else {
-      return this._nextId(tableName).then(id => {
-        object._id = id
-        c.log(id)
-        return idbKeyval.set(id, object, store).then(() => {
-        c.log(store); return object} )
-      })
-    }
-    */
-  }
-}
-
 app.load = function() {
+  /*
   //idb.delete('mop-todo-v1')
   this.db = new DataStore('mop-todo-v1')
   this.db.load().then(db => {
@@ -258,10 +177,28 @@ app.load = function() {
     this.db.getAll('keyStore').then(obj => c.log(obj))
     this.db.get('keyStore', 'task').then(obj => c.log(obj))
     //this.db.load('task').then(tasks => c.log(tasks))
+  })
+  */
+  lsd.delete('mop-todos')
+  this.db = new lsd.Database('mop-todos', 1, function (db, version) { 
+    switch(version) {
+      case 0:
+        c.log(0)
+        db.createObjectStore("todo", {keyPath: "id", autoIncrement: true})
+      case 1: 
+        c.log(1)
+      case 2: 
+        c.log(2)
+    }
+  })
+  this.db.new('todo', {text: 'hey'}).then(e => c.log(e))
+  this.db.new('todo', {text: 'hey'}).then(e => c.log(e))
+  this.db.getAll('todo').then(e => c.log(e))
+
+
     this.bind(PageContainer, 'page-content')
     this.bind(Menu, 'menu')
     this.flush()
-  })
 }
 
 
