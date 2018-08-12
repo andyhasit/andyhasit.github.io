@@ -35,70 +35,10 @@
 
 
     <script src="../dist/mop.js"></script>
+    <script src="dist/idb.js"></script>
     <script src="dist/app.js"></script>
     <script>
-    /*
-    
-    class Base {
-        constructor(data) {
-            this.name = data.name;
-        }
-        
-        static get() {
-            let className = this.name;
-            let id = this.key.call(this, arguments);
-            if (!mop.boxRegister.hasOwnProperty[className]) {
-                mop.boxRegister[className] = {}
-            }
-            let register = mop.boxRegister[className];
-            if (register.hasOwnProperty[id]) {
-                return register[id]
-            } else {
-                let box = new this(...arguments);
-                register[id] = box;
-                return box;
-            }
-        }
-    }
-    class A extends Base {
-        static key(constructorArgs) {
-            return constructorArgs[0]['id'];
-        }
-    }
-
-    c.log(A.get({id: 1, name: 'bob'}).name);
-    c.log(A.get({id: 2, name: 'tom'}).name);
-    c.log(A.get({id: 1, name: 'tom'}).name);
-
-
-
-
-    function foo(obj) {
-        var f = function(){};
-        Object.assign(f.prototype, obj)
-        return f
-    }
-
-    F = foo({
-        a() {
-            c.log('aaaaa');
-        },
-        b() {
-            c.log('bbbbbbbb')
-        }
-    })
-
-    f = new F()
-    c.log(f.__proto__)
-
-
-    */
-
-    function here(e){
-        c.log(e)
-    }
     app.load();
-
     </script>
 </body>
 </html>

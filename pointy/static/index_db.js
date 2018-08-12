@@ -11,6 +11,13 @@ dbRequest.onupgradeneeded = function() {
     var index = store.createIndex("NameIndex", ["name.last", "name.first"]);
 };
 
+/*
+request.onsuccess = function(event) {
+  db = event.target.result;
+};
+*/
+
+
 dbRequest.onsuccess = function() {
     // Start a new transaction
     var db = dbRequest.result;

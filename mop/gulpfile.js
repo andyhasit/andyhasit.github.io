@@ -4,12 +4,17 @@ var gulp = require('gulp'),
   uglify = require('gulp-uglifyes');
   watch = require('gulp-watch');
 
+function swallowError (error) {
+  console.log(error.toString())
+  this.emit('end')
+}
+
 gulp.task('concat_src', function(){
   return gulp.src(['src/*.js'])
     .pipe(concat('mop.js'))
     .pipe(gulp.dest('dist'))
     .pipe(uglify())
-    .on('error', function (err) { console.log(err.toString()); })
+    .on('error', swallowError)
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulp.dest('dist'));
 });
@@ -20,7 +25,7 @@ gulp.task('concat_demo', function(){
     .pipe(concat('app.js'))
     .pipe(gulp.dest('demo/dist'))
     .pipe(uglify())
-    .on('error', function (err) { console.log(err.toString()); })
+    .on('error', swallowError)
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulp.dest('demo/dist'));
 });
