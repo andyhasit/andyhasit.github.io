@@ -43,6 +43,18 @@ Page.attsHidden = {style: 'display: none; padding: 20px'};
 Page.attsVisible = {style: 'display: block; padding: 20px'};
 
 
+class DayView extends mop.Box {
+  constructor(params) {
+    super()
+    this.day = params.day
+  }
+  render() {
+    c.log(this.day)
+    return h.div({}, h.h3({}, this.day))
+  }
+}
+DayView.trackBy = 'day';
+
 class HomePage extends Page {
   constructor(page) {
     super(page)
@@ -96,9 +108,22 @@ class PageContainer extends mop.Box {
   push() {
     this._dirty = true
   }
+  renderGoBtn(cls, params) {
+    return h.button({}, params.day, {click: () => app.goto(cls, params)})
+  }
   render() {
-    var pages = app.pages.map(page => this._(page.cls, page))
-    return h.div({}, pages)
+    //var pages = app.pages.map(page => this._(page.cls, page))
+    c.log(app.currentPage)
+    return h.div({}, 
+      [
+        h.div({}, 
+          [
+            this.renderGoBtn(DayView, {day: 'monday'}),
+            this.renderGoBtn(DayView, {day: 'tuesday'}),
+          ]),
+          h.div({}, app.currentPage)
+      ]
+    )
   }
 }
 
@@ -137,8 +162,10 @@ class Menu extends mop.Box {
 }
 
 app = new mop.ViewModel({
+  root: new mop.Box(),
   currentPage: 'home',
   pages: [
+    {cls: DayView, route: 'day', name: 'DayView'},
     {cls: HomePage, route: 'home', name: 'Sophie holiday list'},
     {cls: HomePage, route: 'page2', name: 'Page2'},
     //{cls: HomePage, route: 'page3', name: 'Page3'},
@@ -158,67 +185,62 @@ app.action('showSection', function(section) {
   this.menuOpen = false
 })
 
+app.action('goto', function(cls, params) {
+  this.currentPage = this.root._(cls, params)
+  c.log(this.currentPage)
+})
+
 /*
 app.action('newTask', function(task) {
   this.
 })
+
+1, 
+    function (db, version) { 
+      switch(version) {
+        case 0:
+          c.log(0)
+          db.createObjectStore("todo", {keyPath: "id", autoIncrement: true})
+        case 1: 
+          c.log(1)
+        case 2: 
+          c.log(2)
+      }
+    },
+
 */
 
 app.load = function() {
-  /*
-  //idb.delete('mop-todo-v1')
-  this.db = new DataStore('mop-todo-v1')
-  this.db.load().then(db => {
-    //this.db.new('task', {text: 'Wake up'}).then(obj => c.log(obj))
-    this.db._nextId('task').then(obj => c.log(obj))
-    this.db._nextId('task').then(obj => c.log(obj))
-    this.db._nextId('task').then(obj => c.log(obj))
-    this.db._nextId('task').then(obj => c.log(obj))
-    this.db.getAll('keyStore').then(obj => c.log(obj))
-    this.db.get('keyStore', 'task').then(obj => c.log(obj))
-    //this.db.load('task').then(tasks => c.log(tasks))
-  })
-  */
   lsd.delete('mop-todos')
-  this.db = new lsd.Database('mop-todos', 1, function (db, version) { 
-    switch(version) {
-      case 0:
-        c.log(0)
-        db.createObjectStore("todo", {keyPath: "id", autoIncrement: true})
-      case 1: 
-        c.log(1)
-      case 2: 
-        c.log(2)
-    }
+  const schema = new lsd.Schema()
+  schema.addVersion(schema => {
+    schema.store('day')
+    schema.store('task')
   })
-  this.db.new('todo', {text: 'hey'}).then(e => c.log(e))
-  this.db.new('todo', {text: 'hey'}).then(e => c.log(e))
-  this.db.getAll('todo').then(e => c.log(e))
+  this.db = new lsd.Database('mop-todos', schema)
+  /*
+  this.db = new lsd.Database('mop-todos', function(db) { 
+    db.table('todo')
+    db.table('bucket')
+  })
 
+  
+  this.db.put('task', {text: 'hey'}).then(e => c.log(e))
+  this.db.put('task', {text: 'hey2'}).then(e => {
+    this.db.get('task', 2).then(e => c.log(e))
+  })
+  //this.db.del('task', {id: 2}).then(e => c.log(e))
+  this.db.getAll('task').then(e => c.log(e))
+  c.log(this.db)
+  */
 
+  this.db.getAll('task').then(tasks => {
+    this.tasks = tasks
     this.bind(PageContainer, 'page-content')
     this.bind(Menu, 'menu')
     this.flush()
+
+  })
+
+    
 }
-
-
-/*
-
-table(tableName) {
-    this.tables[tableName] = new idbKeyval.Store(this.dbName, tableName)
-  }
-  _nextId(tableName) {
-
-    return idbKeyval.get(tableName, this.keyStore).then(id => {
-      if (id == undefined) {
-        return idbKeyval.set(tableName, 1, this.keyStore).then(() => 1)
-      } else {
-        return idbKeyval.get(tableName, this.keyStore).then(id => {
-          id ++
-          return idbKeyval.set(tableName, id, this.keyStore).then(() => id)
-        })
-      }
-    })
-  }
-
-  */

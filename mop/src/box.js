@@ -28,6 +28,10 @@ How it works:
 
 var mop = (function() {
 
+  function createElement(tag) {
+    return document.createElement(tag)
+  }
+
   class Box {
     constructor(data) {
       this._data = data
@@ -59,7 +63,7 @@ var mop = (function() {
     _redraw() {
       let virtual = this.render()
       if (this.element == undefined) {
-        this.element = document.createElement(virtual.tag)
+        this.element = createElement(virtual.tag)
       }
       this._childBoxes.length = 0
       this._updateNode(this.element, virtual, this._childBoxes)
@@ -73,6 +77,9 @@ var mop = (function() {
       }
       if (Array.isArray(inner)) {
         this._updateChildren(element, inner, childBoxes)
+      } else if (inner instanceof Box) {
+        this._handleInnderBox(inner, childBoxes)
+        element.appendChild(inner.element)
       } else if (inner !== undefined && inner instanceof VirtualNode) {
         this._updateNode(element, inner, childBoxes)
       } else {
@@ -84,30 +91,32 @@ var mop = (function() {
         }
       }
     }
+    _handleInnderBox(box, childBoxes) {
+      if (box.element == undefined) { 
+        // if child box was never bound, render it now.
+        box._redraw()
+      } else {
+        // else add to childBoxes to be flushed once done here.
+        childBoxes.push(box)
+      }
+    }
     _updateChildren(element, children, childBoxes) {
       /*
       This function gets called when inner is an array.
       */
-      let _this = this
       let fragment = document.createDocumentFragment()
-      children.forEach(function(child) {
+      children.forEach((child) => {
         let childElement
         if (child instanceof Box) {
-          if (child.element == undefined) { 
-            // if child box was never bound, render it now.
-            child._redraw()
-          } else {
-            // else add to childBoxes to be flushed once done here.
-            childBoxes.push(child)
-          }
+          this._handleInnderBox(child, childBoxes)
           childElement = child.element
         } else if (child instanceof VirtualNode) {
-          childElement = document.createElement(child.tag)
-          _this._updateNode(childElement, child, childBoxes)
+          childElement = createElement(child.tag)
+          this._updateNode(childElement, child, childBoxes)
         } else {
           //childElement = document.createTextNode(child);
           //Maybe https://developer.mozilla.org/en-US/docs/Web/API/range/createContextualFragment
-          childElement = document.createElement('div')
+          childElement = createElement('div')
           childElement.innerHTML = child
         }
         fragment.appendChild(childElement)
@@ -265,7 +274,7 @@ Definition can be:
 
 
 function htmlToElement(html) {
-    var template = document.createElement('template');
+    var template = createElement('template');
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;
     return template.content.firstChild;
