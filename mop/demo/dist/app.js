@@ -49,7 +49,6 @@ class DayView extends mop.Box {
     this.day = params.day
   }
   render() {
-    c.log(this.day)
     return h.div({}, h.h3({}, this.day))
   }
 }
@@ -111,17 +110,14 @@ class PageContainer extends mop.Box {
   renderGoBtn(cls, params) {
     return h.button({}, params.day, {click: () => app.goto(cls, params)})
   }
+  renderDayBtns() {
+    return app.days.map(day => this.renderGoBtn(DayView, day))
+  }
   render() {
-    //var pages = app.pages.map(page => this._(page.cls, page))
-    c.log(app.currentPage)
     return h.div({}, 
       [
-        h.div({}, 
-          [
-            this.renderGoBtn(DayView, {day: 'monday'}),
-            this.renderGoBtn(DayView, {day: 'tuesday'}),
-          ]),
-          h.div({}, app.currentPage)
+        h.div({}, this.renderDayBtns()),
+        h.div({}, app.currentPage)
       ]
     )
   }
@@ -150,22 +146,21 @@ class Menu extends mop.Box {
     return {id:"menu", class:"overlay", style:"width: " + width}
   }
   render() {
-    var menuEntries = app.pages.map(page => this._(MenuEntry, page))
+    var menuEntries = app.menuEntries.map(page => this._(MenuEntry, page))
     return h.div(
       this.renderAtts(), 
       [
         h.a({href:"#", class:"closebtn", onclick:"app.hideMenu()"}, '&times;'),
         h.div({class:"overlay-content"}, menuEntries)
       ]
-    );
+    )
   }
 }
 
 app = new mop.ViewModel({
   root: new mop.Box(),
   currentPage: 'home',
-  pages: [
-    {cls: DayView, route: 'day', name: 'DayView'},
+  menuEntries: [
     {cls: HomePage, route: 'home', name: 'Sophie holiday list'},
     {cls: HomePage, route: 'page2', name: 'Page2'},
     //{cls: HomePage, route: 'page3', name: 'Page3'},
@@ -214,7 +209,8 @@ app.load = function() {
   lsd.delete('mop-todos')
   const schema = new lsd.Schema()
   schema.addVersion(schema => {
-    schema.store('day')
+    let days = schema.store('day')
+    days.put({day: 'wed'})
     schema.store('task')
   })
   this.db = new lsd.Database('mop-todos', schema)
@@ -236,10 +232,13 @@ app.load = function() {
 
   this.db.getAll('task').then(tasks => {
     this.tasks = tasks
-    this.bind(PageContainer, 'page-content')
-    this.bind(Menu, 'menu')
-    this.flush()
-
+    this.db.getAll('day').then(days => {
+      this.days = days
+      c.log(days)
+      this.bind(PageContainer, 'page-content')
+      this.bind(Menu, 'menu')
+      this.flush()
+    })
   })
 
     

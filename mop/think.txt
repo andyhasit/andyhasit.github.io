@@ -4,6 +4,8 @@ TODO:
   Big tickets:
             use:
 
+        Root App for caching
+
         Composition for input fields - code reuse & save state
         Restore focus
 

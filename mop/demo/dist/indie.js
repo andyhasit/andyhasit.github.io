@@ -103,7 +103,7 @@ var lsd = (function (exports) {
      this.conf = conf
     }
     store(name, conf=this.conf) {
-      this.idb.createObjectStore(name, conf)
+      return this.idb.createObjectStore(name, conf)
     }
   }
 
