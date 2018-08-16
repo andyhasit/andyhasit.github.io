@@ -113,28 +113,19 @@ class HomePage extends Page {
 HomePage.trackBy = 'route';
 
 
-class ModalContainer extends mop.Box {
-  push() {
-    this._dirty = true
-  }
-  render() {
-    if (app.currentModal) {
-      return h.div({id: 'modal-container', style: 'display: block;'}, app.currentModal)
-    } else {
-      return h.div({id: 'modal-container', style: 'display: hidden;'}, '')
-    }
-  }
-}
-
 class Modal extends mop.Box {
   constructor(props) {
     super(props)
     this.promise = new Promise((resolve, reject) => {
       this._resolveFn = resolve
+      this._rejectFn = reject
     })
   }
   resolveModal(data) {
     this._resolveFn(data)
+  }
+  rejectModal(data) {
+    this._rejectFn(data)
   }
   push() {
     this._dirty = true
@@ -151,12 +142,12 @@ class Modal extends mop.Box {
     return h.button({type: 'button', class: 'btn-ok btn-modal-submit'}, 'OK', {click: e => this.resolveModal(222)})
   }
   cancelButton() {
-    return h.button({type: 'button', class: 'btn-cancel'}, 'Cancel', {click: e => app.cancelModal()})
+    return h.button({type: 'button', class: 'btn-cancel'}, 'Cancel', {click: e => this.rejectModal('user-cancelled')})
   }
   render() {
     let backgroundEvents = {click: e => {
         if (e.target == this.element) {
-          app.cancelModal()
+          this.rejectModal('user-cancelled')
         }
     }}
     return h.div(atts.modalBackground, 
@@ -191,7 +182,12 @@ class PageContainer extends mop.Box {
   render() {
     return h.div({},
       [
-        h.button({}, 'show', {click: () => app.showModal(Modal1, {}).then(r => c.log(r))}),
+        h.button({}, 'show', {
+          click: () => mop.showModal(Modal1, {}).then(r => {
+            c.log(r)
+            app.flush()
+          }).catch(err => {})
+        }),
         h.div(atts.pageContainer, this.renderDayBtns()),
         h.div({}, app.currentPage)
       ]
@@ -260,25 +256,14 @@ app.action('goto', function(cls, params) {
   this.currentPage = this.root._(cls, params)
 })
 
-app.showModal = function(cls, params) {
-  //Todo: create ModalContainer as a box so it has its own stash
-  //Most modals would want to be singletons
-  this.currentModal = this.root._(cls, params)
-  this.flush()
-  return this.currentModal.promise.then(result => {
-    this.currentModal = undefined
-    app.flush()
-    return result
-  }).catch(error => {
-    this.currentModal = undefined
-    app.flush()
-    return error
-  })
+
+
+
+mop._modalContainer = new mop.ModalContainer('modal-container')
+mop.showModal = function(cls, params) {
+  return this._modalContainer.showModal(cls, params)
 }
 
-app.action('cancelModal', function(cls, params) {
-  this.currentModal = undefined
-})
 
 /*
 app.action('newTask', function(task) {
@@ -351,7 +336,6 @@ app.load = function() {
 
 
       this.bind(PageContainer, 'page-container')
-      this.bind(ModalContainer, 'modal-container')
       this.bind(Menu, 'menu')
       this.flush()
     })

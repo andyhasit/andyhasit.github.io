@@ -199,6 +199,41 @@ var mop = (function() {
     }
   }
 
+  class TopLevelContainer extends Box {
+    constructor(id) {
+      super()
+      this._id = id
+      this.element = document.getElementById(id)
+    }
+  }
+
+  class ModalContainer extends TopLevelContainer {
+    render() {
+      if (this._currentModal) {
+        return h.div({id: 'modal-container', style: 'display: block;'}, this._currentModal)
+      } else {
+        return h.div({id: 'modal-container', style: 'display: hidden;'}, '')
+      }
+    }
+    showModal(cls, params) {
+      this._currentModal = this._(cls, params)
+      this._redraw()
+      return new Promise((resolve, reject) => {
+        this._currentModal.promise
+          .then(result => {
+            this._currentModal = undefined
+            this._redraw()
+            resolve(result)
+          })
+          .catch(error => {
+            this._currentModal = undefined
+            this._redraw()
+            reject(error)
+          })
+      })
+    }
+  }
+
   class VirtualNode {
     constructor(tag, atts, inner, listeners) {
       this.tag = tag.toUpperCase()
@@ -210,6 +245,8 @@ var mop = (function() {
 
   const mop = {
     Box: Box,
+    ModalContainer: ModalContainer,
+    TopLevelContainer: TopLevelContainer,
     ViewModel: ViewModel,
     addTags: function(elements) {
       let h = this.html
