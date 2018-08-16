@@ -2,6 +2,13 @@
 c = console
 var h = mop.html
 
+const atts = {
+  pageContainer: {id: 'page-container'},
+  modalBackground: {class: 'modal-background'},
+  menuEntries: {class: 'overlay-content'},
+  modalContent: {class: 'modal-content modal-animate'},
+}
+
 class TodoList extends mop.Box {
   render() {
     var items = this._data.map(todo => this._(TodoItem, todo))
@@ -49,7 +56,10 @@ class DayView extends mop.Box {
     this.day = params.day
   }
   render() {
-    return h.div({}, h.h3({}, this.day))
+    return h.div({}, [
+      h.h3({}, this.day),
+      h.div({}, 'dd'),
+    ])
   }
 }
 DayView.trackBy = 'day';
@@ -103,6 +113,71 @@ class HomePage extends Page {
 HomePage.trackBy = 'route';
 
 
+class ModalContainer extends mop.Box {
+  push() {
+    this._dirty = true
+  }
+  render() {
+    if (app.currentModal) {
+      return h.div({id: 'modal-container', style: 'display: block;'}, app.currentModal)
+    } else {
+      return h.div({id: 'modal-container', style: 'display: hidden;'}, '')
+    }
+  }
+}
+
+class Modal extends mop.Box {
+  constructor(props) {
+    super(props)
+    this.promise = new Promise((resolve, reject) => {
+      this._resolveFn = resolve
+    })
+  }
+  resolveModal(data) {
+    this._resolveFn(data)
+  }
+  push() {
+    this._dirty = true
+  }
+  formField(name, text, placeholder) {
+    return h.label({for: ""},
+      [
+        h.b({}, text),
+        h.input({type: 'text', placeholder: placeholder, name: name})
+      ]
+    )
+  }
+  okButton() {
+    return h.button({type: 'button', class: 'btn-ok btn-modal-submit'}, 'OK', {click: e => this.resolveModal(222)})
+  }
+  cancelButton() {
+    return h.button({type: 'button', class: 'btn-cancel'}, 'Cancel', {click: e => app.cancelModal()})
+  }
+  render() {
+    let backgroundEvents = {click: e => {
+        if (e.target == this.element) {
+          app.cancelModal()
+        }
+    }}
+    return h.div(atts.modalBackground, 
+      this.renderContent(),
+      backgroundEvents
+    )
+  }
+}
+
+class Modal1 extends Modal {
+  renderContent() {
+    return h.form(atts.modalContent, 
+      [
+        this.formField('username', 'Username', 'Bob'),
+        this.okButton(),
+        this.cancelButton(),            
+      ]
+    )
+  }
+}
+
 class PageContainer extends mop.Box {
   push() {
     this._dirty = true
@@ -114,9 +189,10 @@ class PageContainer extends mop.Box {
     return app.days.map(day => this.renderGoBtn(DayView, day))
   }
   render() {
-    return h.div({}, 
+    return h.div({},
       [
-        h.div({}, this.renderDayBtns()),
+        h.button({}, 'show', {click: () => app.showModal(Modal1, {}).then(r => c.log(r))}),
+        h.div(atts.pageContainer, this.renderDayBtns()),
         h.div({}, app.currentPage)
       ]
     )
@@ -151,7 +227,7 @@ class Menu extends mop.Box {
       this.renderAtts(), 
       [
         h.a({href:"#", class:"closebtn", onclick:"app.hideMenu()"}, '&times;'),
-        h.div({class:"overlay-content"}, menuEntries)
+        h.div(atts.menuEntries, menuEntries)
       ]
     )
   }
@@ -182,7 +258,26 @@ app.action('showSection', function(section) {
 
 app.action('goto', function(cls, params) {
   this.currentPage = this.root._(cls, params)
-  c.log(this.currentPage)
+})
+
+app.showModal = function(cls, params) {
+  //Todo: create ModalContainer as a box so it has its own stash
+  //Most modals would want to be singletons
+  this.currentModal = this.root._(cls, params)
+  this.flush()
+  return this.currentModal.promise.then(result => {
+    this.currentModal = undefined
+    app.flush()
+    return result
+  }).catch(error => {
+    this.currentModal = undefined
+    app.flush()
+    return error
+  })
+}
+
+app.action('cancelModal', function(cls, params) {
+  this.currentModal = undefined
 })
 
 /*
@@ -209,9 +304,17 @@ app.load = function() {
   lsd.delete('mop-todos')
   const schema = new lsd.Schema()
   schema.addVersion(schema => {
-    let days = schema.store('day')
+    let days = schema.addStore('day')
+    days.put({day: 'mon'})
+    days.put({day: 'tue'})
     days.put({day: 'wed'})
-    schema.store('task')
+
+    let tasks = schema.addStore('task')
+    tasks.put({text: 'Breadkfast'})
+    tasks.put({text: 'Lunch'})
+    tasks.put({text: 'Dinner'})
+
+    schema.oneToMany('day', 'task')
   })
   this.db = new lsd.Database('mop-todos', schema)
   /*
@@ -232,14 +335,28 @@ app.load = function() {
 
   this.db.getAll('task').then(tasks => {
     this.tasks = tasks
+
     this.db.getAll('day').then(days => {
       this.days = days
-      c.log(days)
-      this.bind(PageContainer, 'page-content')
+
+
+      this.db.setParent('task', 'day', this.tasks[1], this.days[1].id).then(r => {
+
+
+        this.db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
+        this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
+        this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
+
+      })
+
+
+      this.bind(PageContainer, 'page-container')
+      this.bind(ModalContainer, 'modal-container')
       this.bind(Menu, 'menu')
       this.flush()
     })
   })
 
+  
     
 }

@@ -80,14 +80,16 @@ var mop = (function() {
       } else if (inner instanceof Box) {
         this._handleInnderBox(inner, childBoxes)
         element.appendChild(inner.element)
-      } else if (inner !== undefined && inner instanceof VirtualNode) {
-        this._updateNode(element, inner, childBoxes)
-      } else {
-        // maybe convert to string first?
-        if (element.innerHTML !== inner) {
-          let old = element.innerHTML
-          element.innerHTML = inner
-          //c.log(`updated "${old}" to "${inner}"`)
+      } else if (inner instanceof VirtualNode) {
+        let child = createElement(inner.tag)
+        this._updateNode(child, inner, childBoxes)
+        element.innerHTML = ''
+        element.appendChild(child)
+      } else if (inner !== undefined) {
+        let oldHtml = element.innerHTML
+        let newHtml = typeof inner == "string" ? inner : inner.toString()
+        if (oldHtml !== newHtml) {
+          element.innerHTML = newHtml
         }
       }
     }
@@ -185,8 +187,9 @@ var mop = (function() {
     action(name, fn) {
       //todo: use _this?
       this[name] = function() {
-        fn.apply(this, arguments)
+        let result = fn.apply(this, arguments)
         this.flush()
+        return result
       }
     }
     bind(cls, id) {
@@ -216,10 +219,10 @@ var mop = (function() {
         }
       })
     },
-    html: {}
+    html: {},
   }
 
-  let tags = 'a b button br div h1 h2 h3 h4 h5 li i img input p section span table td th tr ul'
+  let tags = 'a b button br div form h1 h2 h3 h4 h5 li i img input label p section span table td th tr ul'
   mop.addTags(tags.split(' '));
 
   return mop

@@ -11,29 +11,8 @@
     <div id="menu" class="overlay"></div>
     <!-- The menu button -->
     <span class="menu-button" onclick="app.showMenu()">&#9776;</span>
-
-    <!-- The Modals -->
-    <div id="modal-add-item" class="modal-background">
-        <!-- Modal Content -->
-        <form class="modal-content modal-animate">
-            <label for="nnn">
-                <b>Username</b>
-                <input type="text" placeholder="Details" name="task_name">
-            </label>
-            <label for="task">
-                <b>Task</b>
-                <select name="task"></select>
-            </label>
-            
-            <button type="button" class="btn-ok btn-modal-submit">OK</button >
-            <button type="button" onclick="app.hideModal()" class="btn-cancel">Cancel</button>         
-        </form>
-    </div>
-
-    <!-- The Page content -->
-    <div id="page-content"></div>
-
-
+    <div id="modal-container"></div>
+    <div id="page-container"></div>
     <script src="../dist/mop.js"></script>
     <script src="dist/indie.js"></script>
     <script src="dist/app.js"></script>

@@ -3,6 +3,7 @@ var lsd = (function (exports) {
   'use strict';
   class Database {
     constructor(dbName, schema) {
+      this.schema = schema
       this._caches = {}
       this._fullyLoaded = {}
       this._dbp = new Promise((resolve, reject) => {
@@ -64,12 +65,85 @@ var lsd = (function (exports) {
         })
       }
     }
+    _criteriaMatch(record, criteria) {
+      for (let key in criteria) {
+        if (record[key] !== criteria[key]) {
+          return false
+        }
+      }
+      return true
+    }
+    _fetchOne(store, criteria) {
+
+      // UNTESTED
+      //Todo: add query caching
+      return this._dbp.then(db => new Promise((resolve, reject) => {
+        let records = []
+        let cursorTrans = db.transaction(store).objectStore(store).openCursor()
+        cursorTrans.onerror = error => c.log(error)
+        cursorTrans.onsuccess = event => {
+          var cursor = event.target.result
+          if (cursor) {
+            let record = cursor.value
+            if (this._criteriaMatch(record, criteria)) {
+              records.push(record)
+            } else {
+              cursor.continue()
+            }
+          }
+          else {
+            resolve(records)
+          }
+        }
+      }))
+    }
+    filter(store, criteria) {
+      //Todo: add query caching
+      return this._dbp.then(db => new Promise((resolve, reject) => {
+        let records = []
+        let cursorTrans = db.transaction(store).objectStore(store).openCursor()
+        cursorTrans.onerror = error => c.log(error)
+        cursorTrans.onsuccess = event => {
+          var cursor = event.target.result
+          if (cursor) {
+            let record = cursor.value
+            if (this._criteriaMatch(record, criteria)) {
+              records.push(record)
+            }
+            cursor.continue();
+          }
+          else {
+            resolve(records)
+          }
+        }
+      }))
+    }
+    getParent(childStore, parentStore, child) {
+      let fkName = this.schema.getFkName(parentStore)
+      let parentId = child[fkName]
+      if (parentId == undefined ) {
+        return Promise.resolve(undefined)
+      }
+      return this.get(parentStore, parentId)
+    }
+    getChildren(parentStore, childStore, parentId) {
+      //Todo : cache
+      return this._dbp.then(db => new Promise((resolve, reject) => {
+        let transaction = db.transaction(childStore)
+        let request = transaction.objectStore(childStore).index(parentStore).get(parentId)
+        transaction.oncomplete = () => resolve(request.result)
+        transaction.onabort = transaction.onerror = () => reject(transaction.error)
+      }))
+    }
+    setParent(childStore, parentStore, childRecord, parentId) {
+      let fkName = this.schema.getFkName(parentStore)
+      childRecord[fkName] = parentId
+      return this.put(childStore, childRecord)
+    }
   }
 
   /*
     IndexDb allows versioning. It would be a shame to lose that, but we also want one description of the model.
-
-
 
     We tap into that by 
     
@@ -97,32 +171,14 @@ var lsd = (function (exports) {
 
   */
 
-  class SchemaUpgrader {
-    constructor(idb, conf) {
-     this.idb = idb
-     this.conf = conf
-    }
-    store(name, conf=this.conf) {
-      return this.idb.createObjectStore(name, conf)
-    }
-  }
-
-  class SchemaMethodGenerator {
-    constructor() {
-     this._stores = {}
-    }
-    store(name, conf=this.conf) {
-      this._stores[name] = conf
-    }
-    generate(target) {
-
-    }
-  }
-
   class Schema {
     constructor(conf={keyPath: "id", autoIncrement: true}) {
       this.conf = conf
       this._versions = []
+      this._stores = {}
+    }
+    getFkName(parentStore){
+      return `__${parentStore}Id`
     }
     addVersion(fn) {
       this._versions.push(fn)
@@ -131,20 +187,22 @@ var lsd = (function (exports) {
       return this._versions.length + 1
     }
     upgrade(idb, oldVersion) {
-      let up = new SchemaUpgrader(idb, this.conf)
+      this._idb = idb
       this._versions.forEach((fn, version) => {
         if (version >= oldVersion) {
-          fn(up)
+          fn(this)
         }
       })
     }
-    generate(target) {
-      let smg = new SchemaMethodGenerator()
-      this._versions.forEach((fn, version) => {
-        fn(smg)
-      })
-      smg.generate(target)
+    addStore(name, conf=this.conf) {
+      let store = this._idb.createObjectStore(name, conf)
+      this._stores[name] = store
+      return store
     }
+    oneToMany(store1, store2) {
+      this._stores[store2].createIndex(store1, `__${store1}Id`);
+    }
+
   }
 
   exports.Schema = Schema
