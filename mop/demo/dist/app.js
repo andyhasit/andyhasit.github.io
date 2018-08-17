@@ -208,19 +208,13 @@ class MenuEntry extends mop.Box {
 MenuEntry.trackBy = 'route';
 
 class Menu extends mop.Box {
-  update(vm) {
-  }
-  _patches() {
-    this.renderAtts()
-  }
   renderAtts() {
     let width = app.menuOpen? "70%" : "0%"
     return {id:"menu", class:"overlay", style:"width: " + width}
   }
   render() {
     var menuEntries = app.menuEntries.map(page => this._(MenuEntry, page))
-    return h.div(
-      this.renderAtts(), 
+    return h.div(this.renderAtts(), 
       [
         h.a({href:"#", class:"closebtn", onclick:"app.hideMenu()"}, '&times;'),
         h.div(atts.menuEntries, menuEntries)
@@ -229,17 +223,47 @@ class Menu extends mop.Box {
   }
 }
 
-app = new mop.ViewModel({
-  root: new mop.Box(),
-  currentPage: 'home',
-  menuEntries: [
+class MenuBar extends mop.Box {
+  render() {
+
+    c.log(this)
+    let btnAtts = {class: 'menu-button'}
+    let btnEvents = {click: function(e) {app.showMenu()}}
+    return h.div({}, 
+      [
+        this._(Menu),
+        h.span(btnAtts, '&#9776;', btnEvents)
+      ]
+    )
+  }
+}
+
+mop.render = function() {
+  return h.div({},
+    [
+      this._(MenuBar),
+      this._(mop.ModalContainer),
+      this._(PageContainer),
+    ]
+  )
+}
+
+mop._modalContainer = new mop.ModalContainer('modal-container')
+mop.showModal = function(cls, params) {
+  return this._modalContainer.showModal(cls, params)
+}
+
+const app = mop
+app.currentPage ='home'
+app.menuEntries = [
     {cls: HomePage, route: 'home', name: 'Sophie holiday list'},
     {cls: HomePage, route: 'page2', name: 'Page2'},
     //{cls: HomePage, route: 'page3', name: 'Page3'},
   ]
-})
+
 
 app.action('showMenu', function() {
+  c.log(88)
   this.menuOpen = true
 })
 
@@ -253,16 +277,30 @@ app.action('showSection', function(section) {
 })
 
 app.action('goto', function(cls, params) {
-  this.currentPage = this.root._(cls, params)
+  this.currentPage = this._(cls, params)
 })
 
+/*
+
+Mop as root app
 
 
-
-mop._modalContainer = new mop.ModalContainer('modal-container')
-mop.showModal = function(cls, params) {
-  return this._modalContainer.showModal(cls, params)
+mop.element = xyz
+mop.render = function() {
+  
 }
+mop.route = 'home'
+mop.addTodo = function(todo) {
+  this.db.new('todo', todo).then(r => {
+    this.flush()
+  })
+}
+
+*/
+
+
+
+
 
 
 /*
@@ -286,6 +324,7 @@ app.action('newTask', function(task) {
 */
 
 app.load = function() {
+  mop.element = document.getElementById('app')
   lsd.delete('mop-todos')
   const schema = new lsd.Schema()
   schema.addVersion(schema => {
@@ -326,17 +365,12 @@ app.load = function() {
 
 
       this.db.setParent('task', 'day', this.tasks[1], this.days[1].id).then(r => {
-
-
         this.db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
         this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
         this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
 
       })
-
-
-      this.bind(PageContainer, 'page-container')
-      this.bind(Menu, 'menu')
+      this._redraw()
       this.flush()
     })
   })

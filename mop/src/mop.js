@@ -32,6 +32,15 @@ var mop = (function() {
     return document.createElement(tag)
   }
 
+  class VirtualNode {
+    constructor(tag, atts, inner, listeners) {
+      this.tag = tag.toUpperCase()
+      this.inner = inner
+      this.atts = atts
+      this.listeners = listeners
+    }
+  }
+
   class Box {
     constructor(data) {
       this._data = data
@@ -48,10 +57,15 @@ var mop = (function() {
       }
     }
     push(data) {
+      if (data !== data) {
+        this._dirty = true
+      }
+        this._dirty = true
       this._data = data
-      this._dirty = true
     }
     flush(force) {
+
+      c.log(this)
       if (force || this._dirty) {
         this._redraw()
       }
@@ -61,39 +75,43 @@ var mop = (function() {
       })
     }
     _redraw() {
-      let virtual = this.render()
+      c.log(this)
+      let vTree = this.render()
       if (this.element == undefined) {
-        this.element = createElement(virtual.tag)
+        this.element = createElement(vTree.tag)
       }
       this._childBoxes.length = 0
-      this._updateNode(this.element, virtual, this._childBoxes)
+      this._updateNode(this.element, vTree, this._childBoxes)
       this._dirty = false
     }
-    _updateNode(element, virtual, childBoxes) {
-      let inner = virtual.inner;
-      this._updateElement(element, virtual.atts)
-      if (virtual.listeners) {
-        this._updateListeners(element, virtual.listeners)
+    _updateNode(element, vTree, childBoxes) {
+      this._updateElement(element, vTree.atts)
+      if (vTree.listeners) {
+        this._updateListeners(element, vTree.listeners)
       }
+      let inner = vTree.inner;
+      c.log(typeof inner)
       if (Array.isArray(inner)) {
-        this._updateChildren(element, inner, childBoxes)
-      } else if (inner instanceof Box) {
-        this._handleInnderBox(inner, childBoxes)
-        element.appendChild(inner.element)
-      } else if (inner instanceof VirtualNode) {
-        let child = createElement(inner.tag)
-        this._updateNode(child, inner, childBoxes)
-        element.innerHTML = ''
-        element.appendChild(child)
-      } else if (inner !== undefined) {
-        let oldHtml = element.innerHTML
-        let newHtml = typeof inner == "string" ? inner : inner.toString()
-        if (oldHtml !== newHtml) {
-          element.innerHTML = newHtml
+        this._processArray(element, inner, childBoxes)
+      } else {
+        if (inner instanceof Box) {
+          this._processBox(inner, childBoxes)
+          element.appendChild(inner.element)
+        } else if (inner instanceof VirtualNode) {
+          let child = createElement(inner.tag)
+          this._updateNode(child, inner, childBoxes)
+          element.innerHTML = ''
+          element.appendChild(child)
+        } else if (inner !== undefined) {
+          let oldHtml = element.innerHTML
+          let newHtml = typeof inner == "string" ? inner : inner.toString()
+          if (oldHtml !== newHtml) {
+            element.innerHTML = newHtml
+          }
         }
       }
     }
-    _handleInnderBox(box, childBoxes) {
+    _processBox(box, childBoxes) {
       if (box.element == undefined) { 
         // if child box was never bound, render it now.
         box._redraw()
@@ -102,15 +120,16 @@ var mop = (function() {
         childBoxes.push(box)
       }
     }
-    _updateChildren(element, children, childBoxes) {
+    _processArray(element, children, childBoxes) {
       /*
       This function gets called when inner is an array.
       */
+      c.log(element.path)
       let fragment = document.createDocumentFragment()
       children.forEach((child) => {
         let childElement
         if (child instanceof Box) {
-          this._handleInnderBox(child, childBoxes)
+          this._processBox(child, childBoxes)
           childElement = child.element
         } else if (child instanceof VirtualNode) {
           childElement = createElement(child.tag)
@@ -168,6 +187,7 @@ var mop = (function() {
     }
   }
 
+  /*
   class ViewModel {
     constructor(props) {
       this._watchers = []
@@ -185,10 +205,11 @@ var mop = (function() {
       this._changes.length = [];
     }
     action(name, fn) {
-      //todo: use _this?
+      let _this = this;
       this[name] = function() {
-        let result = fn.apply(this, arguments)
-        this.flush()
+        let result = fn.apply(_this, arguments)
+        c.log(77)
+        _this.flush()
         return result
       }
     }
@@ -198,6 +219,7 @@ var mop = (function() {
       this._watchers.push(box)
     }
   }
+  */
 
   class TopLevelContainer extends Box {
     constructor(id) {
@@ -234,30 +256,39 @@ var mop = (function() {
     }
   }
 
-  class VirtualNode {
-    constructor(tag, atts, inner, listeners) {
-      this.tag = tag.toUpperCase()
-      this.inner = inner
-      this.atts = atts
-      this.listeners = listeners
+  class RootBox extends Box {
+    constructor() {
+      super()
+      this.html = {}
+      this.Box = Box
+      this.ModalContainer = ModalContainer
+      this.TopLevelContainer = TopLevelContainer
     }
-  }
-
-  const mop = {
-    Box: Box,
-    ModalContainer: ModalContainer,
-    TopLevelContainer: TopLevelContainer,
-    ViewModel: ViewModel,
-    addTags: function(elements) {
+    flush(force) {
+      this._redraw()
+      this._childBoxes.forEach(function(box) {
+        box.flush()
+      })
+    }
+    addTags(elements) {
       let h = this.html
       elements.forEach(function(tag) {
         h[tag] = function(atts, inner, listeners) {
           return new VirtualNode(tag, atts, inner, listeners)
         }
       })
-    },
-    html: {},
+    }
+    action(name, fn) {
+      let _this = this;
+      this[name] = function() {
+        let result = fn.apply(_this, arguments)
+        _this.flush()
+        return result
+      }
+    }
   }
+
+  const mop = new RootBox()
 
   let tags = 'a b button br div form h1 h2 h3 h4 h5 li i img input label p section span table td th tr ul'
   mop.addTags(tags.split(' '));

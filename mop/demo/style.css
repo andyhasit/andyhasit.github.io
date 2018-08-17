@@ -2,6 +2,15 @@ body {
     font-family: 'Lato', sans-serif;
 }
 
+#app {
+    height:100%;
+    width:100%;
+    background:#f00;
+    color:#fff;
+    position: fixed;
+    margin: 0
+}
+
 .clearfix {
   clear: both;
 }
