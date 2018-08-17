@@ -1,0 +1,35 @@
+/*
+TODO:
+
+  Big tickets:
+    - Root App for caching
+    - Composition for input fields - code reuse & save state?
+    - Restore focus
+    - Performance:
+        FastDom:  https://github.com/wilsonpage/fastdom
+        this._patches = [
+        '1.2.3:atts'
+        '1.2.3:'
+        ]
+    this._drawnOnce
+    - Use virtual DOM to patch
+        https://github.com/Matt-Esch/virtual-dom
+
+  Better atts:
+
+
+ca*sfajS6D
+ 
+
+  Think;
+    - different types of triggers, not just string but watchers.
+    - sort shouldChange when element is reactivated.
+    - wrap for namespace
+
+    Redraw mechanism:
+
+        Explicit events
+        Watch objects
+        Compare
+
+*/
