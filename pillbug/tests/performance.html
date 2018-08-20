@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TODO supply a title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+<body>
+<div ms-controller='for1'>
+    <ul>
+
+    </ul>
+</div>
+
+<script>
+    var ul = document.querySelector('ul');
+    console.time('no fragment');
+    for(var i=0;i<1000;i++){
+        var li = document.createElement('li');
+        li.innerText = i;
+
+        ul.appendChild(li);
+    }
+    console.timeEnd('no fragment');
+
+    console.time('has fragment');;
+    var frg = document.createDocumentFragment()
+    for(var i=0;i<1000;i++){
+        var li = document.createElement('li');
+        li.innerText = i+'fragment';
+        frg.appendChild(li);
+
+    }
+    ul.appendChild(frg)
+    console.timeEnd('has fragment');
+</script>
+</body>
+</html>

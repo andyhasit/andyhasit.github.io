@@ -1,7 +1,147 @@
 /*
 
+Aim:
+
+  Allow rapid prototyping, then optimising.
+
+New strategy:
+
+The render function assumes nothing. You can
+
+The top level box might not be bound to an element:
+
+  this.bind('menu', box(Menu, this.menuVisible))
+  this.bind('page-content', box(PageContainer, this.menuVisible))
+  //but how do I prevent it from building new instances?
+
+
+
+Ideas:
+  box accepts: data, differ, key
+  don't bother detecting changes in props
+  Make render accept arguments, such as
+    this 
+    the root app
+    functions h, b etc...
+    the element?
+    whether it is firstRender or not
+
+
+New version: 
+  - there is no flush, only update, which calls render.
+  - render does the DOM updating, so no need to collect child boxes or anything.
+
+  Redraw happens in a tree like fashion
+
+  Use FastDom?
+
+render() {
+  
+}
+
+
 
 */
+
+const c = console
+
+class NodeWrapper {
+  constructor(element) {
+    this.element = element
+  }
+  atts(atts) {
+    for (let key in atts) {
+      //Todo, check if different, and remove uneeded
+      this.element.setAttribute(key, atts[key])
+    }
+    return this
+  }
+  on(listeners) {
+    for (let key in listeners) {
+      this.element.addEventListener(key, listeners[key])
+    }
+    return this
+  }
+  inner(inner) {
+    //Accepts an array of elements ready to be bound
+    if (Array.isArray(inner)) {
+      //Todo: would be good to detach all children
+      //This improves speed first time round, but if I then go caching and
+      // reusing elements
+      this.element.innerHTML = ''
+      let fragment = document.createDocumentFragment()
+      inner.forEach((child) => {
+        if (child instanceof NodeWrapper) {
+          // Node has already been updated
+          fragment.appendChild(child.element)
+        } else {
+          fragment.appendChild(document.createTextNode(child))
+        }
+      })
+      this.element.appendChild(fragment)
+    } else if (inner instanceof NodeWrapper) {
+      this.element.innerHTML = ''
+      this.element.appendChild(inner.element)
+    } else if (inner !== undefined) {
+      //https://stackoverflow.com/questions/21311299/nodevalue-vs-innerhtml-and-textcontent-how-to-choose
+      let oldHtml = this.element.textContent
+      let newHtml = typeof inner == "string" ? inner : inner.toString()
+      if (oldHtml !== newHtml) {
+        this.element.innerHTML = newHtml
+      }
+    }
+  }
+}
+
+
+class Box extends NodeWrapper {
+  constructor(props, key) {
+    super()
+    this._key = key
+    this._boxCache = {}
+    this._elementCache = {}
+    this.update(props)
+  }
+  update(props) {
+    if (props !== this.props) {
+      this._dirty = true
+    }
+    this.props = props
+    this.render()
+  }
+  b() {
+    
+  }
+  h(tag, atts, inner, events, key) {
+    //returns a NodeWrapper
+    let element = document.createElement(tag)
+    let wrapper = new NodeWrapper(element)
+    wrapper.atts(atts)
+    wrapper.inner(inner)
+    wrapper.on(events)
+    return wrapper
+  }
+  render() {
+    m.tag('div')
+    //Top level box will have element set
+    m.atts()
+    this.inner()
+    `
+    div
+      ul
+        li
+        
+    `
+  }
+  tag(type, atts) {
+    if (this.element == undefined) {
+      this.element = document.createElement(type)
+    }
+    if (atts !== undefined) {
+      this.atts(atts)
+    }
+  }
+}
 
 
 function createElement(tag) {
@@ -17,7 +157,7 @@ class VirtualNode {
   }
 }
 
-class Box {
+class OldBox {
   constructor(data) {
     this._data = data
     this._dirty = true
@@ -259,14 +399,15 @@ class RootBox extends Box {
   }
 }
 
-const pillbug = new RootBox()
+const pillbug = {}//new RootBox()
 
 
 let tags = 'a b button br div form h1 h2 h3 h4 h5 li i img input label p section span table td th tr ul'
-pillbug.addTags(tags.split(' '));
+//pillbug.addTags(tags.split(' '));
 
 pillbug.version = '0.0.1'
 pillbug.VirtualNode = VirtualNode
+pillbug.Box = Box
 module.exports = pillbug
 
 
