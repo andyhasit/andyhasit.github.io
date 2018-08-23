@@ -23,6 +23,7 @@ Ideas:
     this 
     the root app
     functions h, b etc...
+    the element?
     whether it is firstRender or not
 
 
@@ -30,6 +31,9 @@ New version:
   - there is no flush, only update, which calls render.
   - render does the DOM updating, so no need to collect child boxes or anything.
 
+  Redraw happens in a tree like fashion
+
+  Use FastDom?
 
 render() {
   
@@ -40,6 +44,8 @@ render() {
 */
 
 const c = console
+const splitter = '---'
+
 
 class NodeWrapper {
   constructor(element) {
@@ -61,6 +67,10 @@ class NodeWrapper {
   inner(inner) {
     //Accepts an array of elements ready to be bound
     if (Array.isArray(inner)) {
+      //Todo: would be good to detach all children
+      //This improves speed first time round, but if I then go caching and
+      // reusing elements
+      this.element.innerHTML = ''
       let fragment = document.createDocumentFragment()
       inner.forEach((child) => {
         if (child instanceof NodeWrapper) {
@@ -70,7 +80,6 @@ class NodeWrapper {
           fragment.appendChild(document.createTextNode(child))
         }
       })
-      this.element.innerHTML = ''
       this.element.appendChild(fragment)
     } else if (inner instanceof NodeWrapper) {
       this.element.innerHTML = ''
@@ -119,6 +128,12 @@ class Box extends NodeWrapper {
     //Top level box will have element set
     m.atts()
     this.inner()
+    `
+    div
+      ul
+        li
+
+    `
   }
   tag(type, atts) {
     if (this.element == undefined) {
@@ -386,6 +401,96 @@ class RootBox extends Box {
   }
 }
 
+
+class IndentationError extends Error {}
+
+class Block {
+  constructor(m, props) {
+    this.element = undefined
+    this._draw()
+    //this.update(m, props)
+  }
+  _draw() {
+    let el, indent, text,  parent, startIndent, previousIndent, parentStack = []
+    this.constructor.template.split('\n').forEach(line => {
+      [indent, text] = this._parseIndent(line)
+      if (indent !== -1) {
+        // Set initial indent
+        if (previousIndent == undefined) {
+          previousIndent = indent
+          startIndent = indent
+        } else {
+          if (startIndent == indent) {
+            throw new IndentationError("You cannot have more than one top level element")
+          }
+        }
+        // Determine if we have moved up or down an indent
+        if (indent > previousIndent) {
+          parentStack.push(el)
+        } else if (indent < previousIndent) {
+          //We might want to check indent matches what is expected
+          parentStack.pop()
+        }
+        // Determine what kind of object we're dealing with
+        if (text.startsWith(':')) {
+          el = this._processBlock(text)
+        } else {
+          el = this._processElement(text)
+        }
+        // Add to parent, or set as block's own element
+        if (parentStack.length == 0) {
+          this.element = el
+          parentStack.push(el)
+        } else {
+          parentStack[parentStack.length - 1].appendChild(el)
+        }
+        previousIndent = indent
+      }
+    })
+  }
+  _processElement(line) {
+    /*let el, tag, rest
+    [tag, ...rest] = this._splitLine(line)
+    el = document.createElement(tag)
+    return el
+
+    */
+    let el, html, extra, template = document.createElement('template');
+    //console.log(this._parseLine(line)[0])
+    [html, extra] = this._parseLine(line);
+    let v = this._parseLine(line);
+    template.innerHTML = html;
+    el = template.content.firstChild;
+    return el;
+  }
+  _parseLine(line) {
+    let html, extra, tag, pos = line.search(/---/);
+    if (pos == -1) {
+      html = line
+    } else {
+      html = line.substring(0, pos).trim();
+      extra = line.substring(pos + 3).trim()
+    }
+    pos = html.indexOf(' ')
+    if (pos == -1) {
+      tag = html
+    } else {
+      tag = html.substring(0, pos).trim()
+    }
+    html = `<${html}></${tag}>`;
+    return [html, extra]
+  }
+  _parseIndent(line) {
+    let pos = line.search(/\S/)
+    return [pos, line.substring(pos).trim()]
+  }
+  update(m, props) {
+
+  }
+
+}
+
+
 const pillbug = {}//new RootBox()
 
 
@@ -393,8 +498,11 @@ let tags = 'a b button br div form h1 h2 h3 h4 h5 li i img input label p section
 //pillbug.addTags(tags.split(' '));
 
 pillbug.version = '0.0.1'
+pillbug.splitter = splitter
 pillbug.VirtualNode = VirtualNode
 pillbug.Box = Box
+pillbug.Block = Block
+pillbug.IndentationError = IndentationError
 module.exports = pillbug
 
 
