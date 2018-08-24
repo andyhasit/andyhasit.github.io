@@ -13,6 +13,15 @@ class NodeWrapper {
     }
     return this
   }
+  class(className) {
+    /*
+    classList.add("mystyle")
+    element.classList.toggle("mystyle")
+    .remove("mystyle")
+    */
+    this.el.className = className
+    return this
+  }
   clear() {
     this.el.innerHTML = ''
     return this
@@ -21,6 +30,10 @@ class NodeWrapper {
     for (let key in listeners) {
       this.el.addEventListener(key, listeners[key])
     }
+    return this
+  }
+  id(id) {
+    this.el.id = id
     return this
   }
   inner(inner) {
@@ -41,6 +54,10 @@ class NodeWrapper {
     this.el.appendChild(fragment)
     return this
   }
+  html(html) {
+    this.el.innerHTML = html
+    return this
+  }
   text(text) {
     this.el.textContent = text
     return this
@@ -52,19 +69,58 @@ const h = function(tag) {
 }
 
 class View {
-  constructor(model, props, key) {
-    this.draw(model, this, h, props, key)
+  constructor(app, props, key) {
+    this._app = app
+    this._vCache = {}
+    this._matchers = {}
+    this._prevState = {}
+    this.v = this._getView.bind(this)
+    this.draw(h, this.v, app, props, key)
   }
-  update(m, v, h, p) {
-
-  }
-  root(el) {
+  setRoot(el) {
     if (el instanceof NodeWrapper || el instanceof View) {
+      this.root = el
       this.el = el.el
-    } else if (el instanceof Node) {
-      this.el = el
     } else {
-      throw new TypeError("View.root() only accepts types: NodeWrapper, View, Node")
+      throw new TypeError("View.setRoot() only accepts types: NodeWrapper, View")
+    }
+  }
+  match(prop, fn) {
+    if (!this._matchers.hasOwnProperty(prop)) {
+      this._matchers[prop] = []
+    }
+    this._matchers[prop].push(fn)
+  }
+  update(h,v,a,p,k) {
+    for (let prop in this._matchers) {
+      let value = p[prop];
+      if (this._prevState[prop] !== value) {
+        let fnList = this._matchers[prop];
+        fnList.forEach(fn => {
+          fn(value)
+        })
+      }
+      this._prevState[prop] = value
+    }
+  }
+  _getView(cls, props, key) {
+    if (key == undefined) {
+      return new cls(this._app, props)
+    }
+    let className = cls.name;
+    if (!this._vCache.hasOwnProperty(className)) {
+      this._vCache[className] = {}
+    }
+    let cacheForType = this._vCache[className];
+    if (cacheForType.hasOwnProperty(key)) {
+      let view = cacheForType[key]
+      view.update(h, this.v, this._app, props, key)
+      return view
+    } else {
+      let view = new cls(this._app, props, key)
+      view.update(h, this.v, this._app, props, key)
+      cacheForType[key] = view
+      return view
     }
   }
 }
@@ -72,8 +128,6 @@ class View {
 class App {
   constructor() {
     this._register = {}
-  }
-  action() {
   }
   _getWatchList(event) {
     let watchers = this._register[event]
@@ -91,9 +145,7 @@ class App {
   }
 }
 
-
 const pillbug = {}
-
 
 pillbug.App = App
 pillbug.View = View

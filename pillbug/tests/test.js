@@ -5,20 +5,10 @@ test('Pillbug version test', () => {
   expect(pillbug.version).toBe('0.0.1')
 })
 
-test('Set root to native DOM element works', () => {
-  class MyView extends pillbug.View {
-    draw(m,v,h,p,k) {
-      v.root(document.createElement('span'))
-    }
-  } 
-  let view = new MyView()
-  expect(view.el.tagName).toBe('SPAN')
-})
-
 test('Set root to NodeWrapper works', () => {
   class MyView extends pillbug.View {
-    draw(m,v,h,p,k) {
-      v.root(h('span'))
+    draw(h,v,a,p,k) {
+      this.setRoot(h('span'))
     }
   } 
   let view = new MyView()
@@ -27,8 +17,8 @@ test('Set root to NodeWrapper works', () => {
 
 test('Set root to invalid type throws TypeError', () => {
   class MyView extends pillbug.View {
-    draw(m,v,h,p,k) {
-      v.root(7)
+    draw(h,v,a,p,k) {
+      this.setRoot(7)
     }
   }
   expect(() => {
@@ -50,9 +40,9 @@ test('Draw with raw DOM operations', () => {
 
 test('Draw with h', () => {
   class MyView extends pillbug.View {
-    draw(m,v,h,p,k) {
+    draw(h,v,a,p,k) {
       let root = h('span').text('hello')
-      v.root(root)
+      this.setRoot(root)
     }
   }
   let view = new MyView()
@@ -62,12 +52,12 @@ test('Draw with h', () => {
 
 test('test inner', () => {
   class MyView extends pillbug.View {
-    draw(m,v,h,p,k) {
+    draw(h,v,a,p,k) {
       let root = h('div').inner([
         h('span').text('hello'),
         h('span').text('yo')
         ])
-      v.root(root)
+      this.setRoot(root)
     }
   }
   let view = new MyView()
@@ -89,11 +79,70 @@ test('App events', () => {
   expect(b).toBe(3)
 })
 
+test('View responds to app events', () => {
+  class MyView extends pillbug.View {
+    draw(h,v,a,p,k) {
+      let usersUl = h('ul')
+      this.setRoot(h('div').inner(usersUl))
+      a.on('users-updated', users => {
+        usersUl.inner(users.map(name => {
+          return h('span').text(name)
+        }))
+      })
+    }
+  }
+  let app = new pillbug.App()
+  let view = new MyView(app)
+  expect(view.el.textContent).toBe('')
+
+  app.emit('users-updated', ['Dave', 'Joe'])
+  expect(view.el.textContent).toBe('DaveJoe')
+
+  app.emit('users-updated', ['Joe'])
+  expect(view.el.textContent).toBe('Joe')
+})
+
+
+test('View builds nested views', () => {
+  class UserLI extends pillbug.View {
+    draw(h,v,a,p,k) {
+      this.setRoot(h('span'))
+      this.match('name', name => this.root.text(name))
+    }
+  }
+  class MyView extends pillbug.View {
+    draw(h,v,a,p,k) {
+      let usersUl = h('ul')
+      this.setRoot(h('div').inner(usersUl))
+      a.on('newUser', users => {
+        usersUl.inner(users.map(user => {
+          return v(UserLI, user, user.id)
+        }))
+      })
+    }
+  }
+
+  let app = new pillbug.App()
+  let view = new MyView(app)
+  app.users = [
+    {id: 1, name: 'Dave'},
+    {id: 2, name: 'Joe'},
+  ]
+  app.emit('newUser', app.users)
+  expect(view.el.textContent).toBe('DaveJoe')
+  
+  app.users[0].name = 'Jane'
+  app.emit('newUser', app.users)
+  expect(view.el.textContent).toBe('JaneJoe')
+
+})
+
+
 
 
 /*
 
-draw(m,v,h,p,k) {
+draw(h,v,a,p,k) {
     let itemsUl = h('ul')
     let input = h('input').on({'click': e => alert(e)})
     this.el = h('div').inner([
