@@ -13,10 +13,17 @@
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "jest": "^23.5.0"
+    "gulp-run": "^1.7.1",
+    "jest": "^23.5.0",
+    "onchange": "^4.1.0",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5"
   },
   "scripts": {
-    "test": "gulp concat_src && jest"
+    "test": "gulp concat_src && jest",
+    "watch:demo": "onchange 'demo/src/**/*.js' 'demo/index.html' -- webpack --config webpack.config.demo.js",
+    "ds": "webpack-dev-server"
   },
   "author": "Andrew Buchan",
   "license": "ISC"

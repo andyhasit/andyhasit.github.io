@@ -1,8 +1,9 @@
 var gulp = require('gulp'),
   concat = require('gulp-concat'),
   rename = require('gulp-rename'),
-  uglify = require('gulp-uglifyes');
-  watch = require('gulp-watch');
+  uglify = require('gulp-uglifyes'),
+  watch = require('gulp-watch'),
+  run = require('gulp-run');
 
 function swallowError (error) {
   console.log(error.toString())
@@ -21,6 +22,7 @@ gulp.task('concat_src', function(){
 
 
 gulp.task('concat_demo', function(){
+  /*
   return gulp.src(['demo/src/*.js'])
     .pipe(concat('app.js'))
     .pipe(gulp.dest('demo/dist'))
@@ -28,6 +30,9 @@ gulp.task('concat_demo', function(){
     .on('error', swallowError)
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulp.dest('demo/dist'));
+  */
+  return run('npx webpack --entry ./demo/src/index.js --output ./demo/dist/bundle.js').exec()
+  ;
 });
 
 all = ['concat_src', 'concat_demo']

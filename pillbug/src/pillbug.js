@@ -1,10 +1,98 @@
 const c = console
 
 
-//For constructing DOM
-class NodeWrapper {
+export class App {
+  constructor() {
+    this._register = {}
+  }
+  _getWatchList(event) {
+    let watchers = this._register[event]
+    if (watchers == undefined) {
+      watchers = []
+      this._register[event] =  watchers
+    }
+    return watchers
+  }
+  emit(event, data) {
+    this._getWatchList(event).forEach(w => w(data))
+  }
+  on(event, callback) {
+    this._getWatchList(event).push(callback)
+  }
+}
+
+
+export class View {
+  constructor(app, props, key) {
+    this._app = app
+    this._vCache = {}
+    this._matchers = {}
+    this._prevState = {}
+    this.v = this._getView.bind(this)
+    this.draw(this, h, this.v, app, props, key)
+  }
+  setRoot(el) {
+    if (el instanceof NodeWrapper || el instanceof View) {
+      this.root = el
+      this.el = el.el
+    } else {
+      throw new TypeError("View.setRoot() only accepts types: NodeWrapper, View")
+    }
+    return el
+  }
+  match(prop, fn) {
+    if (!this._matchers.hasOwnProperty(prop)) {
+      this._matchers[prop] = []
+    }
+    this._matchers[prop].push(fn)
+  }
+  update(s,h,v,a,p,k) {
+    for (let prop in this._matchers) {
+      let value = p[prop];
+      if (this._prevState[prop] !== value) {
+        let fnList = this._matchers[prop];
+        fnList.forEach(fn => {
+          fn(value)
+        })
+      }
+      this._prevState[prop] = value
+    }
+  }
+  _getView(cls, props, key) {
+    if (key == undefined) {
+      return new cls(this._app, props)
+    }
+    let className = cls.name;
+    if (!this._vCache.hasOwnProperty(className)) {
+      this._vCache[className] = {}
+    }
+    let cacheForType = this._vCache[className];
+    if (cacheForType.hasOwnProperty(key)) {
+      let view = cacheForType[key]
+      view.update(this, h, this.v, this._app, props, key)
+      return view
+    } else {
+      let view = new cls(this._app, props, key)
+      view.update(this, h, this.v, this._app, props, key)
+      cacheForType[key] = view
+      return view
+    }
+  }
+}
+
+
+export function h(tag) {
+  return new NodeWrapper(tag)
+}
+
+
+export class NodeWrapper {
   constructor(tag) {
-    this.el = document.createElement(tag)
+    if (tag.startsWith('#')) {
+      this.el = document.getElementById(tag.substr(1))
+    } else {
+      this.el = document.createElement(tag)
+    }
   }
   atts(atts) {
     for (let key in atts) {
@@ -64,94 +152,21 @@ class NodeWrapper {
   }
 }
 
-const h = function(tag) {
-  return new NodeWrapper(tag)
-}
 
-class View {
-  constructor(app, props, key) {
-    this._app = app
-    this._vCache = {}
-    this._matchers = {}
-    this._prevState = {}
-    this.v = this._getView.bind(this)
-    this.draw(h, this.v, app, props, key)
-  }
-  setRoot(el) {
-    if (el instanceof NodeWrapper || el instanceof View) {
-      this.root = el
-      this.el = el.el
-    } else {
-      throw new TypeError("View.setRoot() only accepts types: NodeWrapper, View")
-    }
-  }
-  match(prop, fn) {
-    if (!this._matchers.hasOwnProperty(prop)) {
-      this._matchers[prop] = []
-    }
-    this._matchers[prop].push(fn)
-  }
-  update(h,v,a,p,k) {
-    for (let prop in this._matchers) {
-      let value = p[prop];
-      if (this._prevState[prop] !== value) {
-        let fnList = this._matchers[prop];
-        fnList.forEach(fn => {
-          fn(value)
-        })
-      }
-      this._prevState[prop] = value
-    }
-  }
-  _getView(cls, props, key) {
-    if (key == undefined) {
-      return new cls(this._app, props)
-    }
-    let className = cls.name;
-    if (!this._vCache.hasOwnProperty(className)) {
-      this._vCache[className] = {}
-    }
-    let cacheForType = this._vCache[className];
-    if (cacheForType.hasOwnProperty(key)) {
-      let view = cacheForType[key]
-      view.update(h, this.v, this._app, props, key)
-      return view
-    } else {
-      let view = new cls(this._app, props, key)
-      view.update(h, this.v, this._app, props, key)
-      cacheForType[key] = view
-      return view
-    }
-  }
-}
 
-class App {
-  constructor() {
-    this._register = {}
-  }
-  _getWatchList(event) {
-    let watchers = this._register[event]
-    if (watchers == undefined) {
-      watchers = []
-      this._register[event] =  watchers
-    }
-    return watchers
-  }
-  emit(event, data) {
-    this._getWatchList(event).forEach(w => w(data))
-  }
-  on(event, callback) {
-    this._getWatchList(event).push(callback)
-  }
-}
+
+/*
 
 const pillbug = {}
 
 pillbug.App = App
+pillbug.h = h
 pillbug.View = View
 pillbug.NodeWrapper = NodeWrapper
 pillbug.version = '0.0.1'
 module.exports = pillbug
+
+*/
 
 /*
 
