@@ -29,16 +29,20 @@ export class View {
     this._matchers = {}
     this._prevState = {}
     this.v = this._getView.bind(this)
-    this.draw(this, h, this.v, app, props, key)
+    this.draw(h, this.v, app, props, key, this)
   }
-  setRoot(el) {
+  setRoot(v) {
+    /*
     if (el instanceof NodeWrapper || el instanceof View) {
       this.root = el
       this.el = el.el
     } else {
       throw new TypeError("View.setRoot() only accepts types: NodeWrapper, View")
     }
-    return el
+    */
+    this.root = v
+    this.el = v.el
+    return v
   }
   match(prop, fn) {
     if (!this._matchers.hasOwnProperty(prop)) {
@@ -46,16 +50,16 @@ export class View {
     }
     this._matchers[prop].push(fn)
   }
-  update(s,h,v,a,p,k) {
-    for (let prop in this._matchers) {
+  update(h,v,a,p,k,s) {
+    for (let prop in s._matchers) {
       let value = p[prop];
-      if (this._prevState[prop] !== value) {
-        let fnList = this._matchers[prop];
+      if (s._prevState[prop] !== value) {
+        let fnList = s._matchers[prop];
         fnList.forEach(fn => {
           fn(value)
         })
       }
-      this._prevState[prop] = value
+      s._prevState[prop] = value
     }
   }
   _getView(cls, props, key) {
@@ -69,11 +73,11 @@ export class View {
     let cacheForType = this._vCache[className];
     if (cacheForType.hasOwnProperty(key)) {
       let view = cacheForType[key]
-      view.update(this, h, this.v, this._app, props, key)
+      view.update(h, this.v, this._app, props, key, this)
       return view
     } else {
       let view = new cls(this._app, props, key)
-      view.update(this, h, this.v, this._app, props, key)
+      view.update(h, this.v, this._app, props, key, this)
       cacheForType[key] = view
       return view
     }
@@ -82,19 +86,19 @@ export class View {
 
 
 export class Modal extends View {
-  draw(s,h,v,a,p,k) {
-    this.setRoot(s.getBackground(s,h,v,a,p,k).on({
+  draw(h,v,a,p,k,s) {
+    s.setRoot(s.getBackground(h,v,a,p,k,s).on({
       click: e => {
-        if (e.target == this.el) {
-          this.rejectModal('user-cancelled')
+        if (e.target == s.el) {
+          s.rejectModal('user-cancelled')
         }
       }
     }))
-    this.promise = new Promise((resolve, reject) => {
-      this._resolveFn = resolve
-      this._rejectFn = reject
+    s.promise = new Promise((resolve, reject) => {
+      s._resolveFn = resolve
+      s._rejectFn = reject
     })
-    this.root.inner(s.content(s,h,v,a,p,k))
+    s.root.inner(s.content(h,v,a,p,k,s))
   }
   resolveModal(data) {
     this._resolveFn(data)

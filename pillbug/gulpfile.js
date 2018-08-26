@@ -16,8 +16,9 @@ gulp.task('concat_src', function(){
     .pipe(gulp.dest('dist'))
     .pipe(uglify())
     .on('error', swallowError)
-    .pipe(rename({ suffix: '.min' }))
-    .pipe(gulp.dest('dist'));
+    .pipe(rename({ suffix: '.min' })) 
+    .pipe(gulp.dest('dist'))
+    .pipe(run('gzip dist/pillbug.min.js -f && stat --printf="GZIPPED SIZE: %s\n" dist/pillbug.min.js.gz').exec());
 });
 
 

@@ -154,18 +154,18 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Menu extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
-  draw(s,h,v,a,p,k) {
-    let showMenuBtn = h('span').html('&#9776;').class('menu-button').on({click: e => s.showMenu()})
-    let hideMenuBtn = h('a').atts({href:"#"}).html('&times;').class('closebtn').on({click: e => s.hideMenu()})
-    s.menuDiv = h('div').id('menu').class('overlay').inner([
+  draw(h,v,a,p,k) {
+    let showMenuBtn = h('span').html('&#9776;').class('menu-button').on({click: e => this.showMenu()})
+    let hideMenuBtn = h('a').atts({href:"#"}).html('&times;').class('closebtn').on({click: e => this.hideMenu()})
+    this.menuDiv = h('div').id('menu').class('overlay').inner([
       hideMenuBtn,
       h('div').class('overlay-content').inner([
-        s.getMenuEntry(a, h, 'Page1', 'page1'),
-        s.getMenuEntry(a, h, 'Page2', 'page2')
+        this.getMenuEntry(a, h, 'Page1', 'page1'),
+        this.getMenuEntry(a, h, 'Page2', 'page2')
         ])
       ])
-    s.setRoot(h('#menu-container')).inner([
-      s.menuDiv, 
+    this.setRoot(h('#menu-container')).inner([
+      this.menuDiv, 
       showMenuBtn
       ])
   }
@@ -200,13 +200,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class ModalYesNo extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Modal"] {
-  getBackground(s,h,v,a,p,k) {
+  getBackground(h,v,a,p,k,s) {
     return h('div').class('modal-background')
   }
-  content(s,h,v,a,p,k) {
+  content(h,v,a,p,k,s) {
     return h('div').class('modal-content modal-animate').inner([
-      h('button').text('OK').on({click: e => this.resolveModal(222)}),
-      h('button').text('Cancel').on({click: e => this.rejectModal('user-cancelled')}),
+      h('button').text('OK').on({click: e => s.resolveModal(222)}),
+      h('button').text('Cancel').on({click: e => s.rejectModal('user-cancelled')}),
     ])
   }
 }
@@ -228,9 +228,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class PageContainer extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
-  draw(s,h,v,a,p,k) {
-    s.setRoot(h('#page-container')).inner(p)
-    a.on('goto', page => s.root.inner(page))
+  draw(h,v,a,p,k) {
+    this.setRoot(h('#page-container')).inner(p)
+    a.on('goto', page => this.root.inner(page))
   }
 }
 
@@ -282,16 +282,20 @@ class View {
     this._matchers = {}
     this._prevState = {}
     this.v = this._getView.bind(this)
-    this.draw(this, h, this.v, app, props, key)
+    this.draw(h, this.v, app, props, key, this)
   }
-  setRoot(el) {
+  setRoot(v) {
+    /*
     if (el instanceof NodeWrapper || el instanceof View) {
       this.root = el
       this.el = el.el
     } else {
       throw new TypeError("View.setRoot() only accepts types: NodeWrapper, View")
     }
-    return el
+    */
+    this.root = v
+    this.el = v.el
+    return v
   }
   match(prop, fn) {
     if (!this._matchers.hasOwnProperty(prop)) {
@@ -299,16 +303,16 @@ class View {
     }
     this._matchers[prop].push(fn)
   }
-  update(s,h,v,a,p,k) {
-    for (let prop in this._matchers) {
+  update(h,v,a,p,k,s) {
+    for (let prop in s._matchers) {
       let value = p[prop];
-      if (this._prevState[prop] !== value) {
-        let fnList = this._matchers[prop];
+      if (s._prevState[prop] !== value) {
+        let fnList = s._matchers[prop];
         fnList.forEach(fn => {
           fn(value)
         })
       }
-      this._prevState[prop] = value
+      s._prevState[prop] = value
     }
   }
   _getView(cls, props, key) {
@@ -322,11 +326,11 @@ class View {
     let cacheForType = this._vCache[className];
     if (cacheForType.hasOwnProperty(key)) {
       let view = cacheForType[key]
-      view.update(this, h, this.v, this._app, props, key)
+      view.update(h, this.v, this._app, props, key, this)
       return view
     } else {
       let view = new cls(this._app, props, key)
-      view.update(this, h, this.v, this._app, props, key)
+      view.update(h, this.v, this._app, props, key, this)
       cacheForType[key] = view
       return view
     }
@@ -335,8 +339,8 @@ class View {
 
 
 class Modal extends View {
-  draw(s,h,v,a,p,k) {
-    s.setRoot(s.getBackground(s,h,v,a,p,k).on({
+  draw(h,v,a,p,k,s) {
+    s.setRoot(s.getBackground(h,v,a,p,k,s).on({
       click: e => {
         if (e.target == s.el) {
           s.rejectModal('user-cancelled')
@@ -344,10 +348,10 @@ class Modal extends View {
       }
     }))
     s.promise = new Promise((resolve, reject) => {
-      this._resolveFn = resolve
-      this._rejectFn = reject
+      s._resolveFn = resolve
+      s._rejectFn = reject
     })
-    s.root.inner(s.content(s,h,v,a,p,k))
+    s.root.inner(s.content(h,v,a,p,k,s))
   }
   resolveModal(data) {
     this._resolveFn(data)

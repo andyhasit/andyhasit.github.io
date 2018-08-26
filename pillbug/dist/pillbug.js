@@ -31,14 +31,18 @@ export class View {
     this.v = this._getView.bind(this)
     this.draw(this, h, this.v, app, props, key)
   }
-  setRoot(el) {
+  setRoot(v) {
+    /*
     if (el instanceof NodeWrapper || el instanceof View) {
       this.root = el
       this.el = el.el
     } else {
       throw new TypeError("View.setRoot() only accepts types: NodeWrapper, View")
     }
-    return el
+    */
+    this.root = v
+    this.el = v.el
+    return v
   }
   match(prop, fn) {
     if (!this._matchers.hasOwnProperty(prop)) {
@@ -46,7 +50,7 @@ export class View {
     }
     this._matchers[prop].push(fn)
   }
-  update(s,h,v,a,p,k) {
+  update(h,v,a,p,k) {
     for (let prop in this._matchers) {
       let value = p[prop];
       if (this._prevState[prop] !== value) {
@@ -82,8 +86,8 @@ export class View {
 
 
 export class Modal extends View {
-  draw(s,h,v,a,p,k) {
-    this.setRoot(s.getBackground(s,h,v,a,p,k).on({
+  draw(h,v,a,p,k) {
+    this.setRoot(s.getBackground(h,v,a,p,k).on({
       click: e => {
         if (e.target == this.el) {
           this.rejectModal('user-cancelled')
@@ -94,7 +98,7 @@ export class Modal extends View {
       this._resolveFn = resolve
       this._rejectFn = reject
     })
-    this.root.inner(s.content(s,h,v,a,p,k))
+    this.root.inner(s.content(h,v,a,p,k))
   }
   resolveModal(data) {
     this._resolveFn(data)
