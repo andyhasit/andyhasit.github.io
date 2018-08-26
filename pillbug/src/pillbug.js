@@ -81,6 +81,54 @@ export class View {
 }
 
 
+export class Modal extends View {
+  draw(s,h,v,a,p,k) {
+    this.setRoot(s.getBackground(s,h,v,a,p,k).on({
+      click: e => {
+        if (e.target == this.el) {
+          this.rejectModal('user-cancelled')
+        }
+      }
+    }))
+    this.promise = new Promise((resolve, reject) => {
+      this._resolveFn = resolve
+      this._rejectFn = reject
+    })
+    this.root.inner(s.content(s,h,v,a,p,k))
+  }
+  resolveModal(data) {
+    this._resolveFn(data)
+  }
+  rejectModal(data) {
+    this._rejectFn(data)
+  }
+}
+
+
+export class ModalContainer {
+  constructor(app, el) {
+    this.app = app
+    this.root = el
+    this.el = el.el
+  }
+  showModal(modal) {
+    let p = new Promise((resolve, reject) => {
+      modal.promise
+        .then(result => {          
+          this.root.clear()
+          resolve(result)
+        })
+        .catch(error => {
+          this.root.clear()
+          reject(error)
+        })
+      })
+    this.root.inner(modal)
+    return p
+  }
+}
+
+
 export function h(tag) {
   return new NodeWrapper(tag)
 }

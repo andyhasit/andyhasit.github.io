@@ -1,5 +1,6 @@
 import {View, h} from '../../src/pillbug.js';
 
+
 export default class Menu extends View {
   draw(s,h,v,a,p,k) {
     let showMenuBtn = h('span').html('&#9776;').class('menu-button').on({click: e => s.showMenu()})

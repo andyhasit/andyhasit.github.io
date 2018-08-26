@@ -97,12 +97,11 @@
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../src/pillbug.js */ "./src/pillbug.js");
 /* harmony import */ var _menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./menu */ "./demo/src/menu.js");
-/* harmony import */ var _modal_container__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modal-container */ "./demo/src/modal-container.js");
-/* harmony import */ var _page_container__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./page-container */ "./demo/src/page-container.js");
-/* harmony import */ var _modal_yes_no__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modal-yes-no */ "./demo/src/modal-yes-no.js");
+/* harmony import */ var _page_container__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./page-container */ "./demo/src/page-container.js");
+/* harmony import */ var _modal_yes_no__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modal-yes-no */ "./demo/src/modal-yes-no.js");
 
 
-
+//import ModalContainer from './modal-container';
 
 
 
@@ -113,13 +112,13 @@ const a = new _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["App"]()
 a.load = function() {
   this.menu = new _menu__WEBPACK_IMPORTED_MODULE_1__["default"](this)
   let myModal = 
-  this.pageContainer = new _page_container__WEBPACK_IMPORTED_MODULE_3__["default"](this, Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('div').inner([
+  this.pageContainer = new _page_container__WEBPACK_IMPORTED_MODULE_2__["default"](this, Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('div').inner([
     Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('span').text('hello'),
-    Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('button').text('show modal').on({click: e => this.showModal(new _modal_yes_no__WEBPACK_IMPORTED_MODULE_4__["default"](this)).then(r => {
+    Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('button').text('show modal').on({click: e => this.showModal(new _modal_yes_no__WEBPACK_IMPORTED_MODULE_3__["default"](this)).then(r => {
       c.log(r)
     })}),
     ]))
-  this.modalContainer = new _modal_container__WEBPACK_IMPORTED_MODULE_2__["default"](this)
+  this.modalContainer = new _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["ModalContainer"](this, Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('#modal-container'))
 }
 
 a.goto = function(route) {
@@ -129,8 +128,6 @@ a.goto = function(route) {
   let page = Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('div').text(route)
   this.emit('goto', page)
 }
-
-
 
 
 a.showModal = function(modal) {
@@ -153,6 +150,7 @@ a.load()
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Menu; });
 /* harmony import */ var _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../src/pillbug.js */ "./src/pillbug.js");
+
 
 
 class Menu extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
@@ -187,42 +185,6 @@ class Menu extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
 
 /***/ }),
 
-/***/ "./demo/src/modal-container.js":
-/*!*************************************!*\
-  !*** ./demo/src/modal-container.js ***!
-  \*************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ModalContainer; });
-/* harmony import */ var _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../src/pillbug.js */ "./src/pillbug.js");
-
-
-class ModalContainer extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
-  draw(s,h,v,a,p,k) {
-    s.setRoot(h('#modal-container'))
-  }
-  showModal(modal) {
-    let p = new Promise((resolve, reject) => {
-      modal.promise
-        .then(result => {          
-          this.root.clear()
-          resolve(result)
-        })
-        .catch(error => {
-          this.root.clear()
-          reject(error)
-        })
-      })
-    this.root.inner(modal)
-    return p
-  }
-}
-
-/***/ }),
-
 /***/ "./demo/src/modal-yes-no.js":
 /*!**********************************!*\
   !*** ./demo/src/modal-yes-no.js ***!
@@ -237,36 +199,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class Modal extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
-  draw(s,h,v,a,p,k) {
-    s.setRoot(h('div').class('modal-background').on({
-      click: e => {
-        if (e.target == s.el) {
-          s.rejectModal('user-cancelled')
-        }
-      }
-    }))
-    let content = h('div').class('modal-content modal-animate').inner([
+class ModalYesNo extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Modal"] {
+  getBackground(s,h,v,a,p,k) {
+    return h('div').class('modal-background')
+  }
+  content(s,h,v,a,p,k) {
+    return h('div').class('modal-content modal-animate').inner([
       h('button').text('OK').on({click: e => this.resolveModal(222)}),
       h('button').text('Cancel').on({click: e => this.rejectModal('user-cancelled')}),
     ])
-    s.root.inner(content)
-    s.promise = new Promise((resolve, reject) => {
-      this._resolveFn = resolve
-      this._rejectFn = reject
-    })
   }
-  resolveModal(data) {
-    this._resolveFn(data)
-  }
-  rejectModal(data) {
-    this._rejectFn(data)
-  }
-}
-
-
-class ModalYesNo extends Modal {
-
 }
 
 
@@ -298,13 +240,15 @@ class PageContainer extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"]
 /*!************************!*\
   !*** ./src/pillbug.js ***!
   \************************/
-/*! exports provided: App, View, h, NodeWrapper */
+/*! exports provided: App, View, Modal, ModalContainer, h, NodeWrapper */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "App", function() { return App; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "View", function() { return View; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Modal", function() { return Modal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ModalContainer", function() { return ModalContainer; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return h; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NodeWrapper", function() { return NodeWrapper; });
 const c = console
@@ -386,6 +330,54 @@ class View {
       cacheForType[key] = view
       return view
     }
+  }
+}
+
+
+class Modal extends View {
+  draw(s,h,v,a,p,k) {
+    s.setRoot(s.getBackground(s,h,v,a,p,k).on({
+      click: e => {
+        if (e.target == s.el) {
+          s.rejectModal('user-cancelled')
+        }
+      }
+    }))
+    s.promise = new Promise((resolve, reject) => {
+      this._resolveFn = resolve
+      this._rejectFn = reject
+    })
+    s.root.inner(s.content(s,h,v,a,p,k))
+  }
+  resolveModal(data) {
+    this._resolveFn(data)
+  }
+  rejectModal(data) {
+    this._rejectFn(data)
+  }
+}
+
+
+class ModalContainer {
+  constructor(app, el) {
+    this.app = app
+    this.root = el
+    this.el = el.el
+  }
+  showModal(modal) {
+    let p = new Promise((resolve, reject) => {
+      modal.promise
+        .then(result => {          
+          this.root.clear()
+          resolve(result)
+        })
+        .catch(error => {
+          this.root.clear()
+          reject(error)
+        })
+      })
+    this.root.inner(modal)
+    return p
   }
 }
 

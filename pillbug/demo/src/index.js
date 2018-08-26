@@ -1,6 +1,6 @@
-import {App, h} from '../../src/pillbug.js';
+import {App, h, ModalContainer} from '../../src/pillbug.js';
 import Menu from './menu';
-import ModalContainer from './modal-container';
+//import ModalContainer from './modal-container';
 import PageContainer from './page-container';
 import ModalYesNo from './modal-yes-no';
 
@@ -17,7 +17,7 @@ a.load = function() {
       c.log(r)
     })}),
     ]))
-  this.modalContainer = new ModalContainer(this)
+  this.modalContainer = new ModalContainer(this, h('#modal-container'))
 }
 
 a.goto = function(route) {
@@ -27,8 +27,6 @@ a.goto = function(route) {
   let page = h('div').text(route)
   this.emit('goto', page)
 }
-
-
 
 
 a.showModal = function(modal) {
