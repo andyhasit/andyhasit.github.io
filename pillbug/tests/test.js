@@ -1,13 +1,10 @@
-const pillbug = require('../dist/pillbug.js')
+import {View, App, h} from '../dist/pillbug.js'
 const c = console
 
-test('Pillbug version test', () => {
-  expect(pillbug.version).toBe('0.0.1')
-})
 
 test('Set root to NodeWrapper works', () => {
-  class MyView extends pillbug.View {
-    draw(s,h,v,a,p,k) {
+  class MyView extends View {
+    draw(h,v,a,p,k,s) {
       s.setRoot(h('span'))
     }
   } 
@@ -21,14 +18,15 @@ test('H works with id', () => {
   el.id = id
   document.body.appendChild(el)
   expect(document.getElementById(id).id).toBe(id)
-  let vn = pillbug.h('#my-div')
+  let vn = h('#my-div')
   expect(vn.el.id).toBe(id)
   expect(vn.el === el).toBe(true)
 })
 
+/*
 test('Set root to invalid type throws TypeError', () => {
-  class MyView extends pillbug.View {
-    draw(s,h,v,a,p,k) {
+  class MyView extends View {
+    draw(h,v,a,p,k,s) {
       s.setRoot(7)
     }
   }
@@ -36,10 +34,11 @@ test('Set root to invalid type throws TypeError', () => {
     let view = new MyView()
   }).toThrow(TypeError)
 })
+*/
 
 test('Draw with raw DOM operations', () => {
-  class MyView extends pillbug.View {
-    draw(s,h,v,a,p,k) {
+  class MyView extends View {
+    draw(h,v,a,p,k,s) {
       s.el = document.createElement('span')
       s.el.textContent = 'hello'
     }
@@ -50,8 +49,8 @@ test('Draw with raw DOM operations', () => {
 })
 
 test('Draw with h', () => {
-  class MyView extends pillbug.View {
-    draw(s,h,v,a,p,k) {
+  class MyView extends View {
+    draw(h,v,a,p,k,s) {
       let root = h('span').text('hello')
       s.setRoot(root)
     }
@@ -62,8 +61,8 @@ test('Draw with h', () => {
 })
 
 test('test inner', () => {
-  class MyView extends pillbug.View {
-    draw(s,h,v,a,p,k) {
+  class MyView extends View {
+    draw(h,v,a,p,k,s) {
       let root = h('div').inner([
         h('span').text('hello'),
         h('span').text('yo')
@@ -81,7 +80,7 @@ test('test inner', () => {
 
 test('App events', () => {
   var a, b;
-  let app = new pillbug.App()
+  let app = new App()
   app.on('event1', value => a = value)
   app.on('event2', value => b = value)
   app.emit('event1', 1)
@@ -91,8 +90,8 @@ test('App events', () => {
 })
 
 test('View responds to app events', () => {
-  class MyView extends pillbug.View {
-    draw(s,h,v,a,p,k) {
+  class MyView extends View {
+    draw(h,v,a,p,k,s) {
       let usersUl = h('ul')
       s.setRoot(h('div').inner(usersUl))
       a.on('users-updated', users => {
@@ -102,7 +101,7 @@ test('View responds to app events', () => {
       })
     }
   }
-  let app = new pillbug.App()
+  let app = new App()
   let view = new MyView(app)
   expect(view.el.textContent).toBe('')
 
@@ -114,53 +113,98 @@ test('View responds to app events', () => {
 })
 
 
-test('View builds nested views', () => {
-  class UserLI extends pillbug.View {
-    draw(s,h,v,a,p,k) {
+test('Test prop match', () => {
+
+
+  var view;
+  class MyView extends View {
+    draw(h,v,a,p,k,s) {
       s.setRoot(h('span'))
-      s.match('name', name => this.root.text(name))
-    }
-  }
-  class MyView extends pillbug.View {
-    draw(s,h,v,a,p,k) {
-      let usersUl = h('ul')
-      this.setRoot(h('div').inner(usersUl))
-      a.on('newUser', users => {
-        usersUl.inner(users.map(user => {
-          return v(UserLI, user, user.id)
-        }))
-      })
+      s.match('name', name => s.root.text(name))
     }
   }
 
-  let app = new pillbug.App()
-  let view = new MyView(app)
+  // _iew calls update after creating so we replicate this here.
+  function mockViewCreation(props) {
+    view = new MyView(null, {name: 'Joe'})
+    view.update(props)
+  }
+  
+  mockViewCreation({name: 'Joe'})
+  expect(view.el.textContent).toBe('Joe')
+  view.update({name: 'Jane'})
+  expect(view.el.textContent).toBe('Jane')
+})
+
+test('View builds nested views', () => {
+
+  var userLis;
+
+  class UserLI extends View {
+    draw(h,v,a,p,k,s) {
+      s.setRoot(h('li'))
+      s.match('name', name => s.root.text(name))
+    }
+    update(props) {
+      super.update(props)
+    }
+  }
+  
+  class UsersUL extends View {
+    draw(h,v,a,p,k,s) {
+      s.usersUl = h('ul')
+      s.setRoot(h('div').inner(s.usersUl))
+      c.log(s.el)
+      a.on('users-updated', users => s._rebuild(users))
+    }
+    _rebuild(users) {
+      userLis = users.map(user => {
+        return this.v(UserLI, user, user.id)
+      })
+      this.usersUl.inner(userLis)
+    }
+  }
+
+  let app = new App()
   app.users = [
     {id: 1, name: 'Dave'},
     {id: 2, name: 'Joe'},
   ]
-  app.emit('newUser', app.users)
+
+  let view = new UsersUL(app)
+  expect(view.el.textContent).toBe('')
+
+  app.emit('users-updated', app.users)
   expect(view.el.textContent).toBe('DaveJoe')
-  
   app.users[0].name = 'Jane'
-  app.emit('newUser', app.users)
+  app.emit('users-updated', app.users)
   expect(view.el.textContent).toBe('JaneJoe')
 
 })
 
 
-
-
-/*
-
-draw(s,h,v,a,p,k) {
-    let itemsUl = h('ul')
-    let input = h('input').on({'click': e => alert(e)})
-    this.el = h('div').inner([
-      
-      itemsUl
-    ])
-    m.on('')
+test('Self updating view', () => {
+  class MyView extends View {
+    draw(h) {
+      let clickCount = 0;
+      let counterEl = h('span').text(0);
+      let div = h('div').inner([
+        h('button').text('Click me').on({click: e => {
+          clickCount ++;
+          counterEl.text(clickCount)
+        }}),
+        h('span').text('Click count: '),
+        counterEl
+      ]);
+      this.setRoot(div)
+    }
   }
-  
-  */
+
+  let view = new MyView()
+  console.log(view.el.outerHTML)
+  let btn = view.el.children[0]
+  let counter = view.el.children[2]
+  expect(counter.textContent).toBe('0')
+  btn.click()
+  expect(counter.textContent).toBe('1')
+})

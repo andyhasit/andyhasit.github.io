@@ -107,21 +107,58 @@ __webpack_require__.r(__webpack_exports__);
 
 const c = console;
 
-const a = new _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["App"]()
+const app = new _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["App"](Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('#modal-container'))
 
-a.load = function() {
+/*
+app.appView('menu', Menu)
+app.appView(Menu)
+
+h('#modal-container')
+
+
+
+app.showModal = function(modal) {
+  this.modalContainer.showModal(modal)
+  return modal.promise
+
+}
+
+*/
+
+class MyView extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
+  draw(h) {
+    this.clickCount = 0
+    this.counterEl = h('span').text(0);
+    let div = h('#my-div').inner([
+      h('span').text('You clicked me: '),
+      this.counterEl,
+      h('span').text(' times!'),
+      h('br'),
+      h('button').text('Click me').on({click: e => this._buttonClicked()})
+    ]);
+    this.setRoot(div)
+  }
+  _buttonClicked() {
+    this.clickCount ++;
+    this.counterEl.text(this.clickCount)
+  }
+}
+
+new MyView()
+
+app.load = function() {
   this.menu = new _menu__WEBPACK_IMPORTED_MODULE_1__["default"](this)
   let myModal = 
   this.pageContainer = new _page_container__WEBPACK_IMPORTED_MODULE_2__["default"](this, Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('div').inner([
     Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('span').text('hello'),
-    Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('button').text('show modal').on({click: e => this.showModal(new _modal_yes_no__WEBPACK_IMPORTED_MODULE_3__["default"](this)).then(r => {
-      c.log(r)
-    })}),
+    Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('button').text('show modal').on({click: e => this.showModal(new _modal_yes_no__WEBPACK_IMPORTED_MODULE_3__["default"](this))
+      .then(r => {c.log(r)})
+      .catch(e => {c.log(e)})
+    }),
     ]))
-  this.modalContainer = new _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["ModalContainer"](this, Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('#modal-container'))
 }
 
-a.goto = function(route) {
+app.goto = function(route) {
   c.log(this)
   c.log(route)
   //get translate into url so I get back functionality..
@@ -130,12 +167,7 @@ a.goto = function(route) {
 }
 
 
-a.showModal = function(modal) {
-  this.modalContainer.showModal(modal)
-  return modal.promise
-}
-
-a.load()
+app.load()
 
 /***/ }),
 
@@ -154,18 +186,18 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Menu extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
-  draw(h,v,a,p,k) {
-    let showMenuBtn = h('span').html('&#9776;').class('menu-button').on({click: e => this.showMenu()})
-    let hideMenuBtn = h('a').atts({href:"#"}).html('&times;').class('closebtn').on({click: e => this.hideMenu()})
-    this.menuDiv = h('div').id('menu').class('overlay').inner([
+  draw(h,v,a,p,k,s) {
+    let showMenuBtn = h('span').html('&#9776;').class('menu-button').on({click: e => s.showMenu()})
+    let hideMenuBtn = h('a').atts({href:"#"}).html('&times;').class('closebtn').on({click: e => s.hideMenu()})
+    s.menuDiv = h('div').id('menu').class('overlay').inner([
       hideMenuBtn,
       h('div').class('overlay-content').inner([
-        this.getMenuEntry(a, h, 'Page1', 'page1'),
-        this.getMenuEntry(a, h, 'Page2', 'page2')
+        s.getMenuEntry(a, h, 'Page1', 'page1'),
+        s.getMenuEntry(a, h, 'Page2', 'page2')
         ])
       ])
-    this.setRoot(h('#menu-container')).inner([
-      this.menuDiv, 
+    s.setRoot(h('#menu-container')).inner([
+      s.menuDiv, 
       showMenuBtn
       ])
   }
@@ -200,13 +232,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class ModalYesNo extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Modal"] {
-  getBackground(h,v,a,p,k,s) {
+  overlay(h,v,a,p,k,s) {
     return h('div').class('modal-background')
   }
   content(h,v,a,p,k,s) {
     return h('div').class('modal-content modal-animate').inner([
-      h('button').text('OK').on({click: e => s.resolveModal(222)}),
-      h('button').text('Cancel').on({click: e => s.rejectModal('user-cancelled')}),
+      h('button').text('OK').on({click: e => s.resolve(222521)}),
+      h('button').text('Cancel').on({click: e => s.reject('user-cancelled')}),
     ])
   }
 }
@@ -240,7 +272,7 @@ class PageContainer extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"]
 /*!************************!*\
   !*** ./src/pillbug.js ***!
   \************************/
-/*! exports provided: App, View, Modal, ModalContainer, h, NodeWrapper */
+/*! exports provided: App, View, Modal, h, NodeWrapper */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -248,29 +280,48 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "App", function() { return App; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "View", function() { return View; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Modal", function() { return Modal; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ModalContainer", function() { return ModalContainer; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return h; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NodeWrapper", function() { return NodeWrapper; });
-const c = console
+/*
+Pillbug version 0.0.1
 
+
+*/
 
 class App {
-  constructor() {
-    this._register = {}
+  constructor(modalContainer) {
+    this._modalContainer = modalContainer
+    this._eventWatchers = {}
+    this._views = {}
   }
-  _getWatchList(event) {
-    let watchers = this._register[event]
-    if (watchers == undefined) {
-      watchers = []
-      this._register[event] =  watchers
-    }
-    return watchers
+  addView(name, cls, el) {
+    this._views[name] = new cls(this, el)
+  }
+  showModal(modal) {
+    this._modalContainer.inner(modal)
+    return modal.promise
+      .then(result => {          
+        this._modalContainer.clear()
+        return result
+      })
+      .catch(error => {
+        this._modalContainer.clear()
+        return error
+      })
   }
   emit(event, data) {
-    this._getWatchList(event).forEach(w => w(data))
+    this._watchers(event).forEach(w => w(data))
   }
   on(event, callback) {
-    this._getWatchList(event).push(callback)
+    this._watchers(event).push(callback)
+  }
+  _watchers(event) {
+    let watchers = this._eventWatchers[event]
+    if (watchers == undefined) {
+      watchers = []
+      this._eventWatchers[event] =  watchers
+    }
+    return watchers
   }
 }
 
@@ -278,10 +329,11 @@ class App {
 class View {
   constructor(app, props, key) {
     this._app = app
+    this._key = key
     this._vCache = {}
     this._matchers = {}
-    this._prevState = {}
-    this.v = this._getView.bind(this)
+    this._vals = {}
+    this.v = this._view.bind(this)
     this.draw(h, this.v, app, props, key, this)
   }
   setRoot(v) {
@@ -303,19 +355,21 @@ class View {
     }
     this._matchers[prop].push(fn)
   }
-  update(h,v,a,p,k,s) {
+  update(props) {
+    this._update(h, this.v, this._app, props, this._key, this)
+  }
+  _update(h,v,a,p,k,s) {
     for (let prop in s._matchers) {
-      let value = p[prop];
-      if (s._prevState[prop] !== value) {
-        let fnList = s._matchers[prop];
-        fnList.forEach(fn => {
-          fn(value)
+      let val = p[prop];
+      if (s._vals[prop] !== val) {
+        s._matchers[prop].forEach(fn => {
+          fn(val)
         })
       }
-      s._prevState[prop] = value
+      s._vals[prop] = val
     }
   }
-  _getView(cls, props, key) {
+  _view(cls, props, key) {
     if (key == undefined) {
       return new cls(this._app, props)
     }
@@ -326,11 +380,11 @@ class View {
     let cacheForType = this._vCache[className];
     if (cacheForType.hasOwnProperty(key)) {
       let view = cacheForType[key]
-      view.update(h, this.v, this._app, props, key, this)
+      view.update(props)
       return view
     } else {
       let view = new cls(this._app, props, key)
-      view.update(h, this.v, this._app, props, key, this)
+      view.update(props)
       cacheForType[key] = view
       return view
     }
@@ -340,48 +394,18 @@ class View {
 
 class Modal extends View {
   draw(h,v,a,p,k,s) {
-    s.setRoot(s.getBackground(h,v,a,p,k,s).on({
+    s.setRoot(s.overlay(h,v,a,p,k,s).on({
       click: e => {
         if (e.target == s.el) {
-          s.rejectModal('user-cancelled')
+          s.reject('user-cancelled')
         }
       }
     }))
     s.promise = new Promise((resolve, reject) => {
-      s._resolveFn = resolve
-      s._rejectFn = reject
+      s.resolve = resolve
+      s.reject = reject
     })
     s.root.inner(s.content(h,v,a,p,k,s))
-  }
-  resolveModal(data) {
-    this._resolveFn(data)
-  }
-  rejectModal(data) {
-    this._rejectFn(data)
-  }
-}
-
-
-class ModalContainer {
-  constructor(app, el) {
-    this.app = app
-    this.root = el
-    this.el = el.el
-  }
-  showModal(modal) {
-    let p = new Promise((resolve, reject) => {
-      modal.promise
-        .then(result => {          
-          this.root.clear()
-          resolve(result)
-        })
-        .catch(error => {
-          this.root.clear()
-          reject(error)
-        })
-      })
-    this.root.inner(modal)
-    return p
   }
 }
 
@@ -456,35 +480,6 @@ class NodeWrapper {
     return this
   }
 }
-
-
-
-
-/*
-
-const pillbug = {}
-
-pillbug.App = App
-pillbug.h = h
-pillbug.View = View
-pillbug.NodeWrapper = NodeWrapper
-pillbug.version = '0.0.1'
-module.exports = pillbug
-
-*/
-
-/*
-
-
-function htmlToElement(html) {
-  var template = createElement('template');
-  html = html.trim(); // Never return a text node of whitespace as the result
-  template.innerHTML = html;
-  return template.content.firstChild;
-}
-
-*/
-
 
 
 /***/ })

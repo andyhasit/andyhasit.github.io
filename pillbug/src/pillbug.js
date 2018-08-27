@@ -1,23 +1,43 @@
-const c = console
+/*
+Pillbug version 0.0.1
 
+
+*/
 
 export class App {
-  constructor() {
-    this._register = {}
+  constructor(modalContainer) {
+    this._modalContainer = modalContainer
+    this._eventWatchers = {}
+    this._views = {}
   }
-  _getWatchList(event) {
-    let watchers = this._register[event]
-    if (watchers == undefined) {
-      watchers = []
-      this._register[event] =  watchers
-    }
-    return watchers
+  addView(name, cls, el) {
+    this._views[name] = new cls(this, el)
+  }
+  showModal(modal) {
+    this._modalContainer.inner(modal)
+    return modal.promise
+      .then(result => {          
+        this._modalContainer.clear()
+        return result
+      })
+      .catch(error => {
+        this._modalContainer.clear()
+        return error
+      })
   }
   emit(event, data) {
-    this._getWatchList(event).forEach(w => w(data))
+    this._watchers(event).forEach(w => w(data))
   }
   on(event, callback) {
-    this._getWatchList(event).push(callback)
+    this._watchers(event).push(callback)
+  }
+  _watchers(event) {
+    let watchers = this._eventWatchers[event]
+    if (watchers == undefined) {
+      watchers = []
+      this._eventWatchers[event] =  watchers
+    }
+    return watchers
   }
 }
 
@@ -25,10 +45,11 @@ export class App {
 export class View {
   constructor(app, props, key) {
     this._app = app
+    this._key = key
     this._vCache = {}
     this._matchers = {}
-    this._prevState = {}
-    this.v = this._getView.bind(this)
+    this._vals = {}
+    this.v = this._view.bind(this)
     this.draw(h, this.v, app, props, key, this)
   }
   setRoot(v) {
@@ -50,85 +71,57 @@ export class View {
     }
     this._matchers[prop].push(fn)
   }
-  update(h,v,a,p,k,s) {
+  update(props) {
+    this._update(h, this.v, this._app, props, this._key, this)
+  }
+  _update(h,v,a,p,k,s) {
     for (let prop in s._matchers) {
-      let value = p[prop];
-      if (s._prevState[prop] !== value) {
-        let fnList = s._matchers[prop];
-        fnList.forEach(fn => {
-          fn(value)
+      let val = p[prop];
+      if (s._vals[prop] !== val) {
+        s._matchers[prop].forEach(fn => {
+          fn(val, p)
         })
       }
-      s._prevState[prop] = value
+      s._vals[prop] = val
     }
   }
-  _getView(cls, props, key) {
+  _view(cls, props, key) {
+    let view;
     if (key == undefined) {
-      return new cls(this._app, props)
-    }
-    let className = cls.name;
-    if (!this._vCache.hasOwnProperty(className)) {
-      this._vCache[className] = {}
-    }
-    let cacheForType = this._vCache[className];
-    if (cacheForType.hasOwnProperty(key)) {
-      let view = cacheForType[key]
-      view.update(h, this.v, this._app, props, key, this)
-      return view
+      view = new cls(this._app, props)
     } else {
-      let view = new cls(this._app, props, key)
-      view.update(h, this.v, this._app, props, key, this)
-      cacheForType[key] = view
-      return view
+      let className = cls.name;
+      if (!this._vCache.hasOwnProperty(className)) {
+        this._vCache[className] = {}
+      }
+      let cacheForType = this._vCache[className];
+      if (cacheForType.hasOwnProperty(key)) {
+        view = cacheForType[key]
+      } else {
+        view = new cls(this._app, props, key)
+        cacheForType[key] = view
+      }
     }
+    view.update(props)
+    return view
   }
 }
 
 
 export class Modal extends View {
   draw(h,v,a,p,k,s) {
-    s.setRoot(s.getBackground(h,v,a,p,k,s).on({
+    s.setRoot(s.overlay(h,v,a,p,k,s).on({
       click: e => {
         if (e.target == s.el) {
-          s.rejectModal('user-cancelled')
+          s.reject('user-cancelled')
         }
       }
     }))
     s.promise = new Promise((resolve, reject) => {
-      s._resolveFn = resolve
-      s._rejectFn = reject
+      s.resolve = resolve
+      s.reject = reject
     })
     s.root.inner(s.content(h,v,a,p,k,s))
-  }
-  resolveModal(data) {
-    this._resolveFn(data)
-  }
-  rejectModal(data) {
-    this._rejectFn(data)
-  }
-}
-
-
-export class ModalContainer {
-  constructor(app, el) {
-    this.app = app
-    this.root = el
-    this.el = el.el
-  }
-  showModal(modal) {
-    let p = new Promise((resolve, reject) => {
-      modal.promise
-        .then(result => {          
-          this.root.clear()
-          resolve(result)
-        })
-        .catch(error => {
-          this.root.clear()
-          reject(error)
-        })
-      })
-    this.root.inner(modal)
-    return p
   }
 }
 
@@ -203,32 +196,3 @@ export class NodeWrapper {
     return this
   }
 }
-
-
-
-
-/*
-
-const pillbug = {}
-
-pillbug.App = App
-pillbug.h = h
-pillbug.View = View
-pillbug.NodeWrapper = NodeWrapper
-pillbug.version = '0.0.1'
-module.exports = pillbug
-
-*/
-
-/*
-
-
-function htmlToElement(html) {
-  var template = createElement('template');
-  html = html.trim(); // Never return a text node of whitespace as the result
-  template.innerHTML = html;
-  return template.content.firstChild;
-}
-
-*/
-
