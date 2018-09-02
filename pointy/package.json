@@ -1,0 +1,21 @@
+{
+  "name": "pointy",
+  "version": "1.0.0",
+  "description": "An app which tracks points. Comes in different permutations.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "webpack --config webpack.config.js && jest",
+    "watch": "onchange 'src/**/*.js' 'lib/**/*.js' 'index.html' -- webpack --config webpack.config.js",
+    "build": "webpack --config webpack.config.js"
+  },
+  "author": "Andrew Buchan",
+  "license": "ISC",
+  "devDependencies": {
+    "onchange": "^4.1.0",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0"
+  }
+}

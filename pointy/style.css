@@ -2,6 +2,15 @@ body {
     font-family: 'Lato', sans-serif;
 }
 
+#app {
+    height:100%;
+    width:100%;
+    background:#f00;
+    color:#fff;
+    position: fixed;
+    margin: 0
+}
+
 .clearfix {
   clear: both;
 }
@@ -65,7 +74,7 @@ body {
     padding: 10px;
 }
 
-.page-content {
+#page-container {
     position: absolute;
     top: 45px;
     left: 0px;
@@ -73,8 +82,11 @@ body {
     bottom: 0px;
 }
 
+#modal-container {
+    
+}
+
 .modal-background {
-    display: none;
     position: fixed;
     z-index: 1;
     left: 0;
@@ -86,6 +98,7 @@ body {
     background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
     padding-top: 60px;
 }
+
 
 /* Modal Content/Box */
 .modal-content {

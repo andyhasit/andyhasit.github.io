@@ -1,4 +1,4 @@
-import {View, h} from '../../src/pillbug.js';
+import {View, h} from '../lib/pillbug.js';
 
 export default class PageContainer extends View {
   draw(h,v,a,p,k) {

@@ -1,4 +1,4 @@
-import {View, h} from '../../src/pillbug.js';
+import {View, h} from '../lib/pillbug.js';
 
 
 export default class Menu extends View {

@@ -6,25 +6,15 @@ Pillbug version 0.0.1
 
 const c = console;
 export class App {
-  constructor(modalContainer) {
-    this._modalContainer = modalContainer
+  constructor() {
     this._eventWatchers = {}
     this._views = {}
   }
-  addView(name, cls, el) {
-    this._views[name] = new cls(this, el)
-  }
-  showModal(modal) {
-    this._modalContainer.inner(modal)
-    return modal.promise
-      .then(result => {          
-        this._modalContainer.clear()
-        return result
-      })
-      .catch(error => {
-        this._modalContainer.clear()
-        return error
-      })
+  view(cls, name) {
+    let view = new cls(this)
+    if (name) {
+      this._views[name] = view
+    }
   }
   emit(event, data) {
     this._watchers(event).forEach(w => w(data))
@@ -39,6 +29,24 @@ export class App {
       this._eventWatchers[event] =  watchers
     }
     return watchers
+  }
+}
+
+export class ModalContainer {
+  constructor(id) {
+    this._el = h('#' + id)
+  }
+  showModal(modal) {
+    this._el.inner(modal)
+    return modal.promise
+      .then(result => {          
+        this._el.clear()
+        return result
+      })
+      .catch(error => {
+        this._el.clear()
+        return error
+      })
   }
 }
 
@@ -208,74 +216,50 @@ key won't work if no args, but we want it to!
 params vs vars
 */
 
-export class RouteArg {
-  constructor(str) {
-    // No error checks :-(
-    let name, conv;
-    [name, conv] = str.split(':')
-    this.name = name
-    switch (conv) {
-      case 'int':
-        this.conv = v => parseInt(v);
-        break;
-      case 'float':
-        this.conv = v => parseFloat(v);
-        break;
-      default:
-        this.conv = v => v;
-    }
-  }
-  convert(val) {
-    return this.conv(val)
-  }
-}
-
-class Router {
+export class Router {
   constructor() {
     this.routes = [];
-    window.addEventListener('hashchange', e => this.hashChanged(88))
+    window.addEventListener('hashchange', e => this._hashChanged());
+    window.addEventListener('load', e => this._hashChanged());
+    /*
     //window.addEventListener('load', router);
-  }
-  hashChanged(e) {
-    //identify 
-    c.log(999)
-    let url = location.hash.slice(1) || '/';
-    for ( let i=0, i < this.routes.length; i++) {
-      let route = this.routes[i]
-      if route.matches(url)
+    window.addEventListener('popstate', () => {
+     contentDiv.innerHTML = routes[window.location.pathname];
     }
-    c.log(url)
+    */
+  }
+  add(pattern, cls, key) {
+    this.routes.push(new Route(pattern, cls, keyFn))
+  }
+  _hashChanged(e) {
+    let url = location.hash.slice(1) || '/';
+    let route = this._getRoute(url);
+    if (!route) {
+      throw new Error('Route not matched: ' + url)
+    }
+    //window.history.pushState({}, url, window.location.origin + url);
+  }
+  _goto(url) {
+
+  }
+  _getRoute(url) {
+    let len = this.routes.length;
+    for (let i=0; i<len; i++) {
+      let route = this.routes[i];
+      if (route.matches(url)) {
+        return route
+      }
+    }
   }
 }
-
-
-    Array.prototype.forEach = function(fn) {
-      var StopIteration = new Error("StopIteration");
-      len = this.length;
-      function stop() {
-        throw StopIteration;
-      }
-      for (i=0;i<this.length;i++) {
-        try {
-          fn(this[i], i, stop)
-        } 
-        catch(e) {
-          if(e == StopIteration) {
-            return
-          }
-          throw e;
-        }
-      }
-    }
-
 
 
 export class Route {
-  constructor(pattern, cls, key) {
+  constructor(pattern, cls, keyFn) {
     //'todos/{id:int}?name,age'
     let paramStr;
     this.cls = cls;
-    this.key = key;
+    this.keyFn = keyFn; //TODO - implement/use
     [pattern, paramStr] = pattern.split('?')
     this.pattern = pattern
     this.chunks = pattern.split('/').map(s => {
@@ -334,3 +318,24 @@ export class Route {
   }
 }
 
+export class RouteArg {
+  constructor(str) {
+    // No error checks :-(
+    let name, conv;
+    [name, conv] = str.split(':')
+    this.name = name
+    switch (conv) {
+      case 'int':
+        this.conv = v => parseInt(v);
+        break;
+      case 'float':
+        this.conv = v => parseFloat(v);
+        break;
+      default:
+        this.conv = v => v;
+    }
+  }
+  convert(val) {
+    return this.conv(val)
+  }
+}

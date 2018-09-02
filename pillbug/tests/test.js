@@ -5,7 +5,7 @@ const c = console
 test('Set root to NodeWrapper works', () => {
   class MyView extends View {
     draw(h,v,a,p,k,s) {
-      s.setRoot(h('span'))
+      s.wrap(h('span'))
     }
   } 
   let view = new MyView()
@@ -27,7 +27,7 @@ test('H works with id', () => {
 test('Set root to invalid type throws TypeError', () => {
   class MyView extends View {
     draw(h,v,a,p,k,s) {
-      s.setRoot(7)
+      s.wrap(7)
     }
   }
   expect(() => {
@@ -52,7 +52,7 @@ test('Draw with h', () => {
   class MyView extends View {
     draw(h,v,a,p,k,s) {
       let root = h('span').text('hello')
-      s.setRoot(root)
+      s.wrap(root)
     }
   }
   let view = new MyView()
@@ -67,7 +67,7 @@ test('test inner', () => {
         h('span').text('hello'),
         h('span').text('yo')
         ])
-      s.setRoot(root)
+      s.wrap(root)
     }
   }
   let view = new MyView()
@@ -93,7 +93,7 @@ test('View responds to app events', () => {
   class MyView extends View {
     draw(h,v,a,p,k,s) {
       let usersUl = h('ul')
-      s.setRoot(h('div').inner(usersUl))
+      s.wrap(h('div').inner(usersUl))
       a.on('users-updated', users => {
         usersUl.inner(users.map(name => {
           return h('span').text(name)
@@ -119,7 +119,7 @@ test('Test prop match', () => {
   var view;
   class MyView extends View {
     draw(h,v,a,p,k,s) {
-      s.setRoot(h('span'))
+      s.wrap(h('span'))
       s.match('name', name => s.root.text(name))
     }
   }
@@ -142,7 +142,7 @@ test('View builds nested views', () => {
 
   class UserLI extends View {
     draw(h,v,a,p,k,s) {
-      s.setRoot(h('li'))
+      s.wrap(h('li'))
       s.match('name', name => s.root.text(name))
     }
     update(props) {
@@ -153,8 +153,7 @@ test('View builds nested views', () => {
   class UsersUL extends View {
     draw(h,v,a,p,k,s) {
       s.usersUl = h('ul')
-      s.setRoot(h('div').inner(s.usersUl))
-      c.log(s.el)
+      s.wrap(h('div').inner(s.usersUl))
       a.on('users-updated', users => s._rebuild(users))
     }
     _rebuild(users) {
@@ -189,22 +188,22 @@ test('Self updating view', () => {
       let clickCount = 0;
       let counterEl = h('span').text(0);
       let div = h('div').inner([
-        h('button').text('Click me').on({click: e => {
+        h('button').text('Click me').on('click', e => {
           clickCount ++;
           counterEl.text(clickCount)
-        }}),
+        }),
         h('span').text('Click count: '),
         counterEl
       ]);
-      this.setRoot(div)
+      this.wrap(div)
     }
   }
 
   let view = new MyView()
-  console.log(view.el.outerHTML)
   let btn = view.el.children[0]
   let counter = view.el.children[2]
   expect(counter.textContent).toBe('0')
   btn.click()
   expect(counter.textContent).toBe('1')
 })
+

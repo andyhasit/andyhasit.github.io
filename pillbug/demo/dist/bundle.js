@@ -125,8 +125,28 @@ app.showModal = function(modal) {
 
 */
 
+app.todos = [
+    {id: 1, text: 'A', done: false},
+    {id: 2, text: 'B', done: true},
+    {id: 3, text: 'C', done: false},
+];
+app._nextId = app.todos.length;
+
+app.addTodo = function(text) {
+  this._nextId ++
+  let id = this._nextId
+  this.todos.push({id: id, text: text, done: false})
+  this.emit('todos-changed', this.todos)
+}
+
+app.checkTodo = function(todo, done) {
+  todo.done = done
+  this.emit('todos-changed', this.todos)
+}
+
 class MyView extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
   draw(h) {
+    this.inpval = ''
     this.clickCount = 0
     this.counterEl = h('span').text(0);
     let div = h('#my-div').inner([
@@ -134,9 +154,11 @@ class MyView extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
       this.counterEl,
       h('span').text(' times!'),
       h('br'),
-      h('button').text('Click me').on({click: e => this._buttonClicked()})
+      h('button').text('Click me').on('click', e => this._buttonClicked()),
+      //h('input').bind(this, 'inpval', e=> c.log(e))
+      h('input').on('keypress', e=> c.log(e))
     ]);
-    this.setRoot(div)
+    this.wrap(div)
   }
   _buttonClicked() {
     this.clickCount ++;
@@ -144,30 +166,114 @@ class MyView extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
   }
 }
 
-new MyView()
+
+class TodoListView extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
+  draw(h,v,a,p,k,s) {
+    s.addTodoText = ''
+    s.todoUL = h('ul')
+    s.countEl = h('span')
+    a.on('todos-changed', data => s.todosChanged(h,v,a,p,k,s))
+    s.drawView(h,v,a,p,k,s)
+  }
+  todosChanged(h,v,a,p,k,s) {
+    s.updateCount(h,v,a,p,k,s)
+    s.redrawList(h,v,a,p,k,s)
+  }
+  updateCount(h,v,a,p,k,s) {
+    s.countEl.text(a.todos.length)
+  }
+  drawView(h,v,a,p,k,s) {
+    h('#my-div').inner([
+      s.countEl,
+      h('input').on('change', e=> s.addTodoText = e.target.value),
+      h('button').text('add').on('click', e => a.addTodo(s.addTodoText)),
+      s.todoUL
+    ])
+    s.todosChanged(h,v,a,p,k,s)
+  }
+  redrawList(h,v,a,p,k,s) {
+    s.todoUL.inner(a.todos.map(todo => v(TodoLi, todo, todo.id)))
+  }
+}
+
+
+class TodoLi extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
+  draw(h,v,a,p,k,s) {
+    let textEl = h('span')
+    let btnEl = h('input').atts({type: 'checkbox'})
+    .on('change', e => {
+      a.checkTodo(p, e.target.checked)
+    })
+    s.wrap(h('li').inner([textEl, btnEl]))
+    s.match('text', val => textEl.text(val))
+    s.match('done', val => btnEl.checked(val))
+  }
+}
+
+
+new TodoListView(app)
+
+
+
+class Router {
+  constructor() {
+    this.routes = [];
+    window.addEventListener('hashchange', e => this.hashChanged(88))
+    //window.addEventListener('load', router);
+  }
+  hashChanged(e) {
+    //identify 
+    c.log(999)
+    let url = location.hash.slice(1) || '/';
+    c.log(url)
+  }
+}
+
+r = new Route('todos/{id}?name,age')// ?foo=lorem&foo=ipsum)
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
 
 app.load = function() {
   this.menu = new _menu__WEBPACK_IMPORTED_MODULE_1__["default"](this)
-  let myModal = 
-  this.pageContainer = new _page_container__WEBPACK_IMPORTED_MODULE_2__["default"](this, Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('div').inner([
-    Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('span').text('hello'),
-    Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('button').text('show modal').on({click: e => this.showModal(new _modal_yes_no__WEBPACK_IMPORTED_MODULE_3__["default"](this))
+  /*let myModal = 
+  this.pageContainer = new PageContainer(this, h('div').inner([
+    h('span').text('hello'),
+    h('button').text('show modal').on({click: e => this.showModal(new ModalYesNo(this))
       .then(r => {c.log(r)})
       .catch(e => {c.log(e)})
     }),
     ]))
+  */
+
+  const router = new Router()
 }
 
 app.goto = function(route) {
-  c.log(this)
+
   c.log(route)
   //get translate into url so I get back functionality..
   let page = Object(_src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["h"])('div').text(route)
   this.emit('goto', page)
 }
 
-
 app.load()
+
+
+
+
+//c.log(router.hashChanged())
+//window.addEventListener('hashchange', e=> router.hashChanged())
+
+
 
 /***/ }),
 
@@ -187,8 +293,8 @@ __webpack_require__.r(__webpack_exports__);
 
 class Menu extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
   draw(h,v,a,p,k,s) {
-    let showMenuBtn = h('span').html('&#9776;').class('menu-button').on({click: e => s.showMenu()})
-    let hideMenuBtn = h('a').atts({href:"#"}).html('&times;').class('closebtn').on({click: e => s.hideMenu()})
+    let showMenuBtn = h('span').html('&#9776;').class('menu-button').on('click', e => s.showMenu())
+    let hideMenuBtn = h('a').atts({href:"#"}).html('&times;').class('closebtn').on('click', e => s.hideMenu())
     s.menuDiv = h('div').id('menu').class('overlay').inner([
       hideMenuBtn,
       h('div').class('overlay-content').inner([
@@ -196,16 +302,16 @@ class Menu extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
         s.getMenuEntry(a, h, 'Page2', 'page2')
         ])
       ])
-    s.setRoot(h('#menu-container')).inner([
+    s.wrap(h('#menu-container')).inner([
       s.menuDiv, 
       showMenuBtn
       ])
   }
   getMenuEntry(a, h, text, route) {
-    return h('a').atts({href:"#"}).text(text).on({click: e => {
+    return h('a').atts({href:"#/" + route}).text(text).on('click', e => {
       this.hideMenu()
-      a.goto(route)
-    }})
+      //a.goto(route)
+    })
   }
   showMenu() {
     this.menuDiv.atts({style: 'width: 70%'})
@@ -261,7 +367,7 @@ __webpack_require__.r(__webpack_exports__);
 
 class PageContainer extends _src_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
   draw(h,v,a,p,k) {
-    this.setRoot(h('#page-container')).inner(p)
+    this.wrap(h('#page-container')).inner(p)
     a.on('goto', page => this.root.inner(page))
   }
 }
@@ -336,13 +442,13 @@ class View {
     this.v = this._view.bind(this)
     this.draw(h, this.v, app, props, key, this)
   }
-  setRoot(v) {
+  wrap(v) {
     /*
     if (el instanceof NodeWrapper || el instanceof View) {
       this.root = el
       this.el = el.el
     } else {
-      throw new TypeError("View.setRoot() only accepts types: NodeWrapper, View")
+      throw new TypeError("View.wrap() only accepts types: NodeWrapper, View")
     }
     */
     this.root = v
@@ -363,38 +469,38 @@ class View {
       let val = p[prop];
       if (s._vals[prop] !== val) {
         s._matchers[prop].forEach(fn => {
-          fn(val)
+          fn(val, p)
         })
       }
       s._vals[prop] = val
     }
   }
   _view(cls, props, key) {
+    let view;
     if (key == undefined) {
-      return new cls(this._app, props)
-    }
-    let className = cls.name;
-    if (!this._vCache.hasOwnProperty(className)) {
-      this._vCache[className] = {}
-    }
-    let cacheForType = this._vCache[className];
-    if (cacheForType.hasOwnProperty(key)) {
-      let view = cacheForType[key]
-      view.update(props)
-      return view
+      view = new cls(this._app, props)
     } else {
-      let view = new cls(this._app, props, key)
-      view.update(props)
-      cacheForType[key] = view
-      return view
+      let className = cls.name;
+      if (!this._vCache.hasOwnProperty(className)) {
+        this._vCache[className] = {}
+      }
+      let cacheForType = this._vCache[className];
+      if (cacheForType.hasOwnProperty(key)) {
+        view = cacheForType[key]
+      } else {
+        view = new cls(this._app, props, key)
+        cacheForType[key] = view
+      }
     }
+    view.update(props)
+    return view
   }
 }
 
 
 class Modal extends View {
   draw(h,v,a,p,k,s) {
-    s.setRoot(s.overlay(h,v,a,p,k,s).on({
+    s.wrap(s.overlay(h,v,a,p,k,s).on({
       click: e => {
         if (e.target == s.el) {
           s.reject('user-cancelled')
@@ -425,9 +531,12 @@ class NodeWrapper {
   }
   atts(atts) {
     for (let key in atts) {
-      //Todo, check if different, and remove uneeded
       this.el.setAttribute(key, atts[key])
     }
+    return this
+  }
+  checked(val) {
+    this.el.checked = val
     return this
   }
   class(className) {
@@ -443,10 +552,8 @@ class NodeWrapper {
     this.el.innerHTML = ''
     return this
   }
-  on(listeners) {
-    for (let key in listeners) {
-      this.el.addEventListener(key, listeners[key])
-    }
+  on(event, callback) {
+    this.el.addEventListener(event, callback)
     return this
   }
   id(id) {

@@ -4,6 +4,7 @@ Pillbug version 0.0.1
 
 */
 
+const c = console;
 export class App {
   constructor(modalContainer) {
     this._modalContainer = modalContainer
@@ -52,13 +53,13 @@ export class View {
     this.v = this._view.bind(this)
     this.draw(h, this.v, app, props, key, this)
   }
-  setRoot(v) {
+  wrap(v) {
     /*
     if (el instanceof NodeWrapper || el instanceof View) {
       this.root = el
       this.el = el.el
     } else {
-      throw new TypeError("View.setRoot() only accepts types: NodeWrapper, View")
+      throw new TypeError("View.wrap() only accepts types: NodeWrapper, View")
     }
     */
     this.root = v
@@ -110,7 +111,7 @@ export class View {
 
 export class Modal extends View {
   draw(h,v,a,p,k,s) {
-    s.setRoot(s.overlay(h,v,a,p,k,s).on({
+    s.wrap(s.overlay(h,v,a,p,k,s).on({
       click: e => {
         if (e.target == s.el) {
           s.reject('user-cancelled')
@@ -141,9 +142,12 @@ export class NodeWrapper {
   }
   atts(atts) {
     for (let key in atts) {
-      //Todo, check if different, and remove uneeded
       this.el.setAttribute(key, atts[key])
     }
+    return this
+  }
+  checked(val) {
+    this.el.checked = val
     return this
   }
   class(className) {
@@ -159,10 +163,8 @@ export class NodeWrapper {
     this.el.innerHTML = ''
     return this
   }
-  on(listeners) {
-    for (let key in listeners) {
-      this.el.addEventListener(key, listeners[key])
-    }
+  on(event, callback) {
+    this.el.addEventListener(event, callback)
     return this
   }
   id(id) {
@@ -196,3 +198,99 @@ export class NodeWrapper {
     return this
   }
 }
+
+/*
+
+Routing.
+
+key won't work if no args, but we want it to!
+
+params vs vars
+*/
+
+export class RouteArg {
+  constructor(str) {
+    // No error checks :-(
+    let name, conv;
+    [name, conv] = str.split(':')
+    this.name = name
+    switch (conv) {
+      case 'int':
+        this.conv = v => parseInt(v);
+        break;
+      case 'float':
+        this.conv = v => parseFloat(v);
+        break;
+      default:
+        this.conv = v => v;
+    }
+  }
+  convert(val) {
+    return this.conv(val)
+  }
+}
+
+export class Route {
+  constructor(pattern, cls, key) {
+    //'todos/{id:int}?name,age'
+    let paramStr;
+    this.cls = cls;
+    this.key = key;
+    [pattern, paramStr] = pattern.split('?')
+    this.pattern = pattern
+    this.chunks = pattern.split('/').map(s => {
+      if (s.startsWith('{')) {
+        return new RouteArg(s.slice(1,-1))
+      }
+      return s
+    })
+    this.params = {}
+    if (paramStr) {
+      paramStr.split(',').forEach(s => {
+        let r = new RouteArg(s.trim());
+        this.params[r.name] = r;
+      })
+    }
+  }
+  /*
+  _extract(str) {
+    return str.match(/\{.+?\}/g).map(x => x.slice(1,-1))
+  }
+  */
+  match(url) {
+    let main, paramStr, chunks;
+    [main, paramStr] = url.split('?')
+    chunks = main.split('/')
+    let defChunk, testChunk, props = {}, i=0, end=this.chunks.length, mismatch=false;
+    if (end == chunks.length) {
+      while (true) {
+        defChunk = this.chunks[i];
+        testChunk = chunks[i];
+        if (defChunk instanceof RouteArg) {
+          props[defChunk.name] = defChunk.convert(testChunk)
+        } else if (defChunk !== testChunk) {
+          mismatch = true;
+          break;
+        }
+        i ++;
+        if (i > end) {
+          break;
+        }
+      }
+      if (!mismatch) {
+        if (paramStr) {
+          paramStr.split('&').forEach(e => {
+            let k, v;
+            [k,v] = e.split('=')
+            if (this.params.hasOwnProperty(k)) {
+              props[k] = this.params[k].convert(v)
+            }
+          })
+        }
+        return props
+      }
+    }
+    return false
+  }
+}
+
