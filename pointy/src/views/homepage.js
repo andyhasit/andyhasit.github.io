@@ -16,10 +16,10 @@ export default class HomePage extends View {
       s.btnAdd,
       s.tasksUL
     ]))
-    a.on('tasks-updated', e => s.drawTasksUl(h,v,a,p,k,s))
+    a.on('tasks-updated', tasks => s.drawTasksUl(h,s,tasks))
   }
-  drawTasksUl(h,v,a,p,k,s) {
-    s.tasksUL.inner(a.tasks.map( task => 
+  drawTasksUl(h,s,tasks) {
+    s.tasksUL.inner(tasks.map( task => 
       h('div').inner(task.text)
     ))
   }

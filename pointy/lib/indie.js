@@ -7,14 +7,20 @@ export class Database {
     this._caches = {}
     this._fullyLoaded = {}
     this._dbp = new Promise((resolve, reject) => {
-      let openreq = indexedDB.open(dbName, schema.version())
+      let openreq = indexedDB.open(dbName, schema.getVersion())
       openreq.onerror = () => reject(openreq.error)
-      openreq.onsuccess = () => resolve(openreq.result)
+      openreq.onsuccess = () => {
+        schema.createFunctions(this)
+        resolve(openreq.result)
+      }
       openreq.onupgradeneeded = (event) => {
         // First time setup: create an empty object store
         schema.upgrade(openreq.result, event.oldVersion)
       }
     })
+  }
+  ready() {
+    return this._dbp
   }
   dump() {
     let data = {}, promises=[];
@@ -151,6 +157,13 @@ export class Database {
     childRecord[fkName] = parentId
     return this.put(childStore, childRecord)
   }
+  link(store1, store2, store1Record, store2Record) {
+    let storeName = this.schema.getLinkStoreName(store1, store2);
+    let record = {}
+    record[this.schema.getFkName(store1)] = store1Record.id;
+    record[this.schema.getFkName(store2)] = store2Record.id;
+    return this.put(storeName, record)
+  }
 }
 
 /*
@@ -183,37 +196,100 @@ Todo:
 */
 
 export class Schema {
-  constructor(conf={keyPath: "id", autoIncrement: true}) {
-    this.conf = conf
+  constructor(defaultConf={keyPath: "id", autoIncrement: true}) {
+    this.defaultConf = defaultConf
     this._versions = []
-    this._stores = {}
-  }
-  getFkName(parentStore){
-    return `__${parentStore}Id`
   }
   addVersion(fn) {
     this._versions.push(fn)
   }
-  version() {
+  getVersion() {
     return this._versions.length + 1
   }
   upgrade(idb, oldVersion) {
-    this._idb = idb
+    let schemaUpgrader = new SchemaUpgrader(this, idb, this.defaultConf)
     this._versions.forEach((fn, version) => {
       if (version >= oldVersion) {
-        fn(this)
+        fn(schemaUpgrader, true)
       }
     })
   }
-  addStore(name, conf=this.conf) {
-    let store = this._idb.createObjectStore(name, conf)
-    this._stores[name] = store
+  createFunctions(target) {
+    let schemaFunctionBuilder = new SchemaFunctionBuilder(this, target)
+    this._versions.forEach((fn, version) => {
+      fn(schemaFunctionBuilder, false)
+    })
+  }
+  getFkName(parentStore) {
+    return `__${parentStore}Id`
+  }
+  getLinkStoreName(store1, store2) {
+    return `m2m__${store1}__${store2}`
+  }
+}
+
+
+class SchemaFunctionBuilder {
+  constructor(schema, target) {
+    this.schema = schema
+    this.target = target
+  }
+  capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1)
+  }
+  addStore(name) {
+    let capitalizedName = this.capitalize(name);
+    ['put', 'del', 'get', 'getAll'].forEach(method => {
+      this.target[method + capitalizedName] = function(arg) {
+        return this[method](name, arg)
+      }
+    })
+  }
+  oneToMany(parentStore, childStore) {
+    let parentCaps = this.capitalize(parentStore);
+    let childCaps = this.capitalize(childStore);
+    let pluralChildren = childCaps + 's'; //TODO: all override in opts.
+    //Get parent as getChildParent(child)
+    this.target['get' + childCaps + parentCaps] = function(childRecord) {
+      return this.getParent(childStore, parentStore, childRecord)
+    }
+    //Get children as getParentChildren(parent)
+    this.target['get' + parentCaps + pluralChildren] = function(parentId) {
+      return this.getChildren(parentStore, childStore, parentId)
+    }
+    this.target['set' + childCaps + parentCaps] = function(childRecord, parentId) {
+      return this.setParent(childStore, parentStore, childRecord, parentId)
+    }
+  }
+  manyToMany(store1, store2) {
+    /*let store = this.idb.createObjectStore(this.schema.getLinkStoreName(store1, store2), this.defaultConf)
+    store.createIndex(store1, this.schema.getFkName(store1));
+    store.createIndex(store2, this.schema.getFkName(store2));
+    */
+  }
+}
+
+
+class SchemaUpgrader {
+  constructor(schema, idb, defaultConf) {
+    this.schema = schema
+    this.idb = idb
+    this.stores = {}
+    this.defaultConf = defaultConf
+  }
+  addStore(name, conf=this.defaultConf) {
+    let store = this.idb.createObjectStore(name, conf)
+    this.stores[name] = store
     return store
   }
-  oneToMany(store1, store2) {
-    this._stores[store2].createIndex(store1, `__${store1}Id`);
+  oneToMany(parent, child) {
+    this.stores[child].createIndex(parent, this.schema.getFkName(parent));
   }
-
+  manyToMany(store1, store2) {
+    let store = this.idb.createObjectStore(this.schema.getLinkStoreName(store1, store2), this.defaultConf)
+    store.createIndex(store1, this.schema.getFkName(store1));
+    store.createIndex(store2, this.schema.getFkName(store2));
+  }
 }
 
 export function deleteIdb(dbName) {
