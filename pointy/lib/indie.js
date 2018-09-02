@@ -1,4 +1,6 @@
 
+const c = console;
+
 export class Database {
   constructor(dbName, schema) {
     this.schema = schema
@@ -13,6 +15,13 @@ export class Database {
         schema.upgrade(openreq.result, event.oldVersion)
       }
     })
+  }
+  dump() {
+    let data = {}, promises=[];
+    for (let store in this.schema._stores) {
+      promises.push(this.getAll(store).then(rows => data[store] = rows))
+    }
+    return Promise.all(promises).then(x => data)
   }
   _cacheOf(store) {
     if (!this._caches.hasOwnProperty(store)) {

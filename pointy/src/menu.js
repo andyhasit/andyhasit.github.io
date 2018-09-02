@@ -1,5 +1,18 @@
 import {View, h} from '../lib/pillbug.js';
 
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
 
 export default class Menu extends View {
   _draw(h,v,a,p,k,s) {
@@ -9,13 +22,22 @@ export default class Menu extends View {
       hideMenuBtn,
       h('div').class('overlay-content').inner([
         s.getMenuEntry(a, h, 'Page1', 'page1'),
-        s.getMenuEntry(a, h, 'Page2', 'page2')
+        s.getMenuEntry(a, h, 'Page2', 'page2'),
+        s.downloadButton(h,v,a,p,k,s)
         ])
       ])
     s.wrap(h('#menu-container')).inner([
       s.menuDiv, 
       showMenuBtn
       ])
+  }
+  downloadButton(h,v,a,p,k,s) {
+    return h('a').atts({href:"#"}).text('Download').on('click', e => {
+      a.db.dump().then(data => {
+        download('test.txt', JSON.stringify(data))
+        this.hideMenu()
+      })
+    })
   }
   getMenuEntry(a, h, text, route) {
     return h('a').atts({href:"#" + route}).text(text).on('click', e => {

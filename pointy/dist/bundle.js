@@ -99,6 +99,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Schema", function() { return Schema; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deleteIdb", function() { return deleteIdb; });
 
+const c = console;
+
 class Database {
   constructor(dbName, schema) {
     this.schema = schema
@@ -113,6 +115,13 @@ class Database {
         schema.upgrade(openreq.result, event.oldVersion)
       }
     })
+  }
+  dump() {
+    let data = {}, promises=[];
+    for (let store in this.schema._stores) {
+      promises.push(this.getAll(store).then(rows => data[store] = rows))
+    }
+    return Promise.all(promises).then(x => data)
   }
   _cacheOf(store) {
     if (!this._caches.hasOwnProperty(store)) {
@@ -365,9 +374,11 @@ class App {
 
 class ModalContainer {
   constructor(id) {
+    //c.log(h('#' + id))
     this._el = h('#' + id)
   }
   showModal(modal) {
+    modal.draw()
     this._el.inner(modal)
     return modal.promise
       .then(result => {          
@@ -454,14 +465,13 @@ class View {
 
 
 class Modal extends View {
-  draw(h,v,a,p,k,s) {
-    s.wrap(s.overlay(h,v,a,p,k,s).on({
-      click: e => {
+  _draw(h,v,a,p,k,s) {
+    s.wrap(s.overlay(h,v,a,p,k,s).on('click', e => {
         if (e.target == s.el) {
           s.reject('user-cancelled')
         }
       }
-    }))
+    ))
     s.promise = new Promise((resolve, reject) => {
       s.resolve = resolve
       s.reject = reject
@@ -745,7 +755,9 @@ const c = console;
 const app = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["App"]()
 
 app.modal = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["ModalContainer"]('modal-container')
-app.showModal = app.modal.showModal;
+app.showModal = function(modal) {
+  app.modal.showModal(modal);
+}
 
 app.view(_menu__WEBPACK_IMPORTED_MODULE_2__["default"])
 
@@ -789,11 +801,16 @@ app.loadData = function() {
         this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
         this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
         this.emit('tasks-updated')
+        
+        //this.showModal(new ModalYesNo('Really?'))
       })
     })
   })
 
 }
+
+
+
 
 app.loadData()
 
@@ -812,6 +829,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
 
 
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
 
 class Menu extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
   _draw(h,v,a,p,k,s) {
@@ -821,13 +851,22 @@ class Menu extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
       hideMenuBtn,
       h('div').class('overlay-content').inner([
         s.getMenuEntry(a, h, 'Page1', 'page1'),
-        s.getMenuEntry(a, h, 'Page2', 'page2')
+        s.getMenuEntry(a, h, 'Page2', 'page2'),
+        s.downloadButton(h,v,a,p,k,s)
         ])
       ])
     s.wrap(h('#menu-container')).inner([
       s.menuDiv, 
       showMenuBtn
       ])
+  }
+  downloadButton(h,v,a,p,k,s) {
+    return h('a').atts({href:"#"}).text('Download').on('click', e => {
+      a.db.dump().then(data => {
+        download('test.txt', JSON.stringify(data))
+        this.hideMenu()
+      })
+    })
   }
   getMenuEntry(a, h, text, route) {
     return h('a').atts({href:"#" + route}).text(text).on('click', e => {
@@ -865,8 +904,8 @@ class ModalYesNo extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Modal"] {
   }
   content(h,v,a,p,k,s) {
     return h('div').class('modal-content modal-animate').inner([
-      h('button').text('OK').on({click: e => s.resolve(222521)}),
-      h('button').text('Cancel').on({click: e => s.reject('user-cancelled')}),
+      h('button').text('OK').on('click', e => s.resolve(222521)),
+      h('button').text('Cancel').on('click', e => s.reject('user-cancelled')),
     ])
   }
 }

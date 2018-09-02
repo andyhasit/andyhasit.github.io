@@ -7,8 +7,8 @@ export default class ModalYesNo extends Modal {
   }
   content(h,v,a,p,k,s) {
     return h('div').class('modal-content modal-animate').inner([
-      h('button').text('OK').on({click: e => s.resolve(222521)}),
-      h('button').text('Cancel').on({click: e => s.reject('user-cancelled')}),
+      h('button').text('OK').on('click', e => s.resolve(222521)),
+      h('button').text('Cancel').on('click', e => s.reject('user-cancelled')),
     ])
   }
 }

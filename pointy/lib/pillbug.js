@@ -35,9 +35,11 @@ export class App {
 
 export class ModalContainer {
   constructor(id) {
+    //c.log(h('#' + id))
     this._el = h('#' + id)
   }
   showModal(modal) {
+    modal.draw()
     this._el.inner(modal)
     return modal.promise
       .then(result => {          
@@ -124,14 +126,13 @@ export class View {
 
 
 export class Modal extends View {
-  draw(h,v,a,p,k,s) {
-    s.wrap(s.overlay(h,v,a,p,k,s).on({
-      click: e => {
+  _draw(h,v,a,p,k,s) {
+    s.wrap(s.overlay(h,v,a,p,k,s).on('click', e => {
         if (e.target == s.el) {
           s.reject('user-cancelled')
         }
       }
-    }))
+    ))
     s.promise = new Promise((resolve, reject) => {
       s.resolve = resolve
       s.reject = reject

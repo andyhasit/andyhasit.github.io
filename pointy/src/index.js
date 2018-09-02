@@ -10,7 +10,9 @@ const c = console;
 const app = new App()
 
 app.modal = new ModalContainer('modal-container')
-app.showModal = app.modal.showModal;
+app.showModal = function(modal) {
+  app.modal.showModal(modal);
+}
 
 app.view(Menu)
 
@@ -54,10 +56,15 @@ app.loadData = function() {
         this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
         this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
         this.emit('tasks-updated')
+        
+        //this.showModal(new ModalYesNo('Really?'))
       })
     })
   })
 
 }
+
+
+
 
 app.loadData()
