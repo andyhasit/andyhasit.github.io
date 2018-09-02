@@ -17,8 +17,7 @@ app.showModal = function(modal) {
 app.view(Menu)
 
 app.router = new Router(app, 'page-container', [
-  ['/', HomePage],
-  ['page2', HomePage],
+  ['/', HomePage, props => 1],
   ['todos/{id}?name,age', ''],
 ])
 
@@ -56,7 +55,7 @@ app.loadData = function() {
         this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
         this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
         this.emit('tasks-updated')
-        
+
         //this.showModal(new ModalYesNo('Really?'))
       })
     })

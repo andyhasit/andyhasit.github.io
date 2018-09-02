@@ -269,7 +269,7 @@ export class PageContainer extends View{
     this.wrap(h('#' + id))
   }
   switch(route) {
-    this.root.inner(this._view(route.cls, route.props)) // route.keyFn(route.props)
+    this.root.inner(this._view(route.cls, route.props, route.keyFn(route.props))) // route.keyFn(route.props)
   }
 }
 

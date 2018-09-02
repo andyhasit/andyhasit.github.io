@@ -608,7 +608,7 @@ class PageContainer extends View{
     this.wrap(h('#' + id))
   }
   switch(route) {
-    this.root.inner(this._view(route.cls, route.props)) // route.keyFn(route.props)
+    this.root.inner(this._view(route.cls, route.props, route.keyFn(route.props))) // route.keyFn(route.props)
   }
 }
 
@@ -762,8 +762,7 @@ app.showModal = function(modal) {
 app.view(_menu__WEBPACK_IMPORTED_MODULE_2__["default"])
 
 app.router = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Router"](app, 'page-container', [
-  ['/', _homepage__WEBPACK_IMPORTED_MODULE_3__["default"]],
-  ['page2', _homepage__WEBPACK_IMPORTED_MODULE_3__["default"]],
+  ['/', _homepage__WEBPACK_IMPORTED_MODULE_3__["default"], props => 1],
   ['todos/{id}?name,age', ''],
 ])
 
@@ -801,7 +800,7 @@ app.loadData = function() {
         this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
         this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
         this.emit('tasks-updated')
-        
+
         //this.showModal(new ModalYesNo('Really?'))
       })
     })
@@ -850,7 +849,7 @@ class Menu extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
     s.menuDiv = h('div').id('menu').class('overlay').inner([
       hideMenuBtn,
       h('div').class('overlay-content').inner([
-        s.getMenuEntry(a, h, 'Page1', 'page1'),
+        s.getMenuEntry(a, h, 'Home', ''),
         s.getMenuEntry(a, h, 'Page2', 'page2'),
         s.downloadButton(h,v,a,p,k,s)
         ])
