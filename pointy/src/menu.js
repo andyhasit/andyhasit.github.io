@@ -2,7 +2,7 @@ import {View, h} from '../lib/pillbug.js';
 
 
 export default class Menu extends View {
-  draw(h,v,a,p,k,s) {
+  _draw(h,v,a,p,k,s) {
     let showMenuBtn = h('span').html('&#9776;').class('menu-button').on('click', e => s.showMenu())
     let hideMenuBtn = h('a').atts({href:"#"}).html('&times;').class('closebtn').on('click', e => s.hideMenu())
     s.menuDiv = h('div').id('menu').class('overlay').inner([
@@ -18,7 +18,7 @@ export default class Menu extends View {
       ])
   }
   getMenuEntry(a, h, text, route) {
-    return h('a').atts({href:"#/" + route}).text(text).on('click', e => {
+    return h('a').atts({href:"#" + route}).text(text).on('click', e => {
       this.hideMenu()
       //a.goto(route)
     })

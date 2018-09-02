@@ -6,25 +6,16 @@ Pillbug version 0.0.1
 
 const c = console;
 export class App {
-  constructor(modalContainer) {
-    this._modalContainer = modalContainer
+  constructor() {
     this._eventWatchers = {}
     this._views = {}
   }
-  addView(name, cls, el) {
-    this._views[name] = new cls(this, el)
-  }
-  showModal(modal) {
-    this._modalContainer.inner(modal)
-    return modal.promise
-      .then(result => {          
-        this._modalContainer.clear()
-        return result
-      })
-      .catch(error => {
-        this._modalContainer.clear()
-        return error
-      })
+  view(cls, name) {
+    let view = new cls(this)
+    view.draw()
+    if (name) {
+      this._views[name] = view
+    }
   }
   emit(event, data) {
     this._watchers(event).forEach(w => w(data))
@@ -42,16 +33,37 @@ export class App {
   }
 }
 
+export class ModalContainer {
+  constructor(id) {
+    this._el = h('#' + id)
+  }
+  showModal(modal) {
+    this._el.inner(modal)
+    return modal.promise
+      .then(result => {          
+        this._el.clear()
+        return result
+      })
+      .catch(error => {
+        this._el.clear()
+        return error
+      })
+  }
+}
+
 
 export class View {
   constructor(app, props, key) {
     this._app = app
+    this._props = props
     this._key = key
     this._vCache = {}
     this._matchers = {}
     this._vals = {}
     this.v = this._view.bind(this)
-    this.draw(h, this.v, app, props, key, this)
+  }
+  draw() {
+    this._draw(h, this.v, this._app, this._props, this._key, this)
   }
   wrap(v) {
     /*
@@ -90,6 +102,7 @@ export class View {
     let view;
     if (key == undefined) {
       view = new cls(this._app, props)
+      view.draw()
     } else {
       let className = cls.name;
       if (!this._vCache.hasOwnProperty(className)) {
@@ -100,6 +113,7 @@ export class View {
         view = cacheForType[key]
       } else {
         view = new cls(this._app, props, key)
+        view.draw()
         cacheForType[key] = view
       }
     }
@@ -208,34 +222,62 @@ key won't work if no args, but we want it to!
 params vs vars
 */
 
-export class RouteArg {
-  constructor(str) {
-    // No error checks :-(
-    let name, conv;
-    [name, conv] = str.split(':')
-    this.name = name
-    switch (conv) {
-      case 'int':
-        this.conv = v => parseInt(v);
-        break;
-      case 'float':
-        this.conv = v => parseFloat(v);
-        break;
-      default:
-        this.conv = v => v;
+export class Router {
+  constructor(app, id, routes) {
+    this._app = app;
+    this.pageContainer = new PageContainer(this._app, id);
+    this.routes = routes.map(ar => new Route(...ar));
+    window.addEventListener('hashchange', e => this._hashChanged());
+    window.addEventListener('load', e => this._hashChanged());
+    /*
+    //window.addEventListener('load', router);
+    window.addEventListener('popstate', () => {
+     contentDiv.innerHTML = routes[window.location.pathname];
+    }
+    */
+  }
+  add(pattern, cls, key) {
+    this.routes.push(new Route(pattern, cls, keyFn))
+  }
+  _hashChanged(e) {
+    let url = location.hash.slice(1) || '/';
+    let route = this._getRoute(url);
+    if (!route) {
+      throw new Error('Route not matched: ' + url)
+    }
+    this.pageContainer.switch(route)
+    //window.history.pushState({}, url, window.location.origin + url);
+  }
+  _goto(url) {
+
+  }
+  _getRoute(url) {
+    let len = this.routes.length;
+    for (let i=0; i<len; i++) {
+      let route = this.routes[i];
+      if (route.matches(url)) {
+        return route
+      }
     }
   }
-  convert(val) {
-    return this.conv(val)
+}
+
+export class PageContainer extends View{
+  constructor(app, id) {
+    super(app)
+    this.wrap(h('#' + id))
+  }
+  switch(route) {
+    this.root.inner(this._view(route.cls, route.props)) // route.keyFn(route.props)
   }
 }
 
 export class Route {
-  constructor(pattern, cls, key) {
+  constructor(pattern, cls, keyFn) {
     //'todos/{id:int}?name,age'
     let paramStr;
     this.cls = cls;
-    this.key = key;
+    this.keyFn = keyFn; //TODO - implement/use
     [pattern, paramStr] = pattern.split('?')
     this.pattern = pattern
     this.chunks = pattern.split('/').map(s => {
@@ -257,7 +299,7 @@ export class Route {
     return str.match(/\{.+?\}/g).map(x => x.slice(1,-1))
   }
   */
-  match(url) {
+  matches(url) {
     let main, paramStr, chunks;
     [main, paramStr] = url.split('?')
     chunks = main.split('/')
@@ -287,10 +329,32 @@ export class Route {
             }
           })
         }
-        return props
+        this.props = props // for this run only
+        return true
       }
     }
     return false
   }
 }
 
+export class RouteArg {
+  constructor(str) {
+    // No error checks :-(
+    let name, conv;
+    [name, conv] = str.split(':')
+    this.name = name
+    switch (conv) {
+      case 'int':
+        this.conv = v => parseInt(v);
+        break;
+      case 'float':
+        this.conv = v => parseFloat(v);
+        break;
+      default:
+        this.conv = v => v;
+    }
+  }
+  convert(val) {
+    return this.conv(val)
+  }
+}

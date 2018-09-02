@@ -86,11 +86,234 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./lib/indie.js":
+/*!**********************!*\
+  !*** ./lib/indie.js ***!
+  \**********************/
+/*! exports provided: Database, Schema, deleteIdb */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Database", function() { return Database; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Schema", function() { return Schema; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deleteIdb", function() { return deleteIdb; });
+
+class Database {
+  constructor(dbName, schema) {
+    this.schema = schema
+    this._caches = {}
+    this._fullyLoaded = {}
+    this._dbp = new Promise((resolve, reject) => {
+      let openreq = indexedDB.open(dbName, schema.version())
+      openreq.onerror = () => reject(openreq.error)
+      openreq.onsuccess = () => resolve(openreq.result)
+      openreq.onupgradeneeded = (event) => {
+        // First time setup: create an empty object store
+        schema.upgrade(openreq.result, event.oldVersion)
+      }
+    })
+  }
+  _cacheOf(store) {
+    if (!this._caches.hasOwnProperty(store)) {
+      this._caches[store] = {}
+    }
+    return this._caches[store]
+  }
+  _wrap(store, action, type, ...args) {
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      let transaction = db.transaction(store, type)
+      let request = transaction.objectStore(store)[action](...args)
+      transaction.oncomplete = () => resolve(request.result)
+      transaction.onabort = transaction.onerror = () => reject(transaction.error)
+    }))
+  }
+  put(store, record) {
+    return this._wrap(store, 'put', 'readwrite', record).then(id => {
+      record.id = id
+      this._cacheOf(store)[id] = record
+      return record
+    })
+  }
+  del(store, record) {
+    return this._wrap(store, 'delete', 'readwrite', record.id).then(id => {
+      delete this._cacheOf(store)[record.id]
+    })
+  }
+  get(store, id) {
+    let record = this._cacheOf(store)[id]
+    if (record == undefined) {
+      return this._wrap(store, 'get', undefined, id).then(record => {
+        this._cacheOf(store)[id] = record
+        return record
+      })
+    } else {
+      return Promise.resolve(record)
+    }
+  }
+  getAll(store) {
+    if (this._fullyLoaded[store]) {
+      return Promise.resolve(Object.values(this._cacheOf(store)))
+    } else {
+      return this._wrap(store, 'getAll').then(records => {
+        let cache = this._cacheOf(store)
+        this._fullyLoaded[store] = true
+        records.map(record => cache[record.id] = record)
+        return records
+      })
+    }
+  }
+  _criteriaMatch(record, criteria) {
+    for (let key in criteria) {
+      if (record[key] !== criteria[key]) {
+        return false
+      }
+    }
+    return true
+  }
+  _fetchOne(store, criteria) {
+
+    // UNTESTED
+    //Todo: add query caching
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      let records = []
+      let cursorTrans = db.transaction(store).objectStore(store).openCursor()
+      cursorTrans.onerror = error => c.log(error)
+      cursorTrans.onsuccess = event => {
+        var cursor = event.target.result
+        if (cursor) {
+          let record = cursor.value
+          if (this._criteriaMatch(record, criteria)) {
+            records.push(record)
+          } else {
+            cursor.continue()
+          }
+        }
+        else {
+          resolve(records)
+        }
+      }
+    }))
+  }
+  filter(store, criteria) {
+    //Todo: add query caching
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      let records = []
+      let cursorTrans = db.transaction(store).objectStore(store).openCursor()
+      cursorTrans.onerror = error => c.log(error)
+      cursorTrans.onsuccess = event => {
+        var cursor = event.target.result
+        if (cursor) {
+          let record = cursor.value
+          if (this._criteriaMatch(record, criteria)) {
+            records.push(record)
+          }
+          cursor.continue();
+        }
+        else {
+          resolve(records)
+        }
+      }
+    }))
+  }
+  getParent(childStore, parentStore, child) {
+    let fkName = this.schema.getFkName(parentStore)
+    let parentId = child[fkName]
+    if (parentId == undefined ) {
+      return Promise.resolve(undefined)
+    }
+    return this.get(parentStore, parentId)
+  }
+  getChildren(parentStore, childStore, parentId) {
+    //Todo : cache
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      let transaction = db.transaction(childStore)
+      let request = transaction.objectStore(childStore).index(parentStore).get(parentId)
+      transaction.oncomplete = () => resolve(request.result)
+      transaction.onabort = transaction.onerror = () => reject(transaction.error)
+    }))
+  }
+  setParent(childStore, parentStore, childRecord, parentId) {
+    let fkName = this.schema.getFkName(parentStore)
+    childRecord[fkName] = parentId
+    return this.put(childStore, childRecord)
+  }
+}
+
+/*
+  IndexDb allows versioning. It would be a shame to lose that, but we also want one description of the model.
+
+  We tap into that by 
+  
+  The idea is that we define the stores and relationships once.
+
+  
+  or:
+    db.getParent('table1', 'table2', record)
+    db.getChildren('table1', 'table2', record)
+    db.getRelated('table1', 'table2', record) // many to many
+    db.setParent('table1', 'table2', record, parent)
+    db.link('table1', 'table2', record1, record2)
+    db.unlink('table1', 'table2', record1, record2)
+
+    The many__many tables will have predictable names.
+
+    Need to ensure we can wrap multiple in a transaction.
+
+
+May not want to load everything in memory, e.g. child objects.
+But once a specific query has been called, e.g. getChildren of x, then so long as all other changes are cached
+
+Todo:
+  Make a generic backend agnostic CachedDatabase on which we must implement a wrap method
+
+*/
+
+class Schema {
+  constructor(conf={keyPath: "id", autoIncrement: true}) {
+    this.conf = conf
+    this._versions = []
+    this._stores = {}
+  }
+  getFkName(parentStore){
+    return `__${parentStore}Id`
+  }
+  addVersion(fn) {
+    this._versions.push(fn)
+  }
+  version() {
+    return this._versions.length + 1
+  }
+  upgrade(idb, oldVersion) {
+    this._idb = idb
+    this._versions.forEach((fn, version) => {
+      if (version >= oldVersion) {
+        fn(this)
+      }
+    })
+  }
+  addStore(name, conf=this.conf) {
+    let store = this._idb.createObjectStore(name, conf)
+    this._stores[name] = store
+    return store
+  }
+  oneToMany(store1, store2) {
+    this._stores[store2].createIndex(store1, `__${store1}Id`);
+  }
+
+}
+
+function deleteIdb(dbName) {
+  indexedDB.deleteDatabase(dbName)
+}
+
+/***/ }),
+
 /***/ "./lib/pillbug.js":
 /*!************************!*\
   !*** ./lib/pillbug.js ***!
   \************************/
-/*! exports provided: App, ModalContainer, View, Modal, h, NodeWrapper, Router, Route, RouteArg */
+/*! exports provided: App, ModalContainer, View, Modal, h, NodeWrapper, Router, PageContainer, Route, RouteArg */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -102,6 +325,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return h; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NodeWrapper", function() { return NodeWrapper; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Router", function() { return Router; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PageContainer", function() { return PageContainer; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Route", function() { return Route; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RouteArg", function() { return RouteArg; });
 /*
@@ -118,6 +342,7 @@ class App {
   }
   view(cls, name) {
     let view = new cls(this)
+    view.draw()
     if (name) {
       this._views[name] = view
     }
@@ -160,12 +385,15 @@ class ModalContainer {
 class View {
   constructor(app, props, key) {
     this._app = app
+    this._props = props
     this._key = key
     this._vCache = {}
     this._matchers = {}
     this._vals = {}
     this.v = this._view.bind(this)
-    this.draw(h, this.v, app, props, key, this)
+  }
+  draw() {
+    this._draw(h, this.v, this._app, this._props, this._key, this)
   }
   wrap(v) {
     /*
@@ -204,6 +432,7 @@ class View {
     let view;
     if (key == undefined) {
       view = new cls(this._app, props)
+      view.draw()
     } else {
       let className = cls.name;
       if (!this._vCache.hasOwnProperty(className)) {
@@ -214,6 +443,7 @@ class View {
         view = cacheForType[key]
       } else {
         view = new cls(this._app, props, key)
+        view.draw()
         cacheForType[key] = view
       }
     }
@@ -323,8 +553,10 @@ params vs vars
 */
 
 class Router {
-  constructor() {
-    this.routes = [];
+  constructor(app, id, routes) {
+    this._app = app;
+    this.pageContainer = new PageContainer(this._app, id);
+    this.routes = routes.map(ar => new Route(...ar));
     window.addEventListener('hashchange', e => this._hashChanged());
     window.addEventListener('load', e => this._hashChanged());
     /*
@@ -343,6 +575,7 @@ class Router {
     if (!route) {
       throw new Error('Route not matched: ' + url)
     }
+    this.pageContainer.switch(route)
     //window.history.pushState({}, url, window.location.origin + url);
   }
   _goto(url) {
@@ -359,6 +592,15 @@ class Router {
   }
 }
 
+class PageContainer extends View{
+  constructor(app, id) {
+    super(app)
+    this.wrap(h('#' + id))
+  }
+  switch(route) {
+    this.root.inner(this._view(route.cls, route.props)) // route.keyFn(route.props)
+  }
+}
 
 class Route {
   constructor(pattern, cls, keyFn) {
@@ -387,7 +629,7 @@ class Route {
     return str.match(/\{.+?\}/g).map(x => x.slice(1,-1))
   }
   */
-  match(url) {
+  matches(url) {
     let main, paramStr, chunks;
     [main, paramStr] = url.split('?')
     chunks = main.split('/')
@@ -417,7 +659,8 @@ class Route {
             }
           })
         }
-        return props
+        this.props = props // for this run only
+        return true
       }
     }
     return false
@@ -449,6 +692,27 @@ class RouteArg {
 
 /***/ }),
 
+/***/ "./src/homepage.js":
+/*!*************************!*\
+  !*** ./src/homepage.js ***!
+  \*************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return HomePage; });
+/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
+
+
+class HomePage extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
+  _draw(h,v,a,p,k) {
+    this.wrap(h('div')).inner('home page!')
+  }
+}
+
+/***/ }),
+
 /***/ "./src/index.js":
 /*!**********************!*\
   !*** ./src/index.js ***!
@@ -459,9 +723,12 @@ class RouteArg {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
-/* harmony import */ var _menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./menu */ "./src/menu.js");
-/* harmony import */ var _page_container__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./page-container */ "./src/page-container.js");
-/* harmony import */ var _modal_yes_no__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modal-yes-no */ "./src/modal-yes-no.js");
+/* harmony import */ var _lib_indie_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../lib/indie.js */ "./lib/indie.js");
+/* harmony import */ var _menu__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./menu */ "./src/menu.js");
+/* harmony import */ var _homepage__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./homepage */ "./src/homepage.js");
+/* harmony import */ var _modal_yes_no__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modal-yes-no */ "./src/modal-yes-no.js");
+
+
 
 
 
@@ -470,19 +737,59 @@ __webpack_require__.r(__webpack_exports__);
 const c = console;
 
 const app = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["App"]()
+
 app.modal = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["ModalContainer"]('modal-container')
-app.router = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Router"]([
+app.showModal = app.modal.showModal;
+
+app.view(_menu__WEBPACK_IMPORTED_MODULE_2__["default"])
+
+app.router = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Router"](app, 'page-container', [
+  ['/', _homepage__WEBPACK_IMPORTED_MODULE_3__["default"]],
+  ['page2', _homepage__WEBPACK_IMPORTED_MODULE_3__["default"]],
   ['todos/{id}?name,age', ''],
 ])
 
-app.goto = function(route) {
+app.goto = function(url) {
   // so far not used as we use hrefs
   //this.emit('goto', page)
+  //window.history.pushState({}, window.location + url, window.location.origin + url);
 }
-app.showModal = app.modal.showModal;
 
-app.view(_menu__WEBPACK_IMPORTED_MODULE_1__["default"])
+app.loadData = function() {
+  Object(_lib_indie_js__WEBPACK_IMPORTED_MODULE_1__["deleteIdb"])('mop-todos')
+  const schema = new _lib_indie_js__WEBPACK_IMPORTED_MODULE_1__["Schema"]()
+  schema.addVersion(schema => {
+    let days = schema.addStore('day')
+    days.put({day: 'mon'})
+    days.put({day: 'tue'})
+    days.put({day: 'wed'})
 
+    let tasks = schema.addStore('task')
+    tasks.put({text: 'Breadkfast'})
+    tasks.put({text: 'Lunch'})
+    tasks.put({text: 'Dinner'})
+
+    schema.oneToMany('day', 'task')
+  })
+  this.db = new _lib_indie_js__WEBPACK_IMPORTED_MODULE_1__["Database"]('mop-todos', schema)
+
+  this.db.getAll('task').then(tasks => {
+    this.tasks = tasks
+
+    this.db.getAll('day').then(days => {
+      this.days = days
+      this.db.setParent('task', 'day', this.tasks[1], this.days[1].id).then(r => {
+        this.db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
+        this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
+        this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
+
+      })
+    })
+  })
+
+}
+
+app.loadData()
 
 /***/ }),
 
@@ -501,7 +808,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Menu extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
-  draw(h,v,a,p,k,s) {
+  _draw(h,v,a,p,k,s) {
     let showMenuBtn = h('span').html('&#9776;').class('menu-button').on('click', e => s.showMenu())
     let hideMenuBtn = h('a').atts({href:"#"}).html('&times;').class('closebtn').on('click', e => s.hideMenu())
     s.menuDiv = h('div').id('menu').class('overlay').inner([
@@ -517,7 +824,7 @@ class Menu extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
       ])
   }
   getMenuEntry(a, h, text, route) {
-    return h('a').atts({href:"#/" + route}).text(text).on('click', e => {
+    return h('a').atts({href:"#" + route}).text(text).on('click', e => {
       this.hideMenu()
       //a.goto(route)
     })
@@ -558,28 +865,6 @@ class ModalYesNo extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Modal"] {
   }
 }
 
-
-/***/ }),
-
-/***/ "./src/page-container.js":
-/*!*******************************!*\
-  !*** ./src/page-container.js ***!
-  \*******************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return PageContainer; });
-/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
-
-
-class PageContainer extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
-  draw(h,v,a,p,k) {
-    this.wrap(h('#page-container')).inner(p)
-    a.on('goto', page => this.root.inner(page))
-  }
-}
 
 /***/ })
 

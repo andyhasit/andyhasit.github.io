@@ -12,6 +12,7 @@ export class App {
   }
   view(cls, name) {
     let view = new cls(this)
+    view.draw()
     if (name) {
       this._views[name] = view
     }
@@ -54,12 +55,15 @@ export class ModalContainer {
 export class View {
   constructor(app, props, key) {
     this._app = app
+    this._props = props
     this._key = key
     this._vCache = {}
     this._matchers = {}
     this._vals = {}
     this.v = this._view.bind(this)
-    this.draw(h, this.v, app, props, key, this)
+  }
+  draw() {
+    this._draw(h, this.v, this._app, this._props, this._key, this)
   }
   wrap(v) {
     /*
@@ -98,6 +102,7 @@ export class View {
     let view;
     if (key == undefined) {
       view = new cls(this._app, props)
+      view.draw()
     } else {
       let className = cls.name;
       if (!this._vCache.hasOwnProperty(className)) {
@@ -108,6 +113,7 @@ export class View {
         view = cacheForType[key]
       } else {
         view = new cls(this._app, props, key)
+        view.draw()
         cacheForType[key] = view
       }
     }
@@ -217,8 +223,10 @@ params vs vars
 */
 
 export class Router {
-  constructor() {
-    this.routes = [];
+  constructor(app, id, routes) {
+    this._app = app;
+    this.pageContainer = new PageContainer(this._app, id);
+    this.routes = routes.map(ar => new Route(...ar));
     window.addEventListener('hashchange', e => this._hashChanged());
     window.addEventListener('load', e => this._hashChanged());
     /*
@@ -237,6 +245,7 @@ export class Router {
     if (!route) {
       throw new Error('Route not matched: ' + url)
     }
+    this.pageContainer.switch(route)
     //window.history.pushState({}, url, window.location.origin + url);
   }
   _goto(url) {
@@ -253,6 +262,15 @@ export class Router {
   }
 }
 
+export class PageContainer extends View{
+  constructor(app, id) {
+    super(app)
+    this.wrap(h('#' + id))
+  }
+  switch(route) {
+    this.root.inner(this._view(route.cls, route.props)) // route.keyFn(route.props)
+  }
+}
 
 export class Route {
   constructor(pattern, cls, keyFn) {
@@ -281,7 +299,7 @@ export class Route {
     return str.match(/\{.+?\}/g).map(x => x.slice(1,-1))
   }
   */
-  match(url) {
+  matches(url) {
     let main, paramStr, chunks;
     [main, paramStr] = url.split('?')
     chunks = main.split('/')
@@ -311,7 +329,8 @@ export class Route {
             }
           })
         }
-        return props
+        this.props = props // for this run only
+        return true
       }
     }
     return false
