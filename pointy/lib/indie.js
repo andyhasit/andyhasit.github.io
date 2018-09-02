@@ -18,10 +18,14 @@ export class Database {
   }
   dump() {
     let data = {}, promises=[];
-    for (let store in this.schema._stores) {
-      promises.push(this.getAll(store).then(rows => data[store] = rows))
-    }
-    return Promise.all(promises).then(x => data)
+    return this._dbp.then(db => {
+      let names = db.objectStoreNames, len = db.objectStoreNames.length;
+      for (let i=0;i<len;i++) {
+        let store = names[i];
+        promises.push(this.getAll(store).then(rows => data[store] = rows))
+      }
+      return Promise.all(promises).then(x => data)
+    });
   }
   _cacheOf(store) {
     if (!this._caches.hasOwnProperty(store)) {

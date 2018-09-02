@@ -1,25 +1,20 @@
 import {App, ModalContainer, Router} from '../lib/pillbug.js';
-import {Database, Schema, deleteIdb} from '../lib/indie.js';
 
-import Menu from './menu';
-import HomePage from './homepage';
-import ModalYesNo from './modal-yes-no';
+import Menu from './views/menu';
+import AppDatabase from './schema';
+import routes from './routes';
 
-const c = console;
 
-const app = new App()
-
-app.modal = new ModalContainer('modal-container')
-app.showModal = function(modal) {
-  app.modal.showModal(modal);
-}
+const app = new App();
+app.db = AppDatabase;
+app.router = new Router(app, 'page-container', routes);
+app.modalContainer = new ModalContainer('modal-container')
 
 app.view(Menu)
 
-app.router = new Router(app, 'page-container', [
-  ['/', HomePage, props => 1],
-  ['todos/{id}?name,age', ''],
-])
+app.showModal = function(modal) {
+  return app.modalContainer.showModal(modal);
+}
 
 app.goto = function(url) {
   // so far not used as we use hrefs
@@ -27,43 +22,31 @@ app.goto = function(url) {
   //window.history.pushState({}, window.location + url, window.location.origin + url);
 }
 
-app.loadData = function() {
-  deleteIdb('mop-todos')
-  const schema = new Schema()
-  schema.addVersion(schema => {
-    let days = schema.addStore('day')
-    days.put({day: 'mon'})
-    days.put({day: 'tue'})
-    days.put({day: 'wed'})
 
-    let tasks = schema.addStore('task')
-    tasks.put({text: 'Breadkfast'})
-    tasks.put({text: 'Lunch'})
-    tasks.put({text: 'Dinner'})
-
-    schema.oneToMany('day', 'task')
+app.addTask = function(task) {
+  c.log(task)
+  this.db.put('task', task).then(task => {
+    this.tasks.push(task)
+    this.emit('tasks-updated')
   })
-  this.db = new Database('mop-todos', schema)
-
-  this.db.getAll('task').then(tasks => {
-    this.tasks = tasks
-
-    this.db.getAll('day').then(days => {
-      this.days = days
-      this.db.setParent('task', 'day', this.tasks[1], this.days[1].id).then(r => {
-        this.db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
-        this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
-        this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
-        this.emit('tasks-updated')
-
-        //this.showModal(new ModalYesNo('Really?'))
-      })
-    })
-  })
-
 }
 
+app.loadData = function() {
+  let db = this.db;
+  db.getAll('task').then(tasks => {
+  this.tasks = tasks
 
+  db.getAll('day').then(days => {
+    this.days = days
+    db.setParent('task', 'day', this.tasks[1], this.days[1].id).then(r => {
+      db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
+      db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
+      db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
+      this.emit('tasks-updated')
+    })
+  })
+})
+}
 
 
 app.loadData()

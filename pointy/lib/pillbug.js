@@ -41,15 +41,17 @@ export class ModalContainer {
   showModal(modal) {
     modal.draw()
     this._el.inner(modal)
-    return modal.promise
+    return new Promise((resolve, reject) => {
+      modal.promise
       .then(result => {          
         this._el.clear()
-        return result
+        resolve(result)
       })
       .catch(error => {
         this._el.clear()
-        return error
+        reject(error)
       })
+    })
   }
 }
 
@@ -178,6 +180,10 @@ export class NodeWrapper {
     this.el.innerHTML = ''
     return this
   }
+  focus(){
+    this.el.focus()
+    return this
+  }
   on(event, callback) {
     this.el.addEventListener(event, callback)
     return this
@@ -269,7 +275,7 @@ export class PageContainer extends View{
     this.wrap(h('#' + id))
   }
   switch(route) {
-    this.root.inner(this._view(route.cls, route.props, route.keyFn(route.props))) // route.keyFn(route.props)
+    this.root.inner(this._view(route.cls, route.props, route.keyFn(route.props)))
   }
 }
 
@@ -278,7 +284,7 @@ export class Route {
     //'todos/{id:int}?name,age'
     let paramStr;
     this.cls = cls;
-    this.keyFn = keyFn; //TODO - implement/use
+    this.keyFn = keyFn || function(){return 1}; //Default is for pages to be cached.
     [pattern, paramStr] = pattern.split('?')
     this.pattern = pattern
     this.chunks = pattern.split('/').map(s => {

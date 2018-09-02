@@ -1,4 +1,4 @@
-import {Modal, h} from '../lib/pillbug.js';
+import {Modal, h} from '../../lib/pillbug.js';
 
 
 export default class ModalYesNo extends Modal {
@@ -6,8 +6,13 @@ export default class ModalYesNo extends Modal {
     return h('div').class('modal-background')
   }
   content(h,v,a,p,k,s) {
+    let text = '';
+    let input = h('input').atts({autofocus:true}).on('change', e => {text = e.target.value})
     return h('div').class('modal-content modal-animate').inner([
-      h('button').text('OK').on('click', e => s.resolve(222521)),
+      h('div').inner([
+        input
+      ]),
+      h('button').text('OK').on('click', e => s.resolve({text: text})),
       h('button').text('Cancel').on('click', e => s.reject('user-cancelled')),
     ])
   }

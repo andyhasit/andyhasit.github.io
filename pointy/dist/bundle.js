@@ -118,10 +118,14 @@ class Database {
   }
   dump() {
     let data = {}, promises=[];
-    for (let store in this.schema._stores) {
-      promises.push(this.getAll(store).then(rows => data[store] = rows))
-    }
-    return Promise.all(promises).then(x => data)
+    return this._dbp.then(db => {
+      let names = db.objectStoreNames, len = db.objectStoreNames.length;
+      for (let i=0;i<len;i++) {
+        let store = names[i];
+        promises.push(this.getAll(store).then(rows => data[store] = rows))
+      }
+      return Promise.all(promises).then(x => data)
+    });
   }
   _cacheOf(store) {
     if (!this._caches.hasOwnProperty(store)) {
@@ -380,15 +384,17 @@ class ModalContainer {
   showModal(modal) {
     modal.draw()
     this._el.inner(modal)
-    return modal.promise
+    return new Promise((resolve, reject) => {
+      modal.promise
       .then(result => {          
         this._el.clear()
-        return result
+        resolve(result)
       })
       .catch(error => {
         this._el.clear()
-        return error
+        reject(error)
       })
+    })
   }
 }
 
@@ -517,6 +523,10 @@ class NodeWrapper {
     this.el.innerHTML = ''
     return this
   }
+  focus(){
+    this.el.focus()
+    return this
+  }
   on(event, callback) {
     this.el.addEventListener(event, callback)
     return this
@@ -608,7 +618,7 @@ class PageContainer extends View{
     this.wrap(h('#' + id))
   }
   switch(route) {
-    this.root.inner(this._view(route.cls, route.props, route.keyFn(route.props))) // route.keyFn(route.props)
+    this.root.inner(this._view(route.cls, route.props, route.keyFn(route.props)))
   }
 }
 
@@ -617,7 +627,7 @@ class Route {
     //'todos/{id:int}?name,age'
     let paramStr;
     this.cls = cls;
-    this.keyFn = keyFn; //TODO - implement/use
+    this.keyFn = keyFn || function(){return 1}; //Default is for pages to be cached.
     [pattern, paramStr] = pattern.split('?')
     this.pattern = pattern
     this.chunks = pattern.split('/').map(s => {
@@ -702,33 +712,6 @@ class RouteArg {
 
 /***/ }),
 
-/***/ "./src/homepage.js":
-/*!*************************!*\
-  !*** ./src/homepage.js ***!
-  \*************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return HomePage; });
-/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
-
-
-class HomePage extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
-  _draw(h,v,a,p,k,s) {
-    s.wrap(h('div'))
-    a.on('tasks-updated', e => s.drawTodos(h,v,a,p,k,s))
-  }
-  drawTodos(h,v,a,p,k,s) {
-    s.root.inner(a.tasks.map( todo => 
-      h('div').inner(todo.text)
-    ))
-  }
-}
-
-/***/ }),
-
 /***/ "./src/index.js":
 /*!**********************!*\
   !*** ./src/index.js ***!
@@ -739,10 +722,9 @@ class HomePage extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
-/* harmony import */ var _lib_indie_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../lib/indie.js */ "./lib/indie.js");
-/* harmony import */ var _menu__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./menu */ "./src/menu.js");
-/* harmony import */ var _homepage__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./homepage */ "./src/homepage.js");
-/* harmony import */ var _modal_yes_no__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modal-yes-no */ "./src/modal-yes-no.js");
+/* harmony import */ var _views_menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./views/menu */ "./src/views/menu.js");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./schema */ "./src/schema.js");
+/* harmony import */ var _routes__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./routes */ "./src/routes.js");
 
 
 
@@ -750,21 +732,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const c = console;
+const app = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["App"]();
+app.db = _schema__WEBPACK_IMPORTED_MODULE_2__["default"];
+app.router = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Router"](app, 'page-container', _routes__WEBPACK_IMPORTED_MODULE_3__["default"]);
+app.modalContainer = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["ModalContainer"]('modal-container')
 
-const app = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["App"]()
+app.view(_views_menu__WEBPACK_IMPORTED_MODULE_1__["default"])
 
-app.modal = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["ModalContainer"]('modal-container')
 app.showModal = function(modal) {
-  app.modal.showModal(modal);
+  return app.modalContainer.showModal(modal);
 }
-
-app.view(_menu__WEBPACK_IMPORTED_MODULE_2__["default"])
-
-app.router = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Router"](app, 'page-container', [
-  ['/', _homepage__WEBPACK_IMPORTED_MODULE_3__["default"], props => 1],
-  ['todos/{id}?name,age', ''],
-])
 
 app.goto = function(url) {
   // so far not used as we use hrefs
@@ -772,60 +749,182 @@ app.goto = function(url) {
   //window.history.pushState({}, window.location + url, window.location.origin + url);
 }
 
-app.loadData = function() {
-  Object(_lib_indie_js__WEBPACK_IMPORTED_MODULE_1__["deleteIdb"])('mop-todos')
-  const schema = new _lib_indie_js__WEBPACK_IMPORTED_MODULE_1__["Schema"]()
-  schema.addVersion(schema => {
-    let days = schema.addStore('day')
-    days.put({day: 'mon'})
-    days.put({day: 'tue'})
-    days.put({day: 'wed'})
 
-    let tasks = schema.addStore('task')
-    tasks.put({text: 'Breadkfast'})
-    tasks.put({text: 'Lunch'})
-    tasks.put({text: 'Dinner'})
-
-    schema.oneToMany('day', 'task')
+app.addTask = function(task) {
+  c.log(task)
+  this.db.put('task', task).then(task => {
+    this.tasks.push(task)
+    this.emit('tasks-updated')
   })
-  this.db = new _lib_indie_js__WEBPACK_IMPORTED_MODULE_1__["Database"]('mop-todos', schema)
-
-  this.db.getAll('task').then(tasks => {
-    this.tasks = tasks
-
-    this.db.getAll('day').then(days => {
-      this.days = days
-      this.db.setParent('task', 'day', this.tasks[1], this.days[1].id).then(r => {
-        this.db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
-        this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
-        this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
-        this.emit('tasks-updated')
-
-        //this.showModal(new ModalYesNo('Really?'))
-      })
-    })
-  })
-
 }
 
+app.loadData = function() {
+  let db = this.db;
+  db.getAll('task').then(tasks => {
+  this.tasks = tasks
 
+  db.getAll('day').then(days => {
+    this.days = days
+    db.setParent('task', 'day', this.tasks[1], this.days[1].id).then(r => {
+      db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
+      db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
+      db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
+      this.emit('tasks-updated')
+    })
+  })
+})
+}
 
 
 app.loadData()
 
 /***/ }),
 
-/***/ "./src/menu.js":
-/*!*********************!*\
-  !*** ./src/menu.js ***!
-  \*********************/
+/***/ "./src/modals/AddTaskModal.js":
+/*!************************************!*\
+  !*** ./src/modals/AddTaskModal.js ***!
+  \************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ModalYesNo; });
+/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/pillbug.js */ "./lib/pillbug.js");
+
+
+
+class ModalYesNo extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Modal"] {
+  overlay(h,v,a,p,k,s) {
+    return h('div').class('modal-background')
+  }
+  content(h,v,a,p,k,s) {
+    let text = '';
+    let input = h('input').atts({autofocus:true}).on('change', e => {text = e.target.value})
+    return h('div').class('modal-content modal-animate').inner([
+      h('div').inner([
+        input
+      ]),
+      h('button').text('OK').on('click', e => s.resolve({text: text})),
+      h('button').text('Cancel').on('click', e => s.reject('user-cancelled')),
+    ])
+  }
+}
+
+
+/***/ }),
+
+/***/ "./src/routes.js":
+/*!***********************!*\
+  !*** ./src/routes.js ***!
+  \***********************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return routes; });
+/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
+/* harmony import */ var _views_homepage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./views/homepage */ "./src/views/homepage.js");
+
+
+
+
+const routes = [
+  ['/', _views_homepage__WEBPACK_IMPORTED_MODULE_1__["default"]],
+  ['todos/{id}?name,age', ''],
+]
+
+
+
+
+/***/ }),
+
+/***/ "./src/schema.js":
+/*!***********************!*\
+  !*** ./src/schema.js ***!
+  \***********************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return db; });
+/* harmony import */ var _lib_indie_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/indie.js */ "./lib/indie.js");
+
+
+const schema = new _lib_indie_js__WEBPACK_IMPORTED_MODULE_0__["Schema"]()
+
+//Problem
+schema.addVersion(schema => {
+  let days = schema.addStore('day')
+  /*
+  days.put({day: 'mon'})
+  */
+
+  let tasks = schema.addStore('task')
+
+  schema.oneToMany('day', 'task')
+})
+
+const db = new _lib_indie_js__WEBPACK_IMPORTED_MODULE_0__["Database"]('mop-todos', schema)
+
+
+
+/***/ }),
+
+/***/ "./src/views/homepage.js":
+/*!*******************************!*\
+  !*** ./src/views/homepage.js ***!
+  \*******************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return HomePage; });
+/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/pillbug.js */ "./lib/pillbug.js");
+/* harmony import */ var _modals_AddTaskModal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../modals/AddTaskModal */ "./src/modals/AddTaskModal.js");
+
+
+
+class HomePage extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
+  _draw(h,v,a,p,k,s) {
+    s.tasksUL = h('ul')
+    s.btnAdd = h('button').text('Add').on('click', e => {
+      a.showModal(new _modals_AddTaskModal__WEBPACK_IMPORTED_MODULE_1__["default"]())
+        .then(task => {
+          a.addTask(task)
+        })
+        .catch(e => {})
+
+    })
+    s.wrap(h('div').inner([
+      s.btnAdd,
+      s.tasksUL
+    ]))
+    a.on('tasks-updated', e => s.drawTasksUl(h,v,a,p,k,s))
+  }
+  drawTasksUl(h,v,a,p,k,s) {
+    s.tasksUL.inner(a.tasks.map( task => 
+      h('div').inner(task.text)
+    ))
+  }
+}
+
+/***/ }),
+
+/***/ "./src/views/menu.js":
+/*!***************************!*\
+  !*** ./src/views/menu.js ***!
+  \***************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Menu; });
-/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
+/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/pillbug.js */ "./lib/pillbug.js");
 
 
 function download(filename, text) {
@@ -862,7 +961,7 @@ class Menu extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
   downloadButton(h,v,a,p,k,s) {
     return h('a').atts({href:"#"}).text('Download').on('click', e => {
       a.db.dump().then(data => {
-        download('test.txt', JSON.stringify(data))
+        download('pointydb.json', JSON.stringify(data))
         this.hideMenu()
       })
     })
@@ -880,35 +979,6 @@ class Menu extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
     this.menuDiv.atts({style: 'width: 0'})
   }
 }
-
-/***/ }),
-
-/***/ "./src/modal-yes-no.js":
-/*!*****************************!*\
-  !*** ./src/modal-yes-no.js ***!
-  \*****************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ModalYesNo; });
-/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
-
-
-
-class ModalYesNo extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Modal"] {
-  overlay(h,v,a,p,k,s) {
-    return h('div').class('modal-background')
-  }
-  content(h,v,a,p,k,s) {
-    return h('div').class('modal-content modal-animate').inner([
-      h('button').text('OK').on('click', e => s.resolve(222521)),
-      h('button').text('Cancel').on('click', e => s.reject('user-cancelled')),
-    ])
-  }
-}
-
 
 /***/ })
 
