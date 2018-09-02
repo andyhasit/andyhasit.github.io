@@ -53,7 +53,7 @@ app.loadData = function() {
         this.db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
         this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
         this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
-
+        this.emit('tasks-updated')
       })
     })
   })

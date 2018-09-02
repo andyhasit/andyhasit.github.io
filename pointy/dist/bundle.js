@@ -706,8 +706,14 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class HomePage extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
-  _draw(h,v,a,p,k) {
-    this.wrap(h('div')).inner('home page!')
+  _draw(h,v,a,p,k,s) {
+    s.wrap(h('div'))
+    a.on('tasks-updated', e => s.drawTodos(h,v,a,p,k,s))
+  }
+  drawTodos(h,v,a,p,k,s) {
+    s.root.inner(a.tasks.map( todo => 
+      h('div').inner(todo.text)
+    ))
   }
 }
 
@@ -782,7 +788,7 @@ app.loadData = function() {
         this.db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
         this.db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
         this.db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
-
+        this.emit('tasks-updated')
       })
     })
   })
