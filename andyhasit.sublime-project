@@ -1,0 +1,23 @@
+{
+	"build_systems":
+	[
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"python\" -u \"$file\""
+		}
+	],
+	"folders":
+	[
+		{
+			"path": "/media/andrew/08f1f5e8-a00a-4ba3-a0dd-93ae1b759ec5/repos/andyhasit.github.io/pillbug"
+		},
+		{
+			"path": "/media/andrew/08f1f5e8-a00a-4ba3-a0dd-93ae1b759ec5/repos/andyhasit.github.io/pointy"
+		},
+		{
+			"path": "/media/andrew/08f1f5e8-a00a-4ba3-a0dd-93ae1b759ec5/repos/ratherdry"
+		}
+	]
+}

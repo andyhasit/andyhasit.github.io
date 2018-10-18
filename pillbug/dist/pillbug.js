@@ -35,9 +35,11 @@ export class App {
 
 export class ModalContainer {
   constructor(id) {
+    //c.log(h('#' + id))
     this._el = h('#' + id)
   }
   showModal(modal) {
+    modal.draw()
     this._el.inner(modal)
     return modal.promise
       .then(result => {          
@@ -124,14 +126,13 @@ export class View {
 
 
 export class Modal extends View {
-  draw(h,v,a,p,k,s) {
-    s.wrap(s.overlay(h,v,a,p,k,s).on({
-      click: e => {
+  _draw(h,v,a,p,k,s) {
+    s.wrap(s.overlay(h,v,a,p,k,s).on('click', e => {
         if (e.target == s.el) {
           s.reject('user-cancelled')
         }
       }
-    }))
+    ))
     s.promise = new Promise((resolve, reject) => {
       s.resolve = resolve
       s.reject = reject
@@ -268,7 +269,7 @@ export class PageContainer extends View{
     this.wrap(h('#' + id))
   }
   switch(route) {
-    this.root.inner(this._view(route.cls, route.props)) // route.keyFn(route.props)
+    this.root.inner(this._view(route.cls, route.props, route.keyFn(route.props)))
   }
 }
 
@@ -277,7 +278,7 @@ export class Route {
     //'todos/{id:int}?name,age'
     let paramStr;
     this.cls = cls;
-    this.keyFn = keyFn; //TODO - implement/use
+    this.keyFn = keyFn || props => 1; //Default is for pages to be cached.
     [pattern, paramStr] = pattern.split('?')
     this.pattern = pattern
     this.chunks = pattern.split('/').map(s => {

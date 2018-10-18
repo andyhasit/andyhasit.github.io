@@ -1,5 +1,5 @@
 module.exports = {
-    "mode": "production",
+    "mode": "development",
     "entry": __dirname + "/src/index.js",
     "output": {
         "path": __dirname + "/dist",

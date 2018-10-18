@@ -143,18 +143,21 @@ export class Database {
     }
     return this.get(parentStore, parentId)
   }
-  getChildren(parentStore, childStore, parentId) {
+  getLinked(storeName, store1, store2Record) {
+
+  }
+  getChildren(parentStore, childStore, parentRecord) {
     //Todo : cache
     return this._dbp.then(db => new Promise((resolve, reject) => {
       let transaction = db.transaction(childStore)
-      let request = transaction.objectStore(childStore).index(parentStore).get(parentId)
+      let request = transaction.objectStore(childStore).index(parentStore).get(parentRecord.id)
       transaction.oncomplete = () => resolve(request.result)
       transaction.onabort = transaction.onerror = () => reject(transaction.error)
     }))
   }
-  setParent(childStore, parentStore, childRecord, parentId) {
+  setParent(childStore, parentStore, childRecord, parentRecord) {
     let fkName = this.schema.getFkName(parentStore)
-    childRecord[fkName] = parentId
+    childRecord[fkName] = parentRecord.id
     return this.put(childStore, childRecord)
   }
   link(store1, store2, store1Record, store2Record) {
@@ -248,24 +251,39 @@ class SchemaFunctionBuilder {
   oneToMany(parentStore, childStore) {
     let parentCaps = this.capitalize(parentStore);
     let childCaps = this.capitalize(childStore);
-    let pluralChildren = childCaps + 's'; //TODO: all override in opts.
+    let pluralChildren = childCaps + 's'; //TODO: allow override in opts.
     //Get parent as getChildParent(child)
     this.target['get' + childCaps + parentCaps] = function(childRecord) {
       return this.getParent(childStore, parentStore, childRecord)
     }
     //Get children as getParentChildren(parent)
-    this.target['get' + parentCaps + pluralChildren] = function(parentId) {
-      return this.getChildren(parentStore, childStore, parentId)
+    this.target['get' + parentCaps + pluralChildren] = function(parentRecord) {
+      return this.getChildren(parentStore, childStore, parentRecord)
     }
-    this.target['set' + childCaps + parentCaps] = function(childRecord, parentId) {
-      return this.setParent(childStore, parentStore, childRecord, parentId)
+    this.target['set' + childCaps + parentCaps] = function(childRecord, parentRecord) {
+      return this.setParent(childStore, parentStore, childRecord, parentRecord)
     }
   }
   manyToMany(store1, store2) {
-    /*let store = this.idb.createObjectStore(this.schema.getLinkStoreName(store1, store2), this.defaultConf)
-    store.createIndex(store1, this.schema.getFkName(store1));
-    store.createIndex(store2, this.schema.getFkName(store2));
-    */
+    let storeName = this.schema.getLinkStoreName(store1, store2);
+    let store1Caps = this.capitalize(store1);
+    let store2Caps = this.capitalize(store2);
+    let pluralStore1 = store1Caps + 's';
+    let pluralStore2 = store2Caps + 's';
+    this.target['get' + store1Caps + pluralStore2] = function(store1Record) {
+      return this.getChildren(store2, storeName, store1Record)
+      //return this.getLinked(storeName, store2, store1Record) //tagtask(tag)
+    }
+    this.target['get' + store2Caps + pluralStore1] = function(store2Record) {
+      //return this.getLinked(storeName, store1, store2Record)
+    }
+    this.target['link' + store1Caps + 'to' + store2Caps] = function(store1Record, store2Record) {
+      db.link(store1, store2, store1Record, store2Record)
+    }
+    this.target['link' + store2Caps + 'to' + store1Caps] = function(store2Record, store1Record) {
+      db.link(store1, store2, store1Record, store2Record)
+    }
+    //TODO: test above, then add unlink
   }
 }
 

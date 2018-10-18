@@ -1,2 +1,1113 @@
-!function(t){var e={};function s(n){if(e[n])return e[n].exports;var r=e[n]={i:n,l:!1,exports:{}};return t[n].call(r.exports,r,r.exports,s),r.l=!0,r.exports}s.m=t,s.c=e,s.d=function(t,e,n){s.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:n})},s.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})},s.t=function(t,e){if(1&e&&(t=s(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var n=Object.create(null);if(s.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var r in t)s.d(n,r,function(e){return t[e]}.bind(null,r));return n},s.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return s.d(e,"a",e),e},s.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},s.p="",s(s.s=0)}([function(t,e,s){"use strict";s.r(e);console;class n{constructor(t,e,s){this._app=t,this._props=e,this._key=s,this._vCache={},this._matchers={},this._vals={},this.v=this._view.bind(this)}draw(){this._draw(i,this.v,this._app,this._props,this._key,this)}wrap(t){return this.root=t,this.el=t.el,t}match(t,e){this._matchers.hasOwnProperty(t)||(this._matchers[t]=[]),this._matchers[t].push(e)}update(t){this._update(i,this.v,this._app,t,this._key,this)}_update(t,e,s,n,r,i){for(let t in i._matchers){let e=n[t];i._vals[t]!==e&&i._matchers[t].forEach(t=>{t(e,n)}),i._vals[t]=e}}_view(t,e,s){let n;if(void 0==s)(n=new t(this._app,e)).draw();else{let r=t.name;this._vCache.hasOwnProperty(r)||(this._vCache[r]={});let i=this._vCache[r];i.hasOwnProperty(s)?n=i[s]:((n=new t(this._app,e,s)).draw(),i[s]=n)}return n.update(e),n}}class r extends n{_draw(t,e,s,n,r,i){i.wrap(i.overlay(t,e,s,n,r,i).on("click",t=>{t.target==i.el&&i.reject("user-cancelled")})),i.promise=new Promise((t,e)=>{i.resolve=t,i.reject=e}),i.root.inner(i.content(t,e,s,n,r,i))}}function i(t){return new a(t)}class a{constructor(t){t.startsWith("#")?this.el=document.getElementById(t.substr(1)):this.el=document.createElement(t)}atts(t){for(let e in t)this.el.setAttribute(e,t[e]);return this}checked(t){return this.el.checked=t,this}class(t){return this.el.className=t,this}clear(){return this.el.innerHTML="",this}focus(){return this.el.focus(),this}on(t,e){return this.el.addEventListener(t,e),this}id(t){return this.el.id=t,this}inner(t){this.el.innerHTML="",Array.isArray(t)||(t=[t]);let e=document.createDocumentFragment();return t.forEach(t=>{t instanceof a||t instanceof n?e.appendChild(t.el):t instanceof Node?e.appendChild(t):e.appendChild(document.createTextNode(t.toString()))}),this.el.appendChild(e),this}html(t){return this.el.innerHTML=t,this}text(t){return this.el.textContent=t,this}}class o extends n{constructor(t,e){super(t),this.wrap(i("#"+e))}switch(t){this.root.inner(this._view(t.cls,t.props,t.keyFn(t.props)))}}class h{constructor(t,e,s){let n;this.cls=e,this.keyFn=s||function(){return 1},[t,n]=t.split("?"),this.pattern=t,this.chunks=t.split("/").map(t=>t.startsWith("{")?new l(t.slice(1,-1)):t),this.params={},n&&n.split(",").forEach(t=>{let e=new l(t.trim());this.params[e.name]=e})}matches(t){let e,s,n;[e,s]=t.split("?"),n=e.split("/");let r,i,a={},o=0,h=this.chunks.length,c=!1;if(h==n.length){for(;;){if(r=this.chunks[o],i=n[o],r instanceof l)a[r.name]=r.convert(i);else if(r!==i){c=!0;break}if(++o>h)break}if(!c)return s&&s.split("&").forEach(t=>{let e,s;[e,s]=t.split("="),this.params.hasOwnProperty(e)&&(a[e]=this.params[e].convert(s))}),this.props=a,!0}return!1}}class l{constructor(t){let e,s;switch([e,s]=t.split(":"),this.name=e,s){case"int":this.conv=(t=>parseInt(t));break;case"float":this.conv=(t=>parseFloat(t));break;default:this.conv=(t=>t)}}convert(t){return this.conv(t)}}const u=console;class d{constructor(t,e){this.schema=t,this.target=e}capitalize(t){return t.charAt(0).toUpperCase()+t.slice(1)}addStore(t){let e=this.capitalize(t);["put","del","get","getAll"].forEach(s=>{this.target[s+e]=function(e){return this[s](t,e)}})}oneToMany(t,e){let s=this.capitalize(t),n=this.capitalize(e),r=n+"s";this.target["get"+n+s]=function(s){return this.getParent(e,t,s)},this.target["get"+s+r]=function(s){return this.getChildren(t,e,s)},this.target["set"+n+s]=function(s,n){return this.setParent(e,t,s,n)}}manyToMany(t,e){}}class p{constructor(t,e,s){this.schema=t,this.idb=e,this.stores={},this.defaultConf=s}addStore(t,e=this.defaultConf){let s=this.idb.createObjectStore(t,e);return this.stores[t]=s,s}oneToMany(t,e){this.stores[e].createIndex(t,this.schema.getFkName(t))}manyToMany(t,e){let s=this.idb.createObjectStore(this.schema.getLinkStoreName(t,e),this.defaultConf);s.createIndex(t,this.schema.getFkName(t)),s.createIndex(e,this.schema.getFkName(e))}}const m=new class{constructor(t={keyPath:"id",autoIncrement:!0}){this.defaultConf=t,this._versions=[]}addVersion(t){this._versions.push(t)}getVersion(){return this._versions.length+1}upgrade(t,e){let s=new p(this,t,this.defaultConf);this._versions.forEach((t,n)=>{n>=e&&t(s,!0)})}createFunctions(t){let e=new d(this,t);this._versions.forEach((t,s)=>{t(e,!1)})}getFkName(t){return`__${t}Id`}getLinkStoreName(t,e){return`m2m__${t}__${e}`}};!function(t){indexedDB.deleteDatabase(t)}("mop-todos"),m.addVersion((t,e)=>{let s=t.addStore("day");t.addStore("task"),t.addStore("tag");t.oneToMany("day","task"),t.manyToMany("tag","task"),e&&s.put({day:"mon"})});const _=new class{constructor(t,e){this.schema=e,this._caches={},this._fullyLoaded={},this._dbp=new Promise((s,n)=>{let r=indexedDB.open(t,e.getVersion());r.onerror=(()=>n(r.error)),r.onsuccess=(()=>{e.createFunctions(this),s(r.result)}),r.onupgradeneeded=(t=>{e.upgrade(r.result,t.oldVersion)})})}ready(){return this._dbp}dump(){let t={},e=[];return this._dbp.then(s=>{let n=s.objectStoreNames,r=s.objectStoreNames.length;for(let s=0;s<r;s++){let r=n[s];e.push(this.getAll(r).then(e=>t[r]=e))}return Promise.all(e).then(e=>t)})}_cacheOf(t){return this._caches.hasOwnProperty(t)||(this._caches[t]={}),this._caches[t]}_wrap(t,e,s,...n){return this._dbp.then(r=>new Promise((i,a)=>{let o=r.transaction(t,s),h=o.objectStore(t)[e](...n);o.oncomplete=(()=>i(h.result)),o.onabort=o.onerror=(()=>a(o.error))}))}put(t,e){return this._wrap(t,"put","readwrite",e).then(s=>(e.id=s,this._cacheOf(t)[s]=e,e))}del(t,e){return this._wrap(t,"delete","readwrite",e.id).then(s=>{delete this._cacheOf(t)[e.id]})}get(t,e){let s=this._cacheOf(t)[e];return void 0==s?this._wrap(t,"get",void 0,e).then(s=>(this._cacheOf(t)[e]=s,s)):Promise.resolve(s)}getAll(t){return this._fullyLoaded[t]?Promise.resolve(Object.values(this._cacheOf(t))):this._wrap(t,"getAll").then(e=>{let s=this._cacheOf(t);return this._fullyLoaded[t]=!0,e.map(t=>s[t.id]=t),e})}_criteriaMatch(t,e){for(let s in e)if(t[s]!==e[s])return!1;return!0}_fetchOne(t,e){return this._dbp.then(s=>new Promise((n,r)=>{let i=[],a=s.transaction(t).objectStore(t).openCursor();a.onerror=(t=>u.log(t)),a.onsuccess=(t=>{var s=t.target.result;if(s){let t=s.value;this._criteriaMatch(t,e)?i.push(t):s.continue()}else n(i)})}))}filter(t,e){return this._dbp.then(s=>new Promise((n,r)=>{let i=[],a=s.transaction(t).objectStore(t).openCursor();a.onerror=(t=>u.log(t)),a.onsuccess=(t=>{var s=t.target.result;if(s){let t=s.value;this._criteriaMatch(t,e)&&i.push(t),s.continue()}else n(i)})}))}getParent(t,e,s){let n=s[this.schema.getFkName(e)];return void 0==n?Promise.resolve(void 0):this.get(e,n)}getChildren(t,e,s){return this._dbp.then(n=>new Promise((r,i)=>{let a=n.transaction(e),o=a.objectStore(e).index(t).get(s);a.oncomplete=(()=>r(o.result)),a.onabort=a.onerror=(()=>i(a.error))}))}setParent(t,e,s,n){return s[this.schema.getFkName(e)]=n,this.put(t,s)}link(t,e,s,n){let r=this.schema.getLinkStoreName(t,e),i={};return i[this.schema.getFkName(t)]=s.id,i[this.schema.getFkName(e)]=n.id,this.put(r,i)}}("mop-todos",m);class f extends r{overlay(t,e,s,n,r,i){return t("div").class("modal-background")}content(t,e,s,n,r,i){let a="",o=t("input").atts({autofocus:!0}).on("change",t=>{a=t.target.value});return t("div").class("modal-content modal-animate").inner([t("div").inner([o]),t("button").text("OK").on("click",t=>i.resolve({text:a})),t("button").text("Cancel").on("click",t=>i.reject("user-cancelled"))])}}const g=[["/",class extends n{_draw(t,e,s,n,r,i){i.tasksUL=t("ul"),i.btnAdd=t("button").text("Add").on("click",t=>{s.showModal(new f).then(t=>{s.addTask(t)}).catch(t=>{})}),i.wrap(t("div").inner([i.btnAdd,i.tasksUL])),s.on("tasks-updated",e=>i.drawTasksUl(t,i,e))}drawTasksUl(t,e,s){e.tasksUL.inner(s.map(e=>t("div").inner(e.text)))}}],["todos/{id}?name,age",""]],w=new class{constructor(){this._eventWatchers={},this._views={}}view(t,e){let s=new t(this);s.draw(),e&&(this._views[e]=s)}emit(t,e){this._watchers(t).forEach(t=>t(e))}on(t,e){this._watchers(t).push(e)}_watchers(t){let e=this._eventWatchers[t];return void 0==e&&(e=[],this._eventWatchers[t]=e),e}};w.db=_,w.router=new class{constructor(t,e,s){this._app=t,this.pageContainer=new o(this._app,e),this.routes=s.map(t=>new h(...t)),window.addEventListener("hashchange",t=>this._hashChanged()),window.addEventListener("load",t=>this._hashChanged())}add(t,e,s){this.routes.push(new h(t,e,keyFn))}_hashChanged(t){let e=location.hash.slice(1)||"/",s=this._getRoute(e);if(!s)throw new Error("Route not matched: "+e);this.pageContainer.switch(s)}_goto(t){}_getRoute(t){let e=this.routes.length;for(let s=0;s<e;s++){let e=this.routes[s];if(e.matches(t))return e}}}(w,"page-container",g),w.modalContainer=new class{constructor(t){this._el=i("#"+t)}showModal(t){return t.draw(),this._el.inner(t),new Promise((e,s)=>{t.promise.then(t=>{this._el.clear(),e(t)}).catch(t=>{this._el.clear(),s(t)})})}}("modal-container"),w.view(class extends n{_draw(t,e,s,n,r,i){let a=t("span").html("&#9776;").class("menu-button").on("click",t=>i.showMenu()),o=t("a").atts({href:"#"}).html("&times;").class("closebtn").on("click",t=>i.hideMenu());i.menuDiv=t("div").id("menu").class("overlay").inner([o,t("div").class("overlay-content").inner([i.getMenuEntry(s,t,"Home",""),i.getMenuEntry(s,t,"Page2","page2"),i.downloadButton(t,e,s,n,r,i)])]),i.wrap(t("#menu-container")).inner([i.menuDiv,a])}downloadButton(t,e,s,n,r,i){return t("a").atts({href:"#"}).text("Download").on("click",t=>{s.db.dump().then(t=>{!function(t,e){var s=document.createElement("a");s.setAttribute("href","data:text/plain;charset=utf-8,"+encodeURIComponent(e)),s.setAttribute("download",t),s.style.display="none",document.body.appendChild(s),s.click(),document.body.removeChild(s)}("pointydb.json",JSON.stringify(t)),this.hideMenu()})})}getMenuEntry(t,e,s,n){return e("a").atts({href:"#"+n}).text(s).on("click",t=>{this.hideMenu()})}showMenu(){this.menuDiv.atts({style:"width: 70%"})}hideMenu(){this.menuDiv.atts({style:"width: 0"})}}),w.showModal=function(t){return w.modalContainer.showModal(t)},w.goto=function(t){},w.addTask=function(t){this.db.putTask(t).then(t=>{this.db.getAll("task").then(t=>this.emit("tasks-updated",t))})},w.loadData=function(){let t=this.db;this.tasks=[],t.ready().then(()=>{t.putDay({day:new Date}).then(()=>{t.putTag({name:"lame"}).then(()=>{t.putTag({name:"heroic"}).then(e=>{t.putTask({text:"Did my stuff"}).then(s=>{t.link("tag","task",e,s).then(()=>{t.getAll("m2m__tag__task").then(t=>{c.log(t)})})})})})})})},w.loadData()}]);
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/index.js");
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ "./lib/indie.js":
+/*!**********************!*\
+  !*** ./lib/indie.js ***!
+  \**********************/
+/*! exports provided: Database, Schema, deleteIdb */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Database", function() { return Database; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Schema", function() { return Schema; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deleteIdb", function() { return deleteIdb; });
+
+const c = console;
+
+class Database {
+  constructor(dbName, schema) {
+    this.schema = schema
+    this._caches = {}
+    this._fullyLoaded = {}
+    this._dbp = new Promise((resolve, reject) => {
+      let openreq = indexedDB.open(dbName, schema.getVersion())
+      openreq.onerror = () => reject(openreq.error)
+      openreq.onsuccess = () => {
+        schema.createFunctions(this)
+        resolve(openreq.result)
+      }
+      openreq.onupgradeneeded = (event) => {
+        // First time setup: create an empty object store
+        schema.upgrade(openreq.result, event.oldVersion)
+      }
+    })
+  }
+  ready() {
+    return this._dbp
+  }
+  dump() {
+    let data = {}, promises=[];
+    return this._dbp.then(db => {
+      let names = db.objectStoreNames, len = db.objectStoreNames.length;
+      for (let i=0;i<len;i++) {
+        let store = names[i];
+        promises.push(this.getAll(store).then(rows => data[store] = rows))
+      }
+      return Promise.all(promises).then(x => data)
+    });
+  }
+  _cacheOf(store) {
+    if (!this._caches.hasOwnProperty(store)) {
+      this._caches[store] = {}
+    }
+    return this._caches[store]
+  }
+  _wrap(store, action, type, ...args) {
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      let transaction = db.transaction(store, type)
+      let request = transaction.objectStore(store)[action](...args)
+      transaction.oncomplete = () => resolve(request.result)
+      transaction.onabort = transaction.onerror = () => reject(transaction.error)
+    }))
+  }
+  put(store, record) {
+    return this._wrap(store, 'put', 'readwrite', record).then(id => {
+      record.id = id
+      this._cacheOf(store)[id] = record
+      return record
+    })
+  }
+  del(store, record) {
+    return this._wrap(store, 'delete', 'readwrite', record.id).then(id => {
+      delete this._cacheOf(store)[record.id]
+    })
+  }
+  get(store, id) {
+    let record = this._cacheOf(store)[id]
+    if (record == undefined) {
+      return this._wrap(store, 'get', undefined, id).then(record => {
+        this._cacheOf(store)[id] = record
+        return record
+      })
+    } else {
+      return Promise.resolve(record)
+    }
+  }
+  getAll(store) {
+    if (this._fullyLoaded[store]) {
+      return Promise.resolve(Object.values(this._cacheOf(store)))
+    } else {
+      return this._wrap(store, 'getAll').then(records => {
+        let cache = this._cacheOf(store)
+        this._fullyLoaded[store] = true
+        records.map(record => cache[record.id] = record)
+        return records
+      })
+    }
+  }
+  _criteriaMatch(record, criteria) {
+    for (let key in criteria) {
+      if (record[key] !== criteria[key]) {
+        return false
+      }
+    }
+    return true
+  }
+  _fetchOne(store, criteria) {
+
+    // UNTESTED
+    //Todo: add query caching
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      let records = []
+      let cursorTrans = db.transaction(store).objectStore(store).openCursor()
+      cursorTrans.onerror = error => c.log(error)
+      cursorTrans.onsuccess = event => {
+        var cursor = event.target.result
+        if (cursor) {
+          let record = cursor.value
+          if (this._criteriaMatch(record, criteria)) {
+            records.push(record)
+          } else {
+            cursor.continue()
+          }
+        }
+        else {
+          resolve(records)
+        }
+      }
+    }))
+  }
+  filter(store, criteria) {
+    //Todo: add query caching
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      let records = []
+      let cursorTrans = db.transaction(store).objectStore(store).openCursor()
+      cursorTrans.onerror = error => c.log(error)
+      cursorTrans.onsuccess = event => {
+        var cursor = event.target.result
+        if (cursor) {
+          let record = cursor.value
+          if (this._criteriaMatch(record, criteria)) {
+            records.push(record)
+          }
+          cursor.continue();
+        }
+        else {
+          resolve(records)
+        }
+      }
+    }))
+  }
+  getParent(childStore, parentStore, child) {
+    let fkName = this.schema.getFkName(parentStore)
+    let parentId = child[fkName]
+    if (parentId == undefined ) {
+      return Promise.resolve(undefined)
+    }
+    return this.get(parentStore, parentId)
+  }
+  getLinked(storeName, store1, store2Record) {
+
+  }
+  getChildren(parentStore, childStore, parentRecord) {
+    //Todo : cache
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      let transaction = db.transaction(childStore)
+      let request = transaction.objectStore(childStore).index(parentStore).get(parentRecord.id)
+      transaction.oncomplete = () => resolve(request.result)
+      transaction.onabort = transaction.onerror = () => reject(transaction.error)
+    }))
+  }
+  setParent(childStore, parentStore, childRecord, parentRecord) {
+    let fkName = this.schema.getFkName(parentStore)
+    childRecord[fkName] = parentRecord.id
+    return this.put(childStore, childRecord)
+  }
+  link(store1, store2, store1Record, store2Record) {
+    let storeName = this.schema.getLinkStoreName(store1, store2);
+    let record = {}
+    record[this.schema.getFkName(store1)] = store1Record.id;
+    record[this.schema.getFkName(store2)] = store2Record.id;
+    return this.put(storeName, record)
+  }
+}
+
+/*
+  IndexDb allows versioning. It would be a shame to lose that, but we also want one description of the model.
+
+  We tap into that by 
+  
+  The idea is that we define the stores and relationships once.
+
+  
+  or:
+    db.getParent('table1', 'table2', record)
+    db.getChildren('table1', 'table2', record)
+    db.getRelated('table1', 'table2', record) // many to many
+    db.setParent('table1', 'table2', record, parent)
+    db.link('table1', 'table2', record1, record2)
+    db.unlink('table1', 'table2', record1, record2)
+
+    The many__many tables will have predictable names.
+
+    Need to ensure we can wrap multiple in a transaction.
+
+
+May not want to load everything in memory, e.g. child objects.
+But once a specific query has been called, e.g. getChildren of x, then so long as all other changes are cached
+
+Todo:
+  Make a generic backend agnostic CachedDatabase on which we must implement a wrap method
+
+*/
+
+class Schema {
+  constructor(defaultConf={keyPath: "id", autoIncrement: true}) {
+    this.defaultConf = defaultConf
+    this._versions = []
+  }
+  addVersion(fn) {
+    this._versions.push(fn)
+  }
+  getVersion() {
+    return this._versions.length + 1
+  }
+  upgrade(idb, oldVersion) {
+    let schemaUpgrader = new SchemaUpgrader(this, idb, this.defaultConf)
+    this._versions.forEach((fn, version) => {
+      if (version >= oldVersion) {
+        fn(schemaUpgrader, true)
+      }
+    })
+  }
+  createFunctions(target) {
+    let schemaFunctionBuilder = new SchemaFunctionBuilder(this, target)
+    this._versions.forEach((fn, version) => {
+      fn(schemaFunctionBuilder, false)
+    })
+  }
+  getFkName(parentStore) {
+    return `__${parentStore}Id`
+  }
+  getLinkStoreName(store1, store2) {
+    return `m2m__${store1}__${store2}`
+  }
+}
+
+
+class SchemaFunctionBuilder {
+  constructor(schema, target) {
+    this.schema = schema
+    this.target = target
+  }
+  capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1)
+  }
+  addStore(name) {
+    let capitalizedName = this.capitalize(name);
+    ['put', 'del', 'get', 'getAll'].forEach(method => {
+      this.target[method + capitalizedName] = function(arg) {
+        return this[method](name, arg)
+      }
+    })
+  }
+  oneToMany(parentStore, childStore) {
+    let parentCaps = this.capitalize(parentStore);
+    let childCaps = this.capitalize(childStore);
+    let pluralChildren = childCaps + 's'; //TODO: allow override in opts.
+    //Get parent as getChildParent(child)
+    this.target['get' + childCaps + parentCaps] = function(childRecord) {
+      return this.getParent(childStore, parentStore, childRecord)
+    }
+    //Get children as getParentChildren(parent)
+    this.target['get' + parentCaps + pluralChildren] = function(parentRecord) {
+      return this.getChildren(parentStore, childStore, parentRecord)
+    }
+    this.target['set' + childCaps + parentCaps] = function(childRecord, parentRecord) {
+      return this.setParent(childStore, parentStore, childRecord, parentRecord)
+    }
+  }
+  manyToMany(store1, store2) {
+    let storeName = this.schema.getLinkStoreName(store1, store2);
+    let store1Caps = this.capitalize(store1);
+    let store2Caps = this.capitalize(store2);
+    let pluralStore1 = store1Caps + 's';
+    let pluralStore2 = store2Caps + 's';
+    this.target['get' + store1Caps + pluralStore2] = function(store1Record) {
+      return this.getChildren(store2, storeName, store1Record)
+      //return this.getLinked(storeName, store2, store1Record) //tagtask(tag)
+    }
+    this.target['get' + store2Caps + pluralStore1] = function(store2Record) {
+      //return this.getLinked(storeName, store1, store2Record)
+    }
+    this.target['link' + store1Caps + 'to' + store2Caps] = function(store1Record, store2Record) {
+      db.link(store1, store2, store1Record, store2Record)
+    }
+    this.target['link' + store2Caps + 'to' + store1Caps] = function(store2Record, store1Record) {
+      db.link(store1, store2, store1Record, store2Record)
+    }
+    //TODO: test above, then add unlink
+  }
+}
+
+
+class SchemaUpgrader {
+  constructor(schema, idb, defaultConf) {
+    this.schema = schema
+    this.idb = idb
+    this.stores = {}
+    this.defaultConf = defaultConf
+  }
+  addStore(name, conf=this.defaultConf) {
+    let store = this.idb.createObjectStore(name, conf)
+    this.stores[name] = store
+    return store
+  }
+  oneToMany(parent, child) {
+    this.stores[child].createIndex(parent, this.schema.getFkName(parent));
+  }
+  manyToMany(store1, store2) {
+    let store = this.idb.createObjectStore(this.schema.getLinkStoreName(store1, store2), this.defaultConf)
+    store.createIndex(store1, this.schema.getFkName(store1));
+    store.createIndex(store2, this.schema.getFkName(store2));
+  }
+}
+
+function deleteIdb(dbName) {
+  indexedDB.deleteDatabase(dbName)
+}
+
+/***/ }),
+
+/***/ "./lib/pillbug.js":
+/*!************************!*\
+  !*** ./lib/pillbug.js ***!
+  \************************/
+/*! exports provided: App, ModalContainer, View, Modal, h, NodeWrapper, Router, PageContainer, Route, RouteArg */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "App", function() { return App; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ModalContainer", function() { return ModalContainer; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "View", function() { return View; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Modal", function() { return Modal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return h; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NodeWrapper", function() { return NodeWrapper; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Router", function() { return Router; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PageContainer", function() { return PageContainer; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Route", function() { return Route; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RouteArg", function() { return RouteArg; });
+/*
+Pillbug version 0.0.1
+
+
+*/
+
+const c = console;
+class App {
+  constructor() {
+    this._eventWatchers = {}
+    this._views = {}
+  }
+  view(cls, name) {
+    let view = new cls(this)
+    view.draw()
+    if (name) {
+      this._views[name] = view
+    }
+  }
+  emit(event, data) {
+    this._watchers(event).forEach(w => w(data))
+  }
+  on(event, callback) {
+    this._watchers(event).push(callback)
+  }
+  _watchers(event) {
+    let watchers = this._eventWatchers[event]
+    if (watchers == undefined) {
+      watchers = []
+      this._eventWatchers[event] =  watchers
+    }
+    return watchers
+  }
+}
+
+class ModalContainer {
+  constructor(id) {
+    //c.log(h('#' + id))
+    this._el = h('#' + id)
+  }
+  showModal(modal) {
+    modal.draw()
+    this._el.inner(modal)
+    return new Promise((resolve, reject) => {
+      modal.promise
+      .then(result => {          
+        this._el.clear()
+        resolve(result)
+      })
+      .catch(error => {
+        this._el.clear()
+        reject(error)
+      })
+    })
+  }
+}
+
+
+class View {
+  constructor(app, props, key) {
+    this._app = app
+    this._props = props
+    this._key = key
+    this._vCache = {}
+    this._matchers = {}
+    this._vals = {}
+    this.v = this._view.bind(this)
+  }
+  draw() {
+    this._draw(h, this.v, this._app, this._props, this._key, this)
+  }
+  wrap(v) {
+    /*
+    if (el instanceof NodeWrapper || el instanceof View) {
+      this.root = el
+      this.el = el.el
+    } else {
+      throw new TypeError("View.wrap() only accepts types: NodeWrapper, View")
+    }
+    */
+    this.root = v
+    this.el = v.el
+    return v
+  }
+  match(prop, fn) {
+    if (!this._matchers.hasOwnProperty(prop)) {
+      this._matchers[prop] = []
+    }
+    this._matchers[prop].push(fn)
+  }
+  update(props) {
+    this._update(h, this.v, this._app, props, this._key, this)
+  }
+  _update(h,v,a,p,k,s) {
+    for (let prop in s._matchers) {
+      let val = p[prop];
+      if (s._vals[prop] !== val) {
+        s._matchers[prop].forEach(fn => {
+          fn(val, p)
+        })
+      }
+      s._vals[prop] = val
+    }
+  }
+  _view(cls, props, key) {
+    let view;
+    if (key == undefined) {
+      view = new cls(this._app, props)
+      view.draw()
+    } else {
+      let className = cls.name;
+      if (!this._vCache.hasOwnProperty(className)) {
+        this._vCache[className] = {}
+      }
+      let cacheForType = this._vCache[className];
+      if (cacheForType.hasOwnProperty(key)) {
+        view = cacheForType[key]
+      } else {
+        view = new cls(this._app, props, key)
+        view.draw()
+        cacheForType[key] = view
+      }
+    }
+    view.update(props)
+    return view
+  }
+}
+
+
+class Modal extends View {
+  _draw(h,v,a,p,k,s) {
+    s.wrap(s.overlay(h,v,a,p,k,s).on('click', e => {
+        if (e.target == s.el) {
+          s.reject('user-cancelled')
+        }
+      }
+    ))
+    s.promise = new Promise((resolve, reject) => {
+      s.resolve = resolve
+      s.reject = reject
+    })
+    s.root.inner(s.content(h,v,a,p,k,s))
+  }
+}
+
+
+function h(tag) {
+  return new NodeWrapper(tag)
+}
+
+
+class NodeWrapper {
+  constructor(tag) {
+    if (tag.startsWith('#')) {
+      this.el = document.getElementById(tag.substr(1))
+    } else {
+      this.el = document.createElement(tag)
+    }
+  }
+  atts(atts) {
+    for (let key in atts) {
+      this.el.setAttribute(key, atts[key])
+    }
+    return this
+  }
+  checked(val) {
+    this.el.checked = val
+    return this
+  }
+  class(className) {
+    /*
+    classList.add("mystyle")
+    element.classList.toggle("mystyle")
+    .remove("mystyle")
+    */
+    this.el.className = className
+    return this
+  }
+  clear() {
+    this.el.innerHTML = ''
+    return this
+  }
+  focus(){
+    this.el.focus()
+    return this
+  }
+  on(event, callback) {
+    this.el.addEventListener(event, callback)
+    return this
+  }
+  id(id) {
+    this.el.id = id
+    return this
+  }
+  inner(inner) {
+    this.el.innerHTML = ''
+    if (!Array.isArray(inner)) {
+      inner = [inner]
+    }
+    let fragment = document.createDocumentFragment()
+    inner.forEach(child => {
+      if (child instanceof NodeWrapper || child instanceof View) {
+        fragment.appendChild(child.el)
+      } else if (child instanceof Node) {
+        fragment.appendChild(child)
+      } else {
+        fragment.appendChild(document.createTextNode(child.toString()))
+      }
+    })
+    this.el.appendChild(fragment)
+    return this
+  }
+  html(html) {
+    this.el.innerHTML = html
+    return this
+  }
+  text(text) {
+    this.el.textContent = text
+    return this
+  }
+}
+
+/*
+
+Routing.
+
+key won't work if no args, but we want it to!
+
+params vs vars
+*/
+
+class Router {
+  constructor(app, id, routes) {
+    this._app = app;
+    this.pageContainer = new PageContainer(this._app, id);
+    this.routes = routes.map(ar => new Route(...ar));
+    window.addEventListener('hashchange', e => this._hashChanged());
+    window.addEventListener('load', e => this._hashChanged());
+    /*
+    //window.addEventListener('load', router);
+    window.addEventListener('popstate', () => {
+     contentDiv.innerHTML = routes[window.location.pathname];
+    }
+    */
+  }
+  add(pattern, cls, key) {
+    this.routes.push(new Route(pattern, cls, keyFn))
+  }
+  _hashChanged(e) {
+    let url = location.hash.slice(1) || '/';
+    let route = this._getRoute(url);
+    if (!route) {
+      throw new Error('Route not matched: ' + url)
+    }
+    this.pageContainer.switch(route)
+    //window.history.pushState({}, url, window.location.origin + url);
+  }
+  _goto(url) {
+
+  }
+  _getRoute(url) {
+    let len = this.routes.length;
+    for (let i=0; i<len; i++) {
+      let route = this.routes[i];
+      if (route.matches(url)) {
+        return route
+      }
+    }
+  }
+}
+
+class PageContainer extends View{
+  constructor(app, id) {
+    super(app)
+    this.wrap(h('#' + id))
+  }
+  switch(route) {
+    this.root.inner(this._view(route.cls, route.props, route.keyFn(route.props)))
+  }
+}
+
+class Route {
+  constructor(pattern, cls, keyFn) {
+    //'todos/{id:int}?name,age'
+    let paramStr;
+    this.cls = cls;
+    this.keyFn = keyFn || function(){return 1}; //Default is for pages to be cached.
+    [pattern, paramStr] = pattern.split('?')
+    this.pattern = pattern
+    this.chunks = pattern.split('/').map(s => {
+      if (s.startsWith('{')) {
+        return new RouteArg(s.slice(1,-1))
+      }
+      return s
+    })
+    this.params = {}
+    if (paramStr) {
+      paramStr.split(',').forEach(s => {
+        let r = new RouteArg(s.trim());
+        this.params[r.name] = r;
+      })
+    }
+  }
+  /*
+  _extract(str) {
+    return str.match(/\{.+?\}/g).map(x => x.slice(1,-1))
+  }
+  */
+  matches(url) {
+    let main, paramStr, chunks;
+    [main, paramStr] = url.split('?')
+    chunks = main.split('/')
+    let defChunk, testChunk, props = {}, i=0, end=this.chunks.length, mismatch=false;
+    if (end == chunks.length) {
+      while (true) {
+        defChunk = this.chunks[i];
+        testChunk = chunks[i];
+        if (defChunk instanceof RouteArg) {
+          props[defChunk.name] = defChunk.convert(testChunk)
+        } else if (defChunk !== testChunk) {
+          mismatch = true;
+          break;
+        }
+        i ++;
+        if (i > end) {
+          break;
+        }
+      }
+      if (!mismatch) {
+        if (paramStr) {
+          paramStr.split('&').forEach(e => {
+            let k, v;
+            [k,v] = e.split('=')
+            if (this.params.hasOwnProperty(k)) {
+              props[k] = this.params[k].convert(v)
+            }
+          })
+        }
+        this.props = props // for this run only
+        return true
+      }
+    }
+    return false
+  }
+}
+
+class RouteArg {
+  constructor(str) {
+    // No error checks :-(
+    let name, conv;
+    [name, conv] = str.split(':')
+    this.name = name
+    switch (conv) {
+      case 'int':
+        this.conv = v => parseInt(v);
+        break;
+      case 'float':
+        this.conv = v => parseFloat(v);
+        break;
+      default:
+        this.conv = v => v;
+    }
+  }
+  convert(val) {
+    return this.conv(val)
+  }
+}
+
+
+/***/ }),
+
+/***/ "./src/index.js":
+/*!**********************!*\
+  !*** ./src/index.js ***!
+  \**********************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
+/* harmony import */ var _views_menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./views/menu */ "./src/views/menu.js");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./schema */ "./src/schema.js");
+/* harmony import */ var _routes__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./routes */ "./src/routes.js");
+
+
+
+
+
+
+
+const app = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["App"]();
+app.db = _schema__WEBPACK_IMPORTED_MODULE_2__["default"];
+app.router = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Router"](app, 'page-container', _routes__WEBPACK_IMPORTED_MODULE_3__["default"]);
+app.modalContainer = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["ModalContainer"]('modal-container')
+
+app.view(_views_menu__WEBPACK_IMPORTED_MODULE_1__["default"])
+
+app.showModal = function(modal) {
+  return app.modalContainer.showModal(modal);
+}
+
+app.goto = function(url) {
+  // so far not used as we use hrefs
+  //this.emit('goto', page)
+  //window.history.pushState({}, window.location + url, window.location.origin + url);
+}
+
+
+app.addTask = function(task) {
+  this.db.putTask(task).then(task => {
+    this.db.getAll('task').then(tasks =>
+      this.emit('tasks-updated', tasks)
+    )
+  })
+}
+
+app.loadData = function() {
+  let db = this.db;
+  this.tasks = [];
+  db.ready().then(() => {
+    c.log(db)
+    db.putDay({day: new Date()}).then(day => {
+      db.putTag({name: 'lame'}).then(() => {
+        db.putTag({name: 'heroic'}).then(tag => {
+          db.putTask({text: 'Did my stuff'}).then(task => {
+            db.link('tag', 'task', tag, task).then( ()=> {
+              db.getTagTasks(tag).then(x => {
+                c.log(x);
+              })
+              /*
+              db.getTaskTags(task).then(x => {
+                c.log(x);
+              })
+              */
+              db.setTaskDay(task, day).then(() => {
+                db.getTaskDay(task).then( x => {
+                  c.log(x);
+                })
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+
+
+  //.then(tasks => {
+  /*
+  db.getAll('task').then(tasks => {
+    this.tasks = tasks
+    db.getAll('day').then(days => {
+      this.days = days
+      db.setParent('task', 'day', this.tasks[1], this.days[1].id).then(r => {
+        db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
+        db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
+        db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
+        this.emit('tasks-updated')
+      })
+    })
+    //db.link('task')
+  })
+  */
+}
+
+
+app.loadData()
+
+/***/ }),
+
+/***/ "./src/modals/AddTaskModal.js":
+/*!************************************!*\
+  !*** ./src/modals/AddTaskModal.js ***!
+  \************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ModalYesNo; });
+/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/pillbug.js */ "./lib/pillbug.js");
+
+
+
+class ModalYesNo extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Modal"] {
+  overlay(h,v,a,p,k,s) {
+    return h('div').class('modal-background')
+  }
+  content(h,v,a,p,k,s) {
+    let text = '';
+    let input = h('input').atts({autofocus:true}).on('change', e => {text = e.target.value})
+    return h('div').class('modal-content modal-animate').inner([
+      h('div').inner([
+        input
+      ]),
+      h('button').text('OK').on('click', e => s.resolve({text: text})),
+      h('button').text('Cancel').on('click', e => s.reject('user-cancelled')),
+    ])
+  }
+}
+
+
+/***/ }),
+
+/***/ "./src/routes.js":
+/*!***********************!*\
+  !*** ./src/routes.js ***!
+  \***********************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return routes; });
+/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/pillbug.js */ "./lib/pillbug.js");
+/* harmony import */ var _views_homepage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./views/homepage */ "./src/views/homepage.js");
+
+
+
+
+const routes = [
+  ['/', _views_homepage__WEBPACK_IMPORTED_MODULE_1__["default"]],
+  ['todos/{id}?name,age', ''],
+]
+
+
+
+
+/***/ }),
+
+/***/ "./src/schema.js":
+/*!***********************!*\
+  !*** ./src/schema.js ***!
+  \***********************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return db; });
+/* harmony import */ var _lib_indie_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/indie.js */ "./lib/indie.js");
+
+
+const schema = new _lib_indie_js__WEBPACK_IMPORTED_MODULE_0__["Schema"]()
+
+Object(_lib_indie_js__WEBPACK_IMPORTED_MODULE_0__["deleteIdb"])('mop-todos')
+
+schema.addVersion((schema, isUpgrade) => {
+  let days = schema.addStore('day')
+  let tasks = schema.addStore('task')
+  let tags = schema.addStore('tag')
+  schema.oneToMany('day', 'task')
+  schema.manyToMany('tag', 'task')
+  if (isUpgrade) {
+    days.put({day: 'mon'})
+  }
+})
+
+const db = new _lib_indie_js__WEBPACK_IMPORTED_MODULE_0__["Database"]('mop-todos', schema)
+
+
+
+/***/ }),
+
+/***/ "./src/views/homepage.js":
+/*!*******************************!*\
+  !*** ./src/views/homepage.js ***!
+  \*******************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return HomePage; });
+/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/pillbug.js */ "./lib/pillbug.js");
+/* harmony import */ var _modals_AddTaskModal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../modals/AddTaskModal */ "./src/modals/AddTaskModal.js");
+
+
+
+class HomePage extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
+  _draw(h,v,a,p,k,s) {
+    s.tasksUL = h('ul')
+    s.btnAdd = h('button').text('Add').on('click', e => {
+      a.showModal(new _modals_AddTaskModal__WEBPACK_IMPORTED_MODULE_1__["default"]())
+        .then(task => {
+          a.addTask(task)
+        })
+        .catch(e => {})
+
+    })
+    s.wrap(h('div').inner([
+      s.btnAdd,
+      s.tasksUL
+    ]))
+    a.on('tasks-updated', tasks => s.drawTasksUl(h,s,tasks))
+  }
+  drawTasksUl(h,s,tasks) {
+    s.tasksUL.inner(tasks.map( task => 
+      h('div').inner(task.text)
+    ))
+  }
+}
+
+/***/ }),
+
+/***/ "./src/views/menu.js":
+/*!***************************!*\
+  !*** ./src/views/menu.js ***!
+  \***************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Menu; });
+/* harmony import */ var _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/pillbug.js */ "./lib/pillbug.js");
+
+
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+
+class Menu extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
+  _draw(h,v,a,p,k,s) {
+    let showMenuBtn = h('span').html('&#9776;').class('menu-button').on('click', e => s.showMenu())
+    let hideMenuBtn = h('a').atts({href:"#"}).html('&times;').class('closebtn').on('click', e => s.hideMenu())
+    s.menuDiv = h('div').id('menu').class('overlay').inner([
+      hideMenuBtn,
+      h('div').class('overlay-content').inner([
+        s.getMenuEntry(a, h, 'Home', ''),
+        s.getMenuEntry(a, h, 'Page2', 'page2'),
+        s.downloadButton(h,v,a,p,k,s)
+        ])
+      ])
+    s.wrap(h('#menu-container')).inner([
+      s.menuDiv, 
+      showMenuBtn
+      ])
+  }
+  downloadButton(h,v,a,p,k,s) {
+    return h('a').atts({href:"#"}).text('Download').on('click', e => {
+      a.db.dump().then(data => {
+        download('pointydb.json', JSON.stringify(data))
+        this.hideMenu()
+      })
+    })
+  }
+  getMenuEntry(a, h, text, route) {
+    return h('a').atts({href:"#" + route}).text(text).on('click', e => {
+      this.hideMenu()
+      //a.goto(route)
+    })
+  }
+  showMenu() {
+    this.menuDiv.atts({style: 'width: 70%'})
+  }
+  hideMenu() {
+    this.menuDiv.atts({style: 'width: 0'})
+  }
+}
+
+/***/ })
+
+/******/ });
 //# sourceMappingURL=bundle.js.map
