@@ -16,9 +16,6 @@ TODO:
         https://github.com/Matt-Esch/virtual-dom
 
   Better atts:
-
-
-ca*sfajS6D
  
 
   Think;

@@ -246,7 +246,7 @@ export class Router {
     if (!route) {
       throw new Error('Route not matched: ' + url)
     }
-    this.pageContainer.switch(route)
+    this.pageContainer.goto(route)
     //window.history.pushState({}, url, window.location.origin + url);
   }
   _goto(url) {
@@ -263,12 +263,12 @@ export class Router {
   }
 }
 
-export class PageContainer extends View{
+class PageContainer extends View {
   constructor(app, id) {
     super(app)
     this.wrap(h('#' + id))
   }
-  switch(route) {
+  goto(route) {
     this.root.inner(this._view(route.cls, route.props, route.keyFn(route.props)))
   }
 }

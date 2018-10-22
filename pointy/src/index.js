@@ -12,6 +12,7 @@ app.db.ready().then(() => {
   app.router = new Router(app, 'page-container', routes);
   app.modalContainer = new ModalContainer('modal-container')
   app.view(Menu)
+  app.refreshTasks()
 });
 
 
@@ -25,11 +26,14 @@ app.goto = function(url) {
   //window.history.pushState({}, window.location + url, window.location.origin + url);
 }
 
+app.refreshTasks = function() {
+  this.db.getAll('task').then(tasks =>
+    this.emit('tasks-updated', tasks)
+  )
+}
 
 app.addTask = function(task) {
   this.db.putTask(task).then(task => {
-    this.db.getAll('task').then(tasks =>
-      this.emit('tasks-updated', tasks)
-    )
+    this.refreshTasks()
   })
 }

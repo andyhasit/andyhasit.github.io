@@ -828,10 +828,14 @@ __webpack_require__.r(__webpack_exports__);
 
 const app = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["App"]();
 app.db = _schema__WEBPACK_IMPORTED_MODULE_2__["default"];
-app.router = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Router"](app, 'page-container', _routes__WEBPACK_IMPORTED_MODULE_3__["default"]);
-app.modalContainer = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["ModalContainer"]('modal-container')
 
-app.view(_views_menu__WEBPACK_IMPORTED_MODULE_1__["default"])
+app.db.ready().then(() => {
+  app.router = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["Router"](app, 'page-container', _routes__WEBPACK_IMPORTED_MODULE_3__["default"]);
+  app.modalContainer = new _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["ModalContainer"]('modal-container')
+  app.view(_views_menu__WEBPACK_IMPORTED_MODULE_1__["default"])
+  app.refreshTasks()
+});
+
 
 app.showModal = function(modal) {
   return app.modalContainer.showModal(modal);
@@ -843,66 +847,18 @@ app.goto = function(url) {
   //window.history.pushState({}, window.location + url, window.location.origin + url);
 }
 
+app.refreshTasks = function() {
+  this.db.getAll('task').then(tasks =>
+    this.emit('tasks-updated', tasks)
+  )
+}
 
 app.addTask = function(task) {
   this.db.putTask(task).then(task => {
-    this.db.getAll('task').then(tasks =>
-      this.emit('tasks-updated', tasks)
-    )
+    this.refreshTasks()
   })
 }
 
-app.loadData = function() {
-  let db = this.db;
-  this.tasks = [];
-  db.ready().then(() => {
-    c.log(db)
-    db.putDay({day: new Date()}).then(day => {
-      db.putTag({name: 'lame'}).then(() => {
-        db.putTag({name: 'heroic'}).then(tag => {
-          db.putTask({text: 'Did my stuff'}).then(task => {
-            db.link('tag', 'task', tag, task).then( ()=> {
-              db.getTagTasks(tag).then(x => {
-                c.log(x);
-              })
-              /*
-              db.getTaskTags(task).then(x => {
-                c.log(x);
-              })
-              */
-              db.setTaskDay(task, day).then(() => {
-                db.getTaskDay(task).then( x => {
-                  c.log(x);
-                })
-              })
-            })
-          })
-        })
-      })
-    })
-  })
-
-
-  //.then(tasks => {
-  /*
-  db.getAll('task').then(tasks => {
-    this.tasks = tasks
-    db.getAll('day').then(days => {
-      this.days = days
-      db.setParent('task', 'day', this.tasks[1], this.days[1].id).then(r => {
-        db.getChildren('day', 'task', this.days[1].id).then(r => c.log(r))
-        db.getParent('task', 'day', this.tasks[1]).then(r => c.log(r))
-        db.getParent('task', 'day', this.tasks[0]).then(r => c.log(r))
-        this.emit('tasks-updated')
-      })
-    })
-    //db.link('task')
-  })
-  */
-}
-
-
-app.loadData()
 
 /***/ }),
 
@@ -1015,6 +971,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 class HomePage extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
   _draw(h,v,a,p,k,s) {
     s.tasksUL = h('ul')
@@ -1024,13 +981,13 @@ class HomePage extends _lib_pillbug_js__WEBPACK_IMPORTED_MODULE_0__["View"] {
           a.addTask(task)
         })
         .catch(e => {})
-
     })
     s.wrap(h('div').inner([
       s.btnAdd,
       s.tasksUL
     ]))
     a.on('tasks-updated', tasks => s.drawTasksUl(h,s,tasks))
+    c.log(994)
   }
   drawTasksUl(h,s,tasks) {
     s.tasksUL.inner(tasks.map( task => 
