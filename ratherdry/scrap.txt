@@ -1,0 +1,90 @@
+
+/*
+
+If you're not ready for strapon-db, you might want to start with just-the-index-db.
+
+https://jestjs.io/docs/en/expect
+
+Rename this file to basic-strapon-functions. 
+Make another called: 
+  options
+  schema versioning
+
+
+put works as expected
+get works as expected
+del works as expected
+getAll with function works as expected
+getParent works as expected
+setParent works as expected
+getManyToMany works as expected
+linkManyToMany works as expected
+unlink left from right works as expected
+unlink right from left works as expected
+clear works as expected
+
+
+
+it('works with promises wrapped', () => {
+  expect.assertions(1);
+  return db.ready().then(() => {
+    return db.getAllTags().then(tags => {
+      return expect(tags.length).toEqual(1)
+    })
+  })
+});
+
+Each record is cached after it is first retrieved from the database. Every relationship is also cached after it is first queried. Caches are kept updated so long as you only use db's methods.
+
+To illustrate what difference this makes, consider our example app where there are 1000's of owners and 1000's of dogs. When we call the following line for the first time against jeremy it will necessarily cycle through the entire 
+
+    db.getOwnerDogs(jeremy) 
+
+
+
+. This means all repeat queries (which potentially make up the majority of your app's usage) are lightening fast.
+
+
+
+Additionally, simple queries and relationships are lazily cached, which means you don't need to save query results in your app just for performance:
+
+    db.getOwnerDogs(this).then(dogs => {
+     this.myDogs = dogs; // Unecessary, just run the same query again when you need to. 
+    })
+
+Status of project:
+
+It's not complete yet! So if you are reading this (god knows what you put into Google to end up here) just come back in a few days.
+
+
+
+test('Tests run', () => {
+  db.ready().then(() => {
+    c.log(db)
+    db.putDay({day: new Date()}).then(day => {
+      db.putTag({name: 'lame'}).then(() => {
+        db.putTag({name: 'heroic'}).then(tag => {
+          db.putTask({text: 'Did my stuff'}).then(task => {
+            db.link('tag', 'task', tag, task).then( ()=> {
+              db.getTagTasks(tag).then(x => {
+                c.log(x);
+              })
+              db.getTaskTags(task).then(x => {
+                c.log(x);
+              })
+              expect(3).toBe(2)
+              db.setTaskDay(task, day).then(() => {
+                db.getTaskDay(task).then( x => {
+                  c.log(x);
+                })
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+  console.log(db);
+  expect().toBe(2)
+})
+*/

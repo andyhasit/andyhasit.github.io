@@ -1,4 +1,5 @@
-import {Database, Schema, deleteIdb} from '../lib/indie.js';
+import {Database, Schema, deleteIdb} from '../../ratherdry/dist/ratherdry.js';
+// '../lib/indie.js';
 
 const schema = new Schema()
 

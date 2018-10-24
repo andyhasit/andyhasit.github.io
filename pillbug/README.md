@@ -6,15 +6,9 @@ Pillbug is a reactive web framework. This is a guide to track where I am in its 
 
 All the src code is in /src. There is a demo app but this is obsolete and misleading, use the pointy app instead.
 
-### How to use it
+## How to use it
 
-Elements:
-
-* PageContainer (defined in demo and in pillbug - why?)
-* Modal
-* Menu extends View
-
-##### App
+#### App
 
 Create an instance of **App()**. This will act as the root object onto which you attach other things like:
 

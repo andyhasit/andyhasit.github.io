@@ -278,7 +278,7 @@ export class Route {
     //'todos/{id:int}?name,age'
     let paramStr;
     this.cls = cls;
-    this.keyFn = keyFn || props => 1; //Default is for pages to be cached.
+    this.keyFn = keyFn || function(){return 1}; //Default is for pages to be cached.
     [pattern, paramStr] = pattern.split('?')
     this.pattern = pattern
     this.chunks = pattern.split('/').map(s => {

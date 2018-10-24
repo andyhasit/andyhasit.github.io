@@ -1,4 +1,4 @@
-import {App, ModalContainer, Router} from '../lib/pillbug.js';
+import {App, ModalContainer, Router} from '../../pillbug/dist/pillbug.js';
 
 import Menu from './views/menu';
 import AppDatabase from './schema';
@@ -13,8 +13,8 @@ app.db.ready().then(() => {
   app.modalContainer = new ModalContainer('modal-container')
   app.view(Menu)
   app.refreshTasks()
+  console.log('ok')
 });
-
 
 app.showModal = function(modal) {
   return app.modalContainer.showModal(modal);

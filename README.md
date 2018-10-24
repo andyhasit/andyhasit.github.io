@@ -2,14 +2,25 @@
 
 This is my [GitHub Pages](https://pages.github.com/) repository.
 
-I use it as a hosting space + rapid development platform for various front end apps.
+I use it as a hosting space + rapid development platform for my experiments in front end app design.
 
-### Rapid development cycle
+### Current Focus
 
-1. All projects in one repo for easy access & lib reuse
-2. Only use master branch
-3. Edit locally
-4. Install any index page to mobile by clicking "Add to homepage"
+22/10/2018 - currently focused on:
+
+* Pillbug - a reactive framework
+* Ratherdry - an IndexedDb library (also has its own repo)
+* Pointy - an app which uses both the above
+
+
+
+### Rapid development setup
+
+1. Monorepo so separate libs can be developed simultaneously
+2. Only use master branch (not branch per project)
+3. Publish via Github pages so I can test on mobile
+4. One gulp file for all
+
 
 ### Links:
 

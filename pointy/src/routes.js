@@ -1,4 +1,4 @@
-import {Router} from '../lib/pillbug.js';
+import {Router} from '../../pillbug/dist/pillbug.js';
 
 import HomePage from './views/homepage';
 

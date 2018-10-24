@@ -1,4 +1,4 @@
-import {View, h} from '../../lib/pillbug.js';
+import {View, h} from '../../../pillbug/dist/pillbug.js';
 import AddTaskModal from '../modals/AddTaskModal';
 
 

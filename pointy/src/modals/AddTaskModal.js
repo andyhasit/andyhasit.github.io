@@ -1,4 +1,4 @@
-import {Modal, h} from '../../lib/pillbug.js';
+import {Modal, h} from '../../../pillbug/dist/pillbug.js';
 
 
 export default class ModalYesNo extends Modal {
