@@ -38,7 +38,7 @@ gulp.task('ratherdry', function() {
     .pipe(run('gzip ratherdry/dist/ratherdry.min.js -fk && ls -lh ratherdry/dist').exec());
 });
 
-gulp.task('pointy', function() {
+gulp.task('pointy', ['pillbug', 'ratherdry'], function() {
   gulp.src('pointy/src/index.js')
     .pipe(sourcemaps.init())
     .pipe(rollup({
@@ -60,7 +60,14 @@ all = [
 
 gulp.task('default', all, function(){});
 
-gulp.task('watch', all, function(){
+// task "pointy" requires the other two
+gulp.task('watch-demo', all, function() {
+  gulp.watch('pillbug/src/**/*.js', ['pointy']);
+  gulp.watch('ratherdry/src/**/*.js', ['pointy']);
+  gulp.watch('pointy/src/**/*.js', ['pointy']);
+});
+
+gulp.task('watch-libs', all, function(){
   gulp.watch('pillbug/src/**/*.js', ['pillbug']);
   gulp.watch('ratherdry/src/**/*.js', ['ratherdry']);
   gulp.watch('pointy/src/**/*.js', ['pointy']);

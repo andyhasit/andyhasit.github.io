@@ -17,7 +17,7 @@ app.db.ready().then(() => {
 })
 
 app.showModal = function(modal) {
-  return app.modalContainer.showModal(modal);
+  return app.modalContainer.showModal(modal)
 }
 
 app.goto = function(url) {

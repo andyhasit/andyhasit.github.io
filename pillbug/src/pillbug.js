@@ -33,27 +33,6 @@ export class App {
   }
 }
 
-export class ModalContainer {
-  constructor(id) {
-    //c.log(h('#' + id))
-    this._el = h('#' + id)
-  }
-  showModal(modal) {
-    modal.draw()
-    this._el.inner(modal)
-    return modal.promise
-      .then(result => {          
-        this._el.clear()
-        return result
-      })
-      .catch(error => {
-        this._el.clear()
-        return error
-      })
-  }
-}
-
-
 export class View {
   constructor(app, props, key) {
     this._app = app
@@ -124,15 +103,41 @@ export class View {
   }
 }
 
+export class ModalContainer {
+  constructor(id) {
+    this._el = h('#' + id)
+  }
+  showModal(modal) {
+    modal.draw()
+    this._el.inner(modal)
+    let elem = document.getElementsByClassName('modal-autofocus')[0]
+    if (elem) {
+      elem.focus()
+    }
+    return modal.promise
+      .then(result => {          
+        this._el.clear()
+        return result
+      })
+      .catch(error => {
+        this._el.clear()
+        c.log(`Modal rejected (${error}). You can ignore the next error log.`)
+        throw error
+      })
+  }
+}
 
+/*
+Subclasses must implement overlay() and content(). 
+Content should include a control with class "modal-autofocus"
+*/
 export class Modal extends View {
   _draw(h,v,a,p,k,s) {
     s.wrap(s.overlay(h,v,a,p,k,s).on('click', e => {
-        if (e.target == s.el) {
-          s.reject('user-cancelled')
-        }
-      }
-    ))
+      if (e.target == s.el) {
+        s.reject('user-cancelled')
+      } 
+    }))
     s.promise = new Promise((resolve, reject) => {
       s.resolve = resolve
       s.reject = reject

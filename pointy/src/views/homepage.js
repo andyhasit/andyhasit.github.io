@@ -10,7 +10,6 @@ export default class HomePage extends View {
         .then(task => {
           a.addTask(task)
         })
-        .catch(e => {})
     })
     s.wrap(h('div').inner([
       s.btnAdd,
