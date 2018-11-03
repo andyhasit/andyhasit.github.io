@@ -22,6 +22,10 @@ I use it as a hosting space + rapid development platform for my experiments in f
 4. One gulp file for all
 
 
+### Notes:
+
+1. Local dev doesn't work because db doesn't load? I use localhost:101 
+
 ### Links:
 
 https://andyhasit.github.io/pointy

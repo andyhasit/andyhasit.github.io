@@ -20,6 +20,7 @@ gulp.task('pillbug', function() {
     .pipe(terser())  // If it fails, run `npx terser pillbug/src/pillbug.js`
     //.on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
     .on('error', allowError)
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest('pillbug/dist'))
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulp.dest('pillbug/dist'))

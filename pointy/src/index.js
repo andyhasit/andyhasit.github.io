@@ -7,14 +7,14 @@ import routes from './routes';
 
 const app = new App();
 app.db = AppDatabase;
+app.router = new Router(app, 'page-container', routes);
+app.modalContainer = new ModalContainer('modal-container')
+app.view(Menu)
 
-app.db.ready().then(() => {
-  app.router = new Router(app, 'page-container', routes);
-  app.modalContainer = new ModalContainer('modal-container')
-  app.view(Menu)
+app.db.ready().then(() => {  
   app.refreshTasks()
   console.log('ok')
-});
+})
 
 app.showModal = function(modal) {
   return app.modalContainer.showModal(modal);
