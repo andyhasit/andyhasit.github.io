@@ -7,7 +7,13 @@ export default class ModalYesNo extends Modal {
   }
   content(h,v,a,p,k,s) {
     let text = '';
-    let input = h('input').class('modal-autofocus').on('change', e => {text = e.target.value})
+    let input = h('input').class('modal-autofocus')
+      .on('change', e => {text = e.target.value})
+      .on('keyup', e => {
+        if (e.keyCode == 13) {
+          s.resolve({text: text})
+        }
+      })
     input.el.focus();
     return h('div').class('modal-content modal-animate').inner([
       h('div').inner([

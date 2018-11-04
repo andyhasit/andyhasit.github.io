@@ -52,6 +52,18 @@ gulp.task('pointy', ['pillbug', 'ratherdry'], function() {
     .pipe(gulp.dest('pointy/dist'))
 });
 
+gulp.task('pointy-min', function() {
+  gulp.src('pointy/dist/bundle.js')
+    //.pipe(sourcemaps.init())
+    .pipe(terser())  // If it fails, run `npx terser pointy/dist/bundle.js`
+    .on('error', allowError)
+    // inlining the sourcemap into the exported .js file
+    //.pipe(sourcemaps.write())
+    .pipe(rename({ suffix: '.min' }))
+    .pipe(gulp.dest('pointy/dist'))
+    .pipe(run('gzip pointy/dist/bundle.min.js -fk && ls -lh pointy/dist').exec());
+});
+
 all = [
   'pillbug', 
   'pointy',

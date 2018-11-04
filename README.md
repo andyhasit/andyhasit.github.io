@@ -13,6 +13,12 @@ I use it as a hosting space + rapid development platform for my experiments in f
 * Pointy - an app which uses both the above
 
 
+### Next steps:
+
+1. Figure out why not working as PWA
+2. Get Many to many relationships working - or alt solution
+3. Make point logging app
+
 
 ### Rapid development setup
 
@@ -25,6 +31,7 @@ I use it as a hosting space + rapid development platform for my experiments in f
 ### Notes:
 
 1. Local dev doesn't work because db doesn't load? I use localhost:101 
+2. Use incognito chrome on mobile to avoid cached js
 
 ### Links:
 
