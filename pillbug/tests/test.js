@@ -124,7 +124,7 @@ test('Test prop match', () => {
     }
   }
 
-  // _iew calls update after creating so we replicate this here.
+  // _view calls update after creating so we replicate this here.
   function mockViewCreation(props) {
     view = new MyView(null, {name: 'Joe'})
     view.update(props)

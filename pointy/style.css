@@ -139,3 +139,33 @@ body {
   from {transform: scale(0)} 
   to {transform: scale(1)}
 }
+
+.target-scroll {
+  overflow: scroll;
+  background: yellow;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 60px;
+}
+
+.target-row {
+  width: 100%;
+}
+
+.target-row div {
+  display: inline-block;
+  padding: 10px;
+}
+
+.plus-btn {
+  position: fixed;
+  right: 7px;
+  bottom: 7px;
+  height: 50px;
+  width: 50px;
+  /*
+  background: red url(img/plus-btn.png) no-repeat;
+  */
+}

@@ -80,6 +80,7 @@ export class View {
     }
   }
   _view(cls, props, key) {
+    //Gets or retrieves child view, possibly using cached copy
     let view;
     if (key == undefined) {
       view = new cls(this._app, props)
