@@ -18,6 +18,13 @@ I use it as a hosting space + rapid development platform for my experiments in f
 1. Figure out why not working as PWA
 2. Get Many to many relationships working - or alt solution
 3. Make point logging app
+4. keyval (singleton) table
+
+#### Pointy spec:
+
+1. Add entry > dialog > dropdown/new text. For now only one word e.g. Pushups, Novarum, Home organising, Chores etc... plus a score in points.
+2. Homescreen: points per day.
+3. Data structure
 
 
 ### Rapid development setup

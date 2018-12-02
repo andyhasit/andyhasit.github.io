@@ -41,9 +41,9 @@ export class Database {
     return this._dbp.then(db => {
       let names = db.objectStoreNames, len = db.objectStoreNames.length;
       for (let i=0; i<len; i++) {
-        let store = names[i];
-        promises.push(this._wrap(store, 'clear', 'readwrite').then(() => {
-          return this._caches[store] = {}
+        let storeName = names[i];
+        promises.push(this._wrap(storeName, 'clear', 'readwrite').then(() => {
+          return this._caches[storeName] = {}
         }))
       }
       return Promise.all(promises)
@@ -54,58 +54,58 @@ export class Database {
     return this._dbp.then(db => {
       let names = db.objectStoreNames, len = db.objectStoreNames.length;
       for (let i=0; i<len; i++) {
-        let store = names[i];
-        promises.push(this.getAll(store).then(rows => data[store] = rows))
+        let storeName = names[i];
+        promises.push(this.getAll(storeName).then(rows => data[storeName] = rows))
       }
       return Promise.all(promises).then(x => data)
     });
   }
-  _cacheOf(store) {
-    if (!this._caches.hasOwnProperty(store)) {
-      this._caches[store] = {}
+  _cacheOf(storeName) {
+    if (!this._caches.hasOwnProperty(storeName)) {
+      this._caches[storeName] = {}
     }
-    return this._caches[store]
+    return this._caches[storeName]
   }
-  _wrap(store, action, type, ...args) {
+  _wrap(storeName, action, type, ...args) {
     return this._dbp.then(db => new Promise((resolve, reject) => {
-      let transaction = db.transaction(store, type)
-      let request = transaction.objectStore(store)[action](...args)
+      let transaction = db.transaction(storeName, type)
+      let request = transaction.objectStore(storeName)[action](...args)
       transaction.oncomplete = () => resolve(request.result)
       transaction.onabort = transaction.onerror = () => reject(transaction.error)
     }))
   }
-  put(store, record) {
-    return this._wrap(store, 'put', 'readwrite', record).then(id => {
+  put(storeName, record) {
+    return this._wrap(storeName, 'put', 'readwrite', record).then(id => {
       record.id = id
-      this._cacheOf(store)[id] = record
+      this._cacheOf(storeName)[id] = record
       return record
     })
   }
-  del(store, record) {
-    return this._wrap(store, 'delete', 'readwrite', record.id).then(id => {
-      delete this._cacheOf(store)[record.id]
+  del(storeName, record) {
+    return this._wrap(storeName, 'delete', 'readwrite', record.id).then(id => {
+      delete this._cacheOf(storeName)[record.id]
       return true
     })
   }
-  get(store, id) {
-    let record = this._cacheOf(store)[id]
+  get(storeName, id) {
+    let record = this._cacheOf(storeName)[id]
     if (record == undefined) {
-      return this._wrap(store, 'get', undefined, id).then(record => {
+      return this._wrap(storeName, 'get', undefined, id).then(record => {
         //TODO: transform
-        this._cacheOf(store)[id] = record
+        this._cacheOf(storeName)[id] = record
         return record
       })
     } else {
       return Promise.resolve(record)
     }
   }
-  getAll(store) {
-    if (this._fullyLoaded[store]) {
-      return Promise.resolve(Object.values(this._cacheOf(store)))
+  getAll(storeName) {
+    if (this._fullyLoaded[storeName]) {
+      return Promise.resolve(Object.values(this._cacheOf(storeName)))
     } else {
-      return this._wrap(store, 'getAll').then(records => {
-        let cache = this._cacheOf(store)
-        this._fullyLoaded[store] = true
+      return this._wrap(storeName, 'getAll').then(records => {
+        let cache = this._cacheOf(storeName)
+        this._fullyLoaded[storeName] = true
         //TODO: transform
         records.map(record => cache[record.id] = record)
         return records
@@ -120,12 +120,12 @@ export class Database {
     }
     return true
   }
-  _fetchOne(store, criteria) {
+  _fetchOne(storeName, criteria) {
 
     // UNTESTED
     return this._dbp.then(db => new Promise((resolve, reject) => {
       let records = []
-      let cursorTrans = db.transaction(store).objectStore(store).openCursor()
+      let cursorTrans = db.transaction(storeName).objectStore(storeName).openCursor()
       cursorTrans.onerror = error => c.log(error)
       cursorTrans.onsuccess = event => {
         var cursor = event.target.result
@@ -143,12 +143,12 @@ export class Database {
       }
     }))
   }
-  filter(store, criteria) {
+  filter(storeName, criteria) {
     // criteria must be an object
     //Todo: add query caching
     return this._dbp.then(db => new Promise((resolve, reject) => {
       let records = []
-      let cursorTrans = db.transaction(store).objectStore(store).openCursor()
+      let cursorTrans = db.transaction(storeName).objectStore(storeName).openCursor()
       cursorTrans.onerror = error => reject(cursorTrans.error)
       cursorTrans.onsuccess = event => {
         var cursor = event.target.result

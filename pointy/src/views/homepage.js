@@ -1,26 +1,25 @@
 import {View, h} from '../../../pillbug/dist/pillbug.js';
-import AddTaskModal from '../modals/AddTaskModal';
+import AddTargetModal from '../modals/AddTargetModal';
 
 
 export default class HomePage extends View {
   _draw(h,v,a,p,k,s) {
-    s.tasksUL = h('ul')
+    s.targetsUL = h('ul')
     s.btnAdd = h('button').text('Add').on('click', e => {
-      a.showModal(new AddTaskModal())
-        .then(task => {
-          a.addTask(task)
+      a.showModal(new AddTargetModal())
+        .then(target => {
+          a.addTarget(target)
         })
     })
     s.wrap(h('div').inner([
       s.btnAdd,
-      s.tasksUL
+      s.targetsUL
     ]))
-    a.on('tasks-updated', tasks => s.drawTasksUl(h,s,tasks))
-    c.log(994)
+    a.on('refresh', state => s.drawTargetsUl(h,s,state.targets))
   }
-  drawTasksUl(h,s,tasks) {
-    s.tasksUL.inner(tasks.map( task => 
-      h('div').inner(task.text)
+  drawTargetsUl(h,s,targets) {
+    s.targetsUL.inner(targets.map( target => 
+      h('div').inner(target.text)
     ))
   }
 }

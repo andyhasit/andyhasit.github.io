@@ -1,7 +1,7 @@
 import {Modal, h} from '../../../pillbug/dist/pillbug.js';
 
 
-export default class ModalYesNo extends Modal {
+export default class AddEntryModal extends Modal {
   overlay(h,v,a,p,k,s) {
     return h('div').class('modal-background')
   }
@@ -14,7 +14,6 @@ export default class ModalYesNo extends Modal {
           s.resolve({text: text})
         }
       })
-    input.el.focus();
     return h('div').class('modal-content modal-animate').inner([
       h('div').inner([
         input

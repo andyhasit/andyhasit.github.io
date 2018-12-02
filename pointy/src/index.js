@@ -12,7 +12,7 @@ app.modalContainer = new ModalContainer('modal-container')
 app.view(Menu)
 
 app.db.ready().then(() => {  
-  app.refreshTasks()
+  app.refresh()
   console.log('ok')
 })
 
@@ -26,14 +26,30 @@ app.goto = function(url) {
   //window.history.pushState({}, window.location + url, window.location.origin + url);
 }
 
-app.refreshTasks = function() {
-  this.db.getAll('task').then(tasks =>
-    this.emit('tasks-updated', tasks)
-  )
+/*
+Real app functionality:
+
+For now - play dumb. Every time we save, we reload everything - no in-app caching.
+
+Only have one event - dataChanged
+*/
+
+app.refresh = function() {
+  let state = {}
+  this.db.getAll('target').then(targets => {
+    state['targets'] = targets;
+    this.db.getAll('record').then(records => {
+      state['records'] = records;
+      this.db.getAll('category').then(categories => {
+        state['categories'] = categories
+        this.emit('refresh', state)
+      })
+    })
+  })
 }
 
-app.addTask = function(task) {
-  this.db.putTask(task).then(task => {
-    this.refreshTasks()
+app.addTarget = function(target) {
+  this.db.putTarget(target).then(target => {
+    this.refresh()
   })
 }

@@ -22,7 +22,7 @@ export default class Menu extends View {
       hideMenuBtn,
       h('div').class('overlay-content').inner([
         s.getMenuEntry(a, h, 'Home', ''),
-        s.getMenuEntry(a, h, 'Page2', 'page2'),
+        s.getMenuEntry(a, h, 'Stuff', 'page2'),
         s.downloadButton(h,v,a,p,k,s)
         ])
       ])
