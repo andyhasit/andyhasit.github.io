@@ -13,49 +13,66 @@ function sortbyDate(arr) {
 export default class HomePage extends View {
   _draw(h,v,a,p,k,s) {
     s.targetsScroll = h('div').class('target-scroll')
-    let img = h('img').class('plus-btn').atts({src:'img/plus-btn.png'})
-    s.btnAdd = h('a').inner(img).on('click', e => {
+    let btnAddImg = h('img').class('plus-btn').atts({src:'img/plus-btn.png'})
+    s.btnAdd = h('a').inner(btnAddImg).on('click', e => {
       a.showModal(new AddTargetModal())
         .then(target => {
           a.addTarget(target)
         })
     })
 
-
     s.wrap(h('div').inner([
+      s.targetsScroll,
       s.btnAdd,
-      s.targetsScroll
     ]))
-    a.on('refresh', state => s.drawTargets(h,s,state.targets))
+    a.on('refresh', state => {
+      s.drawTargets(h,s,state.targets)
+      s.colourExpired(h,v,a,p,k,s)
+    })
   }
   drawTargets(h,s,targets) {
     let sortedTargets = sortbyDate(targets).map(target => {
       // Make this into own view so it caches
       return s.v(TargetView, target, target.id)
     })
-    console.log(sortedTargets[0])
     s.targetsScroll.inner(sortedTargets)
+  }
+  colourExpired(h,v,a,p,k,s) {
+    // Or make Targets watch an event?
+    console.log(s.targetsScroll)
   }
 }
 
+
+const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
 class TargetView extends View {
   _draw(h,v,a,p,k,s) {
-    let textDiv = h('div')
+    let textDiv = h('div').class('target-text')
     let dueDiv = h('div')
-    let valueDiv = h('div')
+    let valueDiv = h('div').class('target-value')
     s.wrap(h('div').class('target-row').inner([
       dueDiv,
+      valueDiv,
       textDiv,
-      valueDiv
       ]))
-    s.match('text', val => textDiv.text(val))
-    s.match('due', val => dueDiv.text(s.formatDate(val)))
-    s.match('value', val => valueDiv.text(val))
+    let today =  new Date();
+    s.match('text', text => textDiv.text(text))
+    s.match('due', due => {
+      let day = days[due.getDay()]
+      let date = due.getDate()
+      dueDiv.inner([
+        h('div').class('target-due-date').text(`${day} ${date}`),
+        h('div').class('target-due-time').text(`${due.getHours()}:${due.getMinutes()}`)
+      ])
+    })
+    s.match('value', value => valueDiv.text(`-${value}`))
   }
-  formatDate(due) {
-    let dd = due.getDate();
-    let mm = due.getMonth() + 1;
-    let y = due.getFullYear();
-    return dd + '/'+ mm + '/'+ y;
+  formatDate(due, today) {
+    // if too far ahead, give date
+    
+    //let mm = due.getMonth() + 1;
+    //let y = due.getFullYear();
+    return day + ' '+ date
   }
 }

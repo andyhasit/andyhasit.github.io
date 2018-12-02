@@ -21,6 +21,7 @@ export class App {
     this._watchers(event).forEach(w => w(data))
   }
   on(event, callback) {
+    // TODO: make this return a function which removes the callback
     this._watchers(event).push(callback)
   }
   _watchers(event) {

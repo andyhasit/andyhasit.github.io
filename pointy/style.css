@@ -142,12 +142,11 @@ body {
 
 .target-scroll {
   overflow: scroll;
-  background: yellow;
   position: fixed;
   top: 60px;
   left: 0;
   right: 0;
-  bottom: 60px;
+  bottom: 0px;
 }
 
 .target-row {
@@ -156,7 +155,31 @@ body {
 
 .target-row div {
   display: inline-block;
-  padding: 10px;
+  padding: 5px 4px;
+  /*
+  vertical-align: middle;
+  */
+}
+
+.target-due-date {
+  font-size: 12px;
+  text-align: center;
+}
+
+.target-due-time {
+  font-size: 14px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.target-value {
+  text-align: center;
+  font-weight: normal;
+  
+  border: 1px solid gray;
+  border-radius: 5px;
+  padding: 4px 6px;
+  margin-right: 4px;
 }
 
 .plus-btn {
@@ -165,7 +188,15 @@ body {
   bottom: 7px;
   height: 50px;
   width: 50px;
-  /*
+  z-index: 1000;
+}
+
+
+/*
+vertical-align: middle;
+  font-size: 16px;
+  border-right: 1px solid gray;
+  border-left: 1px solid gray;
+  background: yellow;
   background: red url(img/plus-btn.png) no-repeat;
   */
-}
