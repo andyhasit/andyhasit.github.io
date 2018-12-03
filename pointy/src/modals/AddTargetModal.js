@@ -24,41 +24,80 @@ function getDateSpread() {
   ]
 }
 
-input type=range provides a visual UI slider to input a number. The UI for this control is browser-dependent.
 
-input type=color
-
-<input list="pasta" autocomplete=off>
-
-<datalist id="pasta">
-<option>Bavette</option>
-<option>Cannelloni</option>
-<option>Fiorentine</option>
-<option>Gnocchi</option>
-<option>Pappardelle</option>
-<option>Penne lisce</option>
-<option>Pici</option>
-<option>Rigatoni</option>
-<option>Spaghetti</option>
-<option>Tagliatelle</option>
-</datalist>
 */
 
+Date.prototype.toDatetimeLocal = function toDatetimeLocal() {
+    var
+      date = this,
+      ten = function (i) {
+        return (i < 10 ? '0' : '') + i;
+      },
+      YYYY = date.getFullYear(),
+      MM = ten(date.getMonth() + 1),
+      DD = ten(date.getDate()),
+      HH = ten(date.getHours()),
+      II = ten(date.getMinutes()),
+      SS = ten(date.getSeconds())
+    ;
+    return YYYY + '-' + MM + '-' + DD + 'T' +
+             HH + ':' + II + ':' + SS;
+  };
+
+Date.prototype.fromDatetimeLocal = (function (BST) {
+  // BST should not be present as UTC time
+  return new Date(BST).toISOString().slice(0, 16) === BST ?
+    // if it is, it needs to be removed
+    function () {
+      return new Date(
+        this.getTime() +
+        (this.getTimezoneOffset() * 60000)
+      ).toISOString();
+    } :
+    // otherwise can just be equivalent of toISOString
+    Date.prototype.toISOString;
+}('2006-06-06T06:06'));
+
+
 export default class AddTargetModal extends Modal {
+  /*
+  props determine operation mode:
+    undefined: create new target
+    array: clone the first element
+    object: treat as target to be edited
+  */
   overlay(h,v,a,p,k,s) {
     return h('div').class('modal-background')
   }
   content(h,v,a,p,k,s) {
-    let text = '';
+    let target;
+    if (p === undefined) {
+      target = {
+        text: '',
+        value: 50,
+        due: new Date()
+      }
+    } else if (Array.isArray(p)) {
+      let targetToClone = p[0]
+      target = {
+        text: targetToClone.text,
+        value: targetToClone.value,
+        due: targetToClone.due
+      }
+    } else {
+      target = p
+    }
     let textInput = h('input')
       .class('modal-input modal-autofocus')
-      .atts({list: 'suggestions'})
-      .on('change', e => {text = e.target.value})
-      .on('keyup', e => {
-        if (e.keyCode == 13) {
-          s.resolve({text: text})
-        }
-      })
+      .atts({list: 'suggestions', value: target.text})
+      .on('change', e => {target.text = e.target.value})
+
+    let targetValue = '';
+    let ValueSlider = h('input')
+      .class('modal-input')
+      .atts({type:'range', min:0, max:200, value:target.value, step:5})
+      .on('change', e => {target.value = e.target.value; console.log(targetValue)})
+
     /*
     let dateBtnsDiv = h('div').class('button-row').inner(
       getDateSpread(5).map(datePair => {
@@ -71,14 +110,20 @@ export default class AddTargetModal extends Modal {
     let dataList = h('datalist').id('suggestions').inner(
       ['a', 'black', 'bling', 'car'].map(o => h('option').inner(o))
     )
+    console.log(target.due.toDatetimeLocal())
+    let dueDateSelector = h('input')
+      .class('modal-input')
+      .atts({type:'datetime-local', value:target.due.toDatetimeLocal()})
+      .on('change', e => {target.due = new Date(e.target.value); console.log(e.target.value)})
+    
     return h('div').class('modal-content modal-animate').inner([
       h('div').inner([
         textInput,
         dataList,
-        h('input').class('modal-input').atts({type:'range', min:0, max:100, value:90, step:10}),
-        h('input').class('modal-input').atts({type:'datetime-local'})
+        ValueSlider,
+        dueDateSelector
       ]),
-      h('button').text('OK').on('click', e => s.resolve({text: text})),
+      h('button').text('OK').on('click', e => s.resolve(target)),
       h('button').text('Cancel').on('click', e => s.reject('user-cancelled')),
     ])
   }

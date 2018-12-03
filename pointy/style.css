@@ -19,7 +19,7 @@ body {
   height: 100%;
   width: 0;
   position: fixed;
-  z-index: 1;
+  z-index: 100;
   top: 0;
   right: 0;
   background-color: rgb(0,0,0);
@@ -88,7 +88,7 @@ body {
 
 .modal-background {
   position: fixed;
-  z-index: 1;
+  z-index: 100;
   left: 0;
   top: 0;
   width: 100%;
@@ -188,7 +188,7 @@ body {
   bottom: 7px;
   height: 50px;
   width: 50px;
-  z-index: 1000;
+  z-index: 2;
 }
 
 

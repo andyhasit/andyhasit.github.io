@@ -106,10 +106,12 @@ export class View {
 }
 
 export class ModalContainer {
-  constructor(id) {
+  constructor(app, id) {
+    this._app = app
     this._el = h('#' + id)
   }
-  showModal(modal) {
+  showModal(modalClass, props) {
+    let modal = new modalClass(this._app, props)
     modal.draw()
     this._el.inner(modal)
     let elem = document.getElementsByClassName('modal-autofocus')[0]

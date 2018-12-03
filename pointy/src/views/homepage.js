@@ -15,9 +15,9 @@ export default class HomePage extends View {
     s.targetsScroll = h('div').class('target-scroll')
     let btnAddImg = h('img').class('plus-btn').atts({src:'img/plus-btn.png'})
     s.btnAdd = h('a').inner(btnAddImg).on('click', e => {
-      a.showModal(new AddTargetModal())
+      a.showModal(AddTargetModal)
         .then(target => {
-          a.addTarget(target)
+          a.putTarget(target)
         })
     })
 
@@ -39,7 +39,7 @@ export default class HomePage extends View {
   }
   colourExpired(h,v,a,p,k,s) {
     // Or make Targets watch an event?
-    console.log(s.targetsScroll)
+    //console.log(s.targetsScroll)
   }
 }
 
@@ -48,15 +48,24 @@ const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 class TargetView extends View {
   _draw(h,v,a,p,k,s) {
+    let today =  new Date();
     let textDiv = h('div').class('target-text')
     let dueDiv = h('div')
     let valueDiv = h('div').class('target-value')
-    s.wrap(h('div').class('target-row').inner([
-      dueDiv,
-      valueDiv,
-      textDiv,
-      ]))
-    let today =  new Date();
+    let rowDiv = h('div')
+      .class('target-row')
+      .on('click', e => {
+        a.showModal(AddTargetModal, p)
+          .then(target => {
+            a.putTarget(target)
+          })
+      })
+      .inner([
+        dueDiv,
+        valueDiv,
+        textDiv,
+      ])
+    s.wrap(rowDiv)
     s.match('text', text => textDiv.text(text))
     s.match('due', due => {
       let day = days[due.getDay()]

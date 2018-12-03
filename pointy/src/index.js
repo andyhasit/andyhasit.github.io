@@ -8,7 +8,7 @@ import routes from './routes';
 const app = new App();
 app.db = AppDatabase;
 app.router = new Router(app, 'page-container', routes);
-app.modalContainer = new ModalContainer('modal-container')
+app.modalContainer = new ModalContainer(app, 'modal-container')
 app.view(Menu)
 
 app.db.ready().then(() => {  
@@ -16,8 +16,8 @@ app.db.ready().then(() => {
   console.log('ok')
 })
 
-app.showModal = function(modal) {
-  return app.modalContainer.showModal(modal)
+app.showModal = function(modalClass, props) {
+  return app.modalContainer.showModal(modalClass, props)
 }
 
 app.goto = function(url) {
@@ -48,7 +48,7 @@ app.refresh = function() {
   })
 }
 
-app.addTarget = function(target) {
+app.putTarget = function(target) {
   this.db.putTarget(target).then(target => {
     this.refresh()
   })
