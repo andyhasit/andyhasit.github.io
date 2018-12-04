@@ -71,13 +71,14 @@ export class View {
   }
   _update(h,v,a,p,k,s) {
     for (let prop in s._matchers) {
-      let val = p[prop];
-      if (s._vals[prop] !== val) {
+      let val = p[prop]
+      let valAsString = String(val) // Necessary to compare dates etc...
+      if (s._vals[prop] !== valAsString) {
         s._matchers[prop].forEach(fn => {
           fn(val, p)
         })
       }
-      s._vals[prop] = val
+      s._vals[prop] = valAsString
     }
   }
   _view(cls, props, key) {

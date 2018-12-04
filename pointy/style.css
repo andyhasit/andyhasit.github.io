@@ -1,3 +1,13 @@
+@-webkit-keyframes animatezoom {
+  from {-webkit-transform: scale(0)} 
+  to {-webkit-transform: scale(1)}
+}
+
+@keyframes animatezoom {
+  from {transform: scale(0)} 
+  to {transform: scale(1)}
+}
+
 body {
   font-family: 'Lato', sans-serif;
 }
@@ -88,26 +98,55 @@ body {
   top: 0px;
   left: 0px;
   right: 0px;
-  height: 55px;
-  padding-left: 5px;
+  height: 52px;
   border-bottom: 1px solid gray;
+  font-size: 12px;
 }
 
-.top-bar-square {
+.top-bar-totals {
+  display: inline-block;
+  width: 70px;
+}
+
+.top-bar-totals .total-box {
+  position: relative;
+  height: 25px;
+  vertical-align: bottom;
+}
+
+.top-bar-totals .total-label {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  font-size: 8px;
+}
+
+.top-bar-totals .total-balance {
+ position: absolute;
+  bottom: 0;
+  left: 25px;
+  width: 35px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: right;
+}
+
+.top-bar-box {
+  vertical-align: top;
   text-align: center;
   display: inline-block;
-  width: 60px;
+  width: 45px;
   border: 1px solid gray;
   border-radius: 5px;
   padding: 2px 3px;
   margin: 6px 3px;
 }
 
-.top-bar .square-label {
+.top-bar .box-label {
 
 }
 
-.top-bar .square-value {
+.top-bar .box-value {
 
 }
 
@@ -135,26 +174,39 @@ body {
   overflow: auto;
   background-color: rgb(0,0,0); /* Fallback color */
   background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
-  padding-top: 60px;
+  padding-top: 40px;
 }
 
-
-/* Modal Content */
 .modal-content {
   background-color: #fefefe;
   margin: 5px auto;
   border: 1px solid #888;
-  width: 80%;
-  padding: 10px;
+  border-radius: 15px;
+  width: 85%;
+  padding: 15px;
 }
 
 .modal-content * {
   font-size: 16px;
 }
 
+.modal-button-stack {
+  text-align: center;
+}
+
+.modal-button-stack button {
+  width: 90%;
+  margin: 5px;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 18px;
+  border: 0;
+  font-weight: bold;
+}
+
 .modal-input {
   width: 100%;
-  margin: 5px 0 10px;
+  margin: 5px 0 15px;
   padding: 5px;
   box-sizing: border-box;
   border: solid gray 1px;
@@ -180,14 +232,24 @@ body {
   animation: animatezoom 0.15s
 }
 
-@-webkit-keyframes animatezoom {
-  from {-webkit-transform: scale(0)} 
-  to {-webkit-transform: scale(1)}
+.value-picker-button-set {
+
 }
 
-@keyframes animatezoom {
-  from {transform: scale(0)} 
-  to {transform: scale(1)}
+.value-picker-button-set .btn-set {
+  display: inline-block;
+  text-align: center;
+  margin: 5px 15px 15px;
+}
+
+.value-picker-button-set button {
+  margin: 2px 4px;
+  height: 35px;
+  width: 35px;
+  border-radius: 7px;
+  border: none;
+  font-size: 26px;
+  font-weight: bold;
 }
 
 .target-scroll {
