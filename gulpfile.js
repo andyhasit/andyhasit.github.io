@@ -44,7 +44,7 @@ gulp.task('pointy', ['pillbug', 'ratherdry'], function() {
     .pipe(rollup({
       // Rollups `sourcemap` option is unsupported. Use `gulp-sourcemaps` plugin instead
       format: 'iife',
-    }))
+    }).on('error', allowError))
     .on('error', allowError)
     // inlining the sourcemap into the exported .js file
     .pipe(sourcemaps.write())
@@ -61,7 +61,7 @@ gulp.task('pointy-min', function() {
     //.pipe(sourcemaps.write())
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulp.dest('pointy/dist'))
-    .pipe(run('gzip pointy/dist/bundle.min.js -fk && ls -lh pointy/dist').exec());
+    //.pipe(run('gzip pointy/dist/bundle.min.js -fk && ls -lh pointy/dist').exec());
 });
 
 all = [

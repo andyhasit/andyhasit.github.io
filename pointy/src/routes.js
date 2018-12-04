@@ -1,9 +1,9 @@
 import {Router} from '../../pillbug/dist/pillbug.js';
 
-import HomePage from './views/homepage';
+import HomePageView from './views/HomePageView';
 
 const routes = [
-  ['/', HomePage],
+  ['/', HomePageView],
   ['todos/{id}?name,age', ''],
 ]
 

@@ -72,14 +72,53 @@ body {
   top: 0;
   right: 0;
   padding: 10px;
+  z-index: 10;
 }
 
 #page-container {
   position: absolute;
-  top: 45px;
+  top: 0px;
   left: 0px;
   right: 0px;
   bottom: 0px;
+}
+
+.top-bar {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  height: 55px;
+  padding-left: 5px;
+  border-bottom: 1px solid gray;
+}
+
+.top-bar-square {
+  text-align: center;
+  display: inline-block;
+  width: 60px;
+  border: 1px solid gray;
+  border-radius: 5px;
+  padding: 2px 3px;
+  margin: 6px 3px;
+}
+
+.top-bar .square-label {
+
+}
+
+.top-bar .square-value {
+
+}
+
+.top-bar .positive {
+  color: green;
+  border: 1px solid green;
+}
+
+.top-bar .negative {
+  color: red;
+  border: 1px solid red;
 }
 
 #modal-container {
@@ -102,13 +141,11 @@ body {
 
 /* Modal Content */
 .modal-content {
-  
   background-color: #fefefe;
   margin: 5px auto;
   border: 1px solid #888;
   width: 80%;
   padding: 10px;
-  text-align: center;
 }
 
 .modal-content * {
@@ -117,12 +154,25 @@ body {
 
 .modal-input {
   width: 100%;
-  margin: 12px 0;
+  margin: 5px 0 10px;
   padding: 5px;
   box-sizing: border-box;
   border: solid gray 1px;
 }
 
+.modal-label {
+  text-align: left;
+  font-weight: bold;
+}
+
+.modal-buttons {
+  text-align: right;
+}
+
+.modal-buttons button {
+  margin-left: 8px;
+  padding: 5px;
+}
 
 /* Modal pop up Animation */
 .modal-animate {
@@ -161,25 +211,32 @@ body {
   */
 }
 
+.target-due {
+
+}
+
 .target-due-date {
   font-size: 12px;
   text-align: center;
+  width: 36px;
 }
 
 .target-due-time {
   font-size: 14px;
   text-align: center;
   font-weight: bold;
+  width: 36px;
 }
 
 .target-value {
   text-align: center;
   font-weight: normal;
-  
   border: 1px solid gray;
   border-radius: 5px;
   padding: 4px 6px;
   margin-right: 4px;
+  width: 36px;
+  text-align: right;
 }
 
 .plus-btn {

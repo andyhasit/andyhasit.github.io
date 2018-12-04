@@ -1,6 +1,6 @@
 import {App, ModalContainer, Router} from '../../pillbug/dist/pillbug.js';
 
-import Menu from './views/menu';
+import MenuView from './views/MenuView';
 import AppDatabase from './schema';
 import routes from './routes';
 
@@ -9,7 +9,7 @@ const app = new App();
 app.db = AppDatabase;
 app.router = new Router(app, 'page-container', routes);
 app.modalContainer = new ModalContainer(app, 'modal-container')
-app.view(Menu)
+app.view(MenuView)
 
 app.db.ready().then(() => {  
   app.refresh()
@@ -37,9 +37,15 @@ Only have one event - dataChanged
 app.refresh = function() {
   let state = {}
   this.db.getAll('target').then(targets => {
-    state['targets'] = targets;
+    state['targets'] = targets
     this.db.getAll('record').then(records => {
-      state['records'] = records;
+      state['records'] = records
+      state['totals'] = {
+        total: 23,
+        today: 0, 
+        yest: -5,
+        week: 15,
+      }
       this.db.getAll('category').then(categories => {
         state['categories'] = categories
         this.emit('refresh', state)

@@ -27,39 +27,8 @@ function getDateSpread() {
 
 */
 
-Date.prototype.toDatetimeLocal = function toDatetimeLocal() {
-    var
-      date = this,
-      ten = function (i) {
-        return (i < 10 ? '0' : '') + i;
-      },
-      YYYY = date.getFullYear(),
-      MM = ten(date.getMonth() + 1),
-      DD = ten(date.getDate()),
-      HH = ten(date.getHours()),
-      II = ten(date.getMinutes()),
-      SS = ten(date.getSeconds())
-    ;
-    return YYYY + '-' + MM + '-' + DD + 'T' +
-             HH + ':' + II + ':' + SS;
-  };
 
-Date.prototype.fromDatetimeLocal = (function (BST) {
-  // BST should not be present as UTC time
-  return new Date(BST).toISOString().slice(0, 16) === BST ?
-    // if it is, it needs to be removed
-    function () {
-      return new Date(
-        this.getTime() +
-        (this.getTimezoneOffset() * 60000)
-      ).toISOString();
-    } :
-    // otherwise can just be equivalent of toISOString
-    Date.prototype.toISOString;
-}('2006-06-06T06:06'));
-
-
-export default class AddTargetModal extends Modal {
+export default class EditTargetModal extends Modal {
   /*
   props determine operation mode:
     undefined: create new target
@@ -88,16 +57,28 @@ export default class AddTargetModal extends Modal {
       target = p
     }
     let textInput = h('input')
-      .class('modal-input modal-autofocus')
+      .class('modal-input')
       .atts({list: 'suggestions', value: target.text})
       .on('change', e => {target.text = e.target.value})
 
-    let targetValue = '';
-    let ValueSlider = h('input')
+    let valueSlider = h('input')
       .class('modal-input')
       .atts({type:'range', min:0, max:200, value:target.value, step:5})
-      .on('change', e => {target.value = e.target.value; console.log(targetValue)})
+      .on('change', e => {
+        target.value = e.target.value
+        valueLabel.text(`Value: (${target.value})`)
+      })
 
+    let valueLabel = label(`Value: (${target.value})`)
+    /*
+    let valueDisplay = h('span').text(target.value)
+    let valueInput = h('div')
+      //.class('modal-input')
+      .inner([
+        valueDisplay,
+        valueSlider
+        ])
+    */
     /*
     let dateBtnsDiv = h('div').class('button-row').inner(
       getDateSpread(5).map(datePair => {
@@ -112,19 +93,27 @@ export default class AddTargetModal extends Modal {
     )
     console.log(target.due.toDatetimeLocal())
     let dueDateSelector = h('input')
-      .class('modal-input')
+      .class('modal-input') //modal-autofocus
       .atts({type:'datetime-local', value:target.due.toDatetimeLocal()})
-      .on('change', e => {target.due = new Date(e.target.value); console.log(e.target.value)})
+      .on('change', e => {target.due = new Date(e.target.value)})
     
+    function label(text) {
+      return h('label').text(text).class('modal-label')
+    }
     return h('div').class('modal-content modal-animate').inner([
       h('div').inner([
+        label('Description:'),
         textInput,
         dataList,
-        ValueSlider,
-        dueDateSelector
+        label('Due:'),
+        dueDateSelector,
+        valueLabel,
+        valueSlider,
       ]),
-      h('button').text('OK').on('click', e => s.resolve(target)),
-      h('button').text('Cancel').on('click', e => s.reject('user-cancelled')),
+      h('div').class('modal-buttons').inner([
+        h('button').text('OK').on('click', e => s.resolve(target)),
+        h('button').text('Cancel').on('click', e => s.reject('user-cancelled'))
+      ])
     ])
   }
 }

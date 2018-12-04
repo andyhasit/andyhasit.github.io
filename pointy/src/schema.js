@@ -18,7 +18,7 @@ import {Database, Schema, deleteIdb} from '../../ratherdry/dist/ratherdry.js';
 
 const schema = new Schema()
 
-deleteIdb('pointy-v2')
+//deleteIdb('pointy-v2')
 
 schema.addVersion((schema, isUpgrade) => {
   let target = schema.addStore('target')
