@@ -35,8 +35,17 @@ function TargetClick(target, a) {
 export default class TargetView extends View {
   _draw(h,v,a,p,k,s) {
     let target = p
-    let today =  new Date()
-    let textDiv = h('div').class('target-text')
+    
+    function styleIfExpired(now) {
+      c.log(now)
+      if (target.due < now) {
+        rowDiv.class('target-row expired')
+      } else {
+        rowDiv.class('target-row normal')
+      }
+    }
+
+    let textDiv = h('span').class('target-text')
     let dueDiv = h('div')
     let valueDiv = h('div').class('target-value')
     let rowDiv = h('div')
@@ -44,8 +53,8 @@ export default class TargetView extends View {
       .on('click', e => TargetClick(target, a))
       .inner([
         dueDiv,
-        valueDiv,
         textDiv,
+        valueDiv,
       ])
     s.wrap(rowDiv)
     s.match('text', text => textDiv.text(text))
@@ -56,7 +65,9 @@ export default class TargetView extends View {
         h('div').class('target-due-date').text(`${day} ${date}`),
         h('div').class('target-due-time').text(`${getPrettyTime(due)}`)
       ])
+      styleIfExpired(new Date())
     })
     s.match('value', value => valueDiv.text(`${value}`))
+    a.on('tick', styleIfExpired)
   }
 }

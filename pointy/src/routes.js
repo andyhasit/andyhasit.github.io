@@ -1,10 +1,12 @@
 import {Router} from '../../pillbug/dist/pillbug.js';
 
-import HomePageView from './views/HomePageView';
+import HomePage from './views/HomePage';
+import RecordsListingPage from './views/RecordsListingPage';
 
 const routes = [
-  ['/', HomePageView],
-  ['todos/{id}?name,age', ''],
+  ['/', HomePage],
+  ['records', RecordsListingPage],
+  //['todos/{id}?name,age', ''],
 ]
 
 

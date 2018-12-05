@@ -13,6 +13,12 @@ export function sortByDate(arr) {
   });
 }
 
+export function roundMinutes(date) {
+  date.setHours(date.getHours() + Math.round(date.getMinutes()/60));
+  date.setMinutes(0);
+  return date;
+}
+
 
 export function getShortDay(date) {
   return daysShort[date.getDay()]
@@ -93,19 +99,35 @@ export function getTotals(records) {
 }
 
 
-Date.prototype.toDatetimeLocal = function toDatetimeLocal() {
-    var
-      date = this,
-      YYYY = date.getFullYear(),
-      MM = pad00(date.getMonth() + 1),
-      DD = pad00(date.getDate()),
-      HH = pad00(date.getHours()),
-      II = pad00(date.getMinutes()),
-      SS = pad00(date.getSeconds())
-    ;
-    return YYYY + '-' + MM + '-' + DD + 'T' +
-             HH + ':' + II + ':' + SS;
-  };
+export function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+export function toDatetimeLocal(date) {
+  let
+    YYYY = date.getFullYear(),
+    MM = pad00(date.getMonth() + 1),
+    DD = pad00(date.getDate()),
+    HH = pad00(date.getHours()),
+    II = pad00(date.getMinutes()),
+    SS = pad00(date.getSeconds())
+  ;
+  return YYYY + '-' + MM + '-' + DD + 'T' +
+           HH + ':' + II + ':' + SS;
+}
+
+/*
+
+
 
 Date.prototype.fromDatetimeLocal = (function (BST) {
   // BST should not be present as UTC time
@@ -120,3 +142,5 @@ Date.prototype.fromDatetimeLocal = (function (BST) {
     // otherwise can just be equivalent of toISOString
     Date.prototype.toISOString;
 }('2006-06-06T06:06'));
+
+*/

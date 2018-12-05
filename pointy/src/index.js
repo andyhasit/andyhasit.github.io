@@ -38,18 +38,25 @@ Only have one event - dataChanged
 
 
 app.refresh = function() {
-  let state = {}
+  this.state = {}
   this.db.getAll('target').then(targets => {
-    state['targets'] = targets
+    this.state['targets'] = targets
     this.db.getAll('record').then(records => {
-      state['records'] = records
-      state['totals'] = getTotals(records)
+      this.state['records'] = records
+      this.state['totals'] = getTotals(records)
       this.db.getAll('category').then(categories => {
-        state['categories'] = categories
-        this.emit('refresh', state)
+        this.state['categories'] = categories
+        this.emit('refresh', this.state)
       })
     })
   })
+}
+
+app.getSuggestions = function() {
+  let names = []
+  this.state['records'].forEach(i => names.push(i.text))
+  this.state['targets'].forEach(i => names.push(i.text))
+  return [... new Set(names)]
 }
 
 app.putTarget = function(target) {
@@ -59,7 +66,6 @@ app.putTarget = function(target) {
 }
 
 app.deleteTarget = function(target) {
-  c.log(target)
   this.db.delTarget(target).then(e => {
     this.refresh()
   })
@@ -72,7 +78,6 @@ app.archiveTarget = function(target, success) {
   } else {
     value = target.value * -1 * 10
   }
-  console.log(typeof value)
   let record = {
     text: target.text,
     due: target.due,

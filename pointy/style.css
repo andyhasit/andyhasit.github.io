@@ -100,9 +100,9 @@ body {
   right: 0px;
   height: 52px;
   border-bottom: 1px solid gray;
-  font-size: 12px;
 }
-
+/*
+ font-size: 12px;
 .top-bar-totals {
   display: inline-block;
   width: 70px;
@@ -130,6 +130,7 @@ body {
   font-weight: bold;
   text-align: right;
 }
+*/
 
 .top-bar-box {
   vertical-align: top;
@@ -139,7 +140,7 @@ body {
   border: 1px solid gray;
   border-radius: 5px;
   padding: 2px 3px;
-  margin: 6px 3px;
+  margin: 6px 0 6px 6px;
 }
 
 .top-bar .box-label {
@@ -151,8 +152,8 @@ body {
 }
 
 .top-bar .positive {
-  color: green;
-  border: 1px solid green;
+  color: #60f507;
+  border: 1px solid #60f507;
 }
 
 .top-bar .negative {
@@ -233,13 +234,13 @@ body {
 }
 
 .value-picker-button-set {
-
+  text-align: center;
 }
 
 .value-picker-button-set .btn-set {
   display: inline-block;
   text-align: center;
-  margin: 5px 15px 15px;
+  margin: 5px 5px 15px;
 }
 
 .value-picker-button-set button {
@@ -265,6 +266,14 @@ body {
   width: 100%;
 }
 
+.target-scroll .expired{
+  color: #e07500;
+}
+
+.target-scroll .normal{
+  color: black;
+}
+
 .target-row div {
   display: inline-block;
   padding: 5px 4px;
@@ -277,24 +286,32 @@ body {
 
 }
 
-.target-due-date {
+.target-row .target-due-date {
   font-size: 12px;
   text-align: center;
   width: 36px;
 }
 
-.target-due-time {
+.target-row .target-due-time {
   font-size: 14px;
   text-align: center;
   font-weight: bold;
   width: 36px;
 }
 
-.target-value {
+.target-row .target-text {
+  overflow-wrap: break-word;
+}
+
+.target-row .target-value {
   text-align: center;
   font-weight: normal;
+  /*
   border: 1px solid gray;
   border-radius: 5px;
+  */
+  position: fixed;
+  right: 0;
   padding: 4px 6px;
   margin-right: 4px;
   width: 36px;

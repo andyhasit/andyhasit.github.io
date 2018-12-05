@@ -278,8 +278,20 @@ class PageContainer extends View {
     super(app)
     this.wrap(h('#' + id))
   }
+  forceRedraw(element){
+    let disp = element.style.display;
+    element.style.display = 'none';
+    let trick = element.offsetHeight;
+    element.style.display = disp;
+  }
   goto(route) {
-    this.root.inner(this._view(route.cls, route.props, route.keyFn(route.props)))
+    let view = this._view(route.cls, route.props, route.keyFn(route.props))
+    this.root.inner(view)
+    c.log(333)
+    this.forceRedraw(view.el)
+    view.el.style.display = 'none';
+    view.el.style.display = 'block';
+    //window.getComputedStyle()
   }
 }
 

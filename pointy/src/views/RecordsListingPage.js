@@ -5,8 +5,9 @@ import TargetView from './TargetView.js';
 import TopBarView from './TopBarView.js';
 
 
-export default class HomePageView extends View {
+export default class RecordsListingPage extends View {
   _draw(h,v,a,p,k,s) {
+    c.log('drawing rl')
     s.targetsScroll = h('div').class('target-scroll')
     let btnAddImg = h('img').class('plus-btn').atts({src:'img/plus-btn.png'})
     s.btnAdd = h('a').inner(btnAddImg).on('click', e => {
@@ -17,7 +18,8 @@ export default class HomePageView extends View {
     })
     s.wrap(h('div').inner([
       s.v(TopBarView),
-      s.targetsScroll,
+      //s.targetsScroll,
+      h('div').text('hi'),
       s.btnAdd,
     ]))
     a.on('refresh', state => {

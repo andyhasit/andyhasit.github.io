@@ -1,17 +1,6 @@
 import {View, h} from '../../../pillbug/dist/pillbug.js';
+import {download, toDatetimeLocal} from '../utils.js';
 
-function download(filename, text) {
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', filename);
-
-  element.style.display = 'none';
-  document.body.appendChild(element);
-
-  element.click();
-
-  document.body.removeChild(element);
-}
 
 
 export default class Menu extends View {
@@ -22,7 +11,7 @@ export default class Menu extends View {
       hideMenuBtn,
       h('div').class('overlay-content').inner([
         s.getMenuEntry(a, h, 'Home', ''),
-        s.getMenuEntry(a, h, 'Stuff', 'page2'),
+        //s.getMenuEntry(a, h, 'Records', 'records'),
         s.downloadButton(h,v,a,p,k,s)
         ])
       ])
@@ -34,7 +23,8 @@ export default class Menu extends View {
   downloadButton(h,v,a,p,k,s) {
     return h('a').atts({href:"#"}).text('Download').on('click', e => {
       a.db.dump().then(data => {
-        download('pointydb.json', JSON.stringify(data))
+        let timeStamp = new Date()
+        download(`pointydb -- ${toDatetimeLocal(timeStamp)}.json`, JSON.stringify(data))
         this.hideMenu()
       })
     })

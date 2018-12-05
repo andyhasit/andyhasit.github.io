@@ -39,7 +39,12 @@ export default class EditTargetModal extends Modal {
 
     if (p === undefined) {
       mode = 'new'
-      template = {text: '', value: 10, due: new Date()}
+      let defaultDate = new Date()
+      //date.setHours(date.getHours() + Math.round(date.getMinutes()/60));
+
+      defaultDate.setHours(defaultDate.getHours() + 1);
+      defaultDate.setMinutes(0);
+      template = {text: '', value: 10, due: defaultDate}
     } else if (Array.isArray(p)) {
       mode = 'clone'
       template = p[0]
@@ -76,7 +81,7 @@ export default class EditTargetModal extends Modal {
       .atts({list: 'suggestions', value: tempTarget.text})
       .on('change', e => {tempTarget.text = e.target.value})
     let dataList = h('datalist').id('suggestions').inner(
-      ['a', 'black', 'bling', 'car'].map(o => h('option').inner(o))
+      a.getSuggestions().map(suggestion => h('option').inner(suggestion))
     )
 
     function buttonSet(type, btnFn, factor) {
