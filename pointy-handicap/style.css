@@ -98,58 +98,8 @@ body {
   top: 0px;
   left: 0px;
   right: 0px;
-  height: 52px;
+  height: 50px;
   text-align: center;
-  border-bottom: 1px solid gray;
-}
-/*
- font-size: 12px;
-.top-bar-totals {
-  display: inline-block;
-  width: 70px;
-}
-
-.top-bar-totals .total-box {
-  position: relative;
-  height: 25px;
-  vertical-align: bottom;
-}
-
-.top-bar-totals .total-label {
-  position: absolute;
-  bottom: 0px;
-  left: 0px;
-  font-size: 8px;
-}
-
-.top-bar-totals .total-balance {
- position: absolute;
-  bottom: 0;
-  left: 25px;
-  width: 35px;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: right;
-}
-*/
-
-.top-bar-box {
-  vertical-align: top;
-  text-align: center;
-  display: inline-block;
-  width: 45px;
-  border: 1px solid gray;
-  border-radius: 5px;
-  padding: 2px 3px;
-  margin: 6px 6px 6px 6px;
-}
-
-.top-bar .box-label {
-
-}
-
-.top-bar .box-value {
-
 }
 
 .top-bar .positive {
@@ -161,6 +111,70 @@ body {
   color: red;
   border: 1px solid red;
 }
+
+.top-bar .top-band {
+  border: 1px solid black;
+  border-radius: 10px;
+  display: inline-block;
+  font-size: 12px;
+  padding: 5px;
+  margin-top: 3px;
+}
+
+.top-bar .top-band * {
+  padding: 0 2px 0 2px;
+}
+
+.top-bar .bottom-band {
+  display: block;
+}
+
+.top-bar .progress-bar {
+  position: fixed;
+  top: 45px;
+  left: 0;
+  height: 5px;
+}
+
+.top-bar .progress-background {
+  width: 100%;
+  background-color: #ff0808;
+}
+
+.top-bar .progress-foreground {
+  background-color: #53de00;
+  z-index: 2;
+}
+
+.top-bar .points-block {
+  position: fixed;
+  top: 23px;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 2px 4px;
+  font-size: 14px;
+}
+
+.top-bar .points-done {
+  left: 3px;
+  background: #53de00;
+}
+
+.top-bar .points-left {
+  right: 3px;
+  background: #ff0808;
+}
+
+.top-bar .total-score {
+  display: inline-block;
+}
+
+.top-bar .day-target {
+  display: inline-block;
+
+}
+
+
 
 #modal-container {
   

@@ -7,25 +7,8 @@ export default class TopBarView extends View {
   _draw(h,v,a,p,k,s) {
 
     let divContents = []
-
     /*
-    let todayBalanceSpan = h('div').class('total-balance').text(-30)
-    let totalBalanceSpan = h('div').class('total-balance').text(-300)
-    let todayBox = h('div')
-      .class('top-bar-totals')
-      .inner([
-        h('div').class('total-box').inner([
-          h('div').class('total-label').text('Today'),
-          todayBalanceSpan
-        ]),
-        h('div').class('total-box').inner([
-          h('div').class('total-label').text('Total'),
-          totalBalanceSpan
-        ])
-      ])
-    divContents.push(todayBox)
-    */
-
+   
     let boxContainers = {}
     let boxValueElements = {}
     let boxKeys = ['done', 'left', 'target', 'total'] //, 'day2', 'week']
@@ -50,28 +33,42 @@ export default class TopBarView extends View {
       boxValueElements[k] = boxValueElement
       divContents.push(boxContainer)
     })
-    
+    */
+
+    let progressBackground = h('div').class('progress-bar progress-background')
+    let progressForeground = h('div').class('progress-bar progress-foreground')
+    let pointsDone = h('div').class('points-block points-done')
+    let pointsLeft = h('div').class('points-block points-left')
+    let totalScore = h('span').class('total-score')
+    let dayTarget = h('span').class('day-target')
+    let percentageProgress = h('span').class('percentage')
+
     a.on('refresh', state => {
-      boxKeys.forEach(k => {
-        let total = state.totals[k]
-        let container = boxContainers[k]
-        boxValueElements[k].text(total)
-      })
-      let totalContainer = boxContainers['total']
-      let total = state.totals['total']
-      if (total > 0) {
-        totalContainer.class('top-bar-box positive')
-      } else if (total < 0) {
-        totalContainer.class('top-bar-box negative')
-      } else {
-        totalContainer.class('top-bar-box')
-      }
+      let percentage = (state.totals.done/state.totals.target) * 100;
+      progressForeground.atts({style: `width: ${percentage}%`})
+      pointsDone.text(state.totals.done)
+      pointsLeft.text(state.totals.left)
+      dayTarget.text(state.totals.target)
+      totalScore.text(state.totals.total)
+      percentageProgress.text(`${percentage}%`)
     })
 
     let mainDiv = h('div')
       .class('top-bar')
-      .inner(divContents)
-
+      .inner([
+        h('div').class('top-band').inner([
+          'Target: ',
+          dayTarget,
+          ' Total: ',
+          totalScore,
+          ' Progress: ',
+          percentageProgress
+        ]),
+        pointsDone,
+        pointsLeft,
+        progressBackground,
+        progressForeground
+        ])
     s.wrap(mainDiv)
   }
 }

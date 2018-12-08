@@ -12,7 +12,7 @@ schema.addVersion((schema, isUpgrade) => {
   let settings = schema.addStore('settings') // To remember filter states etc... later use key value
   let todayStr = toDateStr(new Date())
   if (isUpgrade) {
-    record.put({text: "meh", date: todayStr, score:20})
+    record.put({text: "meh", date: todayStr, score:450})
     task.put({text: "text only"})
     task.put({text: "date only", date: todayStr})
     task.put({text: "another day", date: "2018-11-30"})
