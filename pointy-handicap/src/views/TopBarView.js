@@ -28,13 +28,18 @@ export default class TopBarView extends View {
 
     let boxContainers = {}
     let boxValueElements = {}
-    let boxKeys = ['done', 'remaining', 'target', 'total'] //, 'day2', 'week']
-    
+    let boxKeys = ['done', 'left', 'target', 'total'] //, 'day2', 'week']
+    let styles = {
+      'done': 'top-bar-box positive',
+      'left': 'top-bar-box negative',
+      'target': 'top-bar-box neutral',
+      'total': 'top-bar-box neutral',
+    }
     boxKeys.forEach(k => {
       let boxValueElement = h('div')
         .class('box-value')
       let boxContainer = h('div')
-        .class('top-bar-box')
+        .class(styles[k])
         .inner([
           h('div')
             .class('box-label')
@@ -51,14 +56,16 @@ export default class TopBarView extends View {
         let total = state.totals[k]
         let container = boxContainers[k]
         boxValueElements[k].text(total)
-        if (total > 0) {
-          container.class('top-bar-box positive')
-        } else if (total < 0) {
-          container.class('top-bar-box negative')
-        } else {
-          container.class('top-bar-box')
-        }
       })
+      let totalContainer = boxContainers['total']
+      let total = state.totals['total']
+      if (total > 0) {
+        totalContainer.class('top-bar-box positive')
+      } else if (total < 0) {
+        totalContainer.class('top-bar-box negative')
+      } else {
+        totalContainer.class('top-bar-box')
+      }
     })
 
     let mainDiv = h('div')

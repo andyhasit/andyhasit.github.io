@@ -24,11 +24,11 @@ export function getShortDay(date) {
   return daysShort[date.getDay()]
 }
 
-function pad00(score) {
-    if(score < 10) {
-        return '0' + score;
+function pad00(value) {
+    if(value < 10) {
+        return '0' + value;
     } else {
-        return score;
+        return value;
     }
 }
 
@@ -45,7 +45,6 @@ export function getDisplayDate(task) {
 }
 
 export function getDisplayTime(task) {
-  console.log(task)
   if (task.hasOwnProperty('start')) {
     return task.start
     if (task.hasOwnProperty('end')) {
@@ -97,7 +96,7 @@ export function getTotals(records) {
   let totals = {
     target: 500,
     done: 0,
-    remaining: 0, 
+    left: 0, 
     total: 0,
   }
   let todayStr = toDateStr(new Date())
@@ -105,9 +104,9 @@ export function getTotals(records) {
     if (record.date == todayStr) {
       totals.done += record.score
     }
-    totals.total += record.score
+    //totals.total += record.score TODO: record days in db
   })
-  totals.remaining = totals.target - totals.done
+  totals.left = totals.target - totals.done
   return totals
 }
 

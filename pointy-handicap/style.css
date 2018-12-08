@@ -99,6 +99,7 @@ body {
   left: 0px;
   right: 0px;
   height: 52px;
+  text-align: center;
   border-bottom: 1px solid gray;
 }
 /*
@@ -140,7 +141,7 @@ body {
   border: 1px solid gray;
   border-radius: 5px;
   padding: 2px 3px;
-  margin: 6px 0 6px 6px;
+  margin: 6px 6px 6px 6px;
 }
 
 .top-bar .box-label {
@@ -338,7 +339,7 @@ body {
 .bottom-btn-row button {
   height: 45px;
   width: 45px;
-  border: 2px solid black;
+  background: white;
   border-radius: 10px;
   float: right;
   font-size: 25px;
@@ -348,19 +349,23 @@ body {
 }
 
 .yellow {
-  background: #f5f500;
+  border: 2px solid #f5f500;
+  color: #ffeb3b;
 }
 
 .red {
-  background: #ff0000;
+  border: 2px solid #ff0000;
+  color: #ff0000;
 }
 
 .green {
-  background: #06c506;
+  border: 2px solid #06c506;
+  color: #06c506;
 }
 
 .blue {
-  background: #21dbf3;
+  border: 2px solid #21dbf3;
+  color: #21dbf3;
 }
 /*
 vertical-align: middle;
