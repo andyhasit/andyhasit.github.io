@@ -327,7 +327,41 @@ body {
   z-index: 2;
 }
 
+.bottom-btn-row {
+  position: fixed;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  height: 60px;
+}
 
+.bottom-btn-row button {
+  height: 45px;
+  width: 45px;
+  border: 2px solid black;
+  border-radius: 10px;
+  float: right;
+  font-size: 25px;
+  font-weight: bold;
+  margin: 10px 10px 0 0;
+  z-index: 2;
+}
+
+.yellow {
+  background: #f5f500;
+}
+
+.red {
+  background: #ff0000;
+}
+
+.green {
+  background: #06c506;
+}
+
+.blue {
+  background: #21dbf3;
+}
 /*
 vertical-align: middle;
   font-size: 16px;

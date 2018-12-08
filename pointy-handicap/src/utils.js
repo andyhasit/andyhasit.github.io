@@ -37,6 +37,24 @@ export function getPrettyTime(date) {
   return pad00(date.getHours()) + ":" + pad00(date.getMinutes())
 }
 
+export function getDisplayDate(task) {
+  if (task.hasOwnProperty('date')) {
+    return task.date
+  }
+  return ''
+}
+
+export function getDisplayTime(task) {
+  console.log(task)
+  if (task.hasOwnProperty('start')) {
+    return task.start
+    if (task.hasOwnProperty('end')) {
+      return `${task.start} - ${task.end}`
+    }
+  }
+  return ''
+}
+
 
 export function capitalize(string) {
   return string.charAt(0).toUpperCase() + string.slice(1)

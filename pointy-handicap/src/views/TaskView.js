@@ -1,7 +1,7 @@
 import {View, h} from '../../../pillbug/dist/pillbug.js';
 import EditTaskModal from '../modals/EditTaskModal';
 import TaskActionsModal from '../modals/TaskActionsModal';
-import {getPrettyTime, getShortDay, sortByDate} from '../utils.js';
+import {getDisplayDate, getDisplayTime, sortByDate} from '../utils.js';
 
 
 function TaskClick(task, a) {
@@ -37,36 +37,34 @@ export default class TaskView extends View {
     let task = p
     
     function styleIfExpired(now) {
-      if (task.due < now) {
+      /*if (task.due < now) {
         rowDiv.class('task-row expired')
       } else {
         rowDiv.class('task-row normal')
-      }
+      }*/
     }
 
     let textDiv = h('span').class('task-text')
-    let dueDiv = h('div')
-    let valueDiv = h('div').class('task-value')
+    let dayDiv = h('div').class('task-due-date')
+    let timeDiv = h('div').class('task-due-time')
     let rowDiv = h('div')
       .class('task-row')
       .on('click', e => TaskClick(task, a))
       .inner([
-        dueDiv,
-        textDiv,
-        valueDiv,
+        dayDiv,
+        timeDiv,
+        textDiv
       ])
     s.wrap(rowDiv)
     s.match('text', text => textDiv.text(text))
-    s.match('due', due => {
-      let day = getShortDay(due)
-      let date = due.getDate()
-      dueDiv.inner([
-        h('div').class('task-due-date').text(`${day} ${date}`),
-        h('div').class('task-due-time').text(`${getPrettyTime(due)}`)
-      ])
+    s.match('date', day => {
+      dayDiv.text(`${getDisplayDate(task)}`)
       styleIfExpired(new Date())
     })
-    s.match('value', value => valueDiv.text(`${value}`))
+    s.match('time', time => {
+      timeDiv.text(`${getDisplayTime(task)}`)
+      styleIfExpired(new Date())
+    })
     a.on('tick', styleIfExpired)
   }
 }

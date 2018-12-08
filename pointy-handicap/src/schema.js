@@ -3,21 +3,18 @@ import {Database, Schema, deleteIdb} from '../../ratherdry/dist/ratherdry.js';
 
 const schema = new Schema()
 
-//deleteIdb('pointy-v2')
+deleteIdb('pointy-handicap')
 
 schema.addVersion((schema, isUpgrade) => {
-  let target = schema.addStore('task')
+  let task = schema.addStore('task')
   let record = schema.addStore('record')
-  let category = schema.addStore('category') // Just string for now
+  let category = schema.addStore('category')
   let settings = schema.addStore('settings') // To remember filter states etc... later use key value
   if (isUpgrade) {
-    /*
-    target.put({due: new Date(), text: "20 pushups", value: 15})
-    target.put({due: new Date(), text: "call mum", value: 20})
-    target.put({due: new Date(), text: "20 pushups", value: 50})
-    target.put({due: new Date(), text: "clean house", value: 30})
-    target.put({due: new Date(), text: "check car", value: 10})
-    */
+    task.put({text: "text only"})
+    task.put({text: "date only", date: '2018-12-07'})
+    task.put({text: "date and start", date: '2018-12-07', start: '14:30'})
+    task.put({text: "date start and end", date: '2018-12-07', start: '14:30', end: '15:30'})
   }
   /*
   let tags = schema.addStore('description')

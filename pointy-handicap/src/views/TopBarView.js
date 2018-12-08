@@ -28,7 +28,7 @@ export default class TopBarView extends View {
 
     let boxContainers = {}
     let boxValueElements = {}
-    let boxKeys = ['today', 'total'] //, 'day2', 'week']
+    let boxKeys = ['done', 'remaining', 'target', 'total'] //, 'day2', 'week']
     
     boxKeys.forEach(k => {
       let boxValueElement = h('div')
