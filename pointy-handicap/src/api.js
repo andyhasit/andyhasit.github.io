@@ -1,7 +1,7 @@
 
 
 const username = 'me'
-const password = 'too'
+const password = 'poo'
 const headers = {
   'Accept': 'application/json',
   'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ class Api {
   _postActionSets(action_sets) {
     let data = {
       'revision': this.revision, 
-      'action_sets': this.action_sets
+      'action_sets': action_sets
     }
     this._actionData.body = JSON.stringify(data)
     return fetch(this._actionRoute, this._actionData)
@@ -71,8 +71,8 @@ class Api {
       .then(json => {
         if (json.status == 'success') {
 
-          console.log("successful response")
-          console.log(json)
+          //console.log("successful response")
+          //console.log(json)
           this._setRevision(json.data.revision)
           return json.data
         } else {
@@ -91,9 +91,9 @@ class Api {
   loadInitialData() {
     return this._postActionSets({
         'read': {
-          'records': {'path': ["records"]},
-          'tasks': {'path': ["tasks"]},
-          'categories': {'path': ["categories"]},
+          'records': {'path': 'records'},
+          'tasks': {'path': 'tasks'},
+          'categories': {'path': 'categories'},
         }
       }
     )
@@ -103,20 +103,18 @@ class Api {
       return true
     });
   }
-  create(path, obj, key) {
-    key = key? key : "__";
+  create(path, record, key) {
+    key = key? key : "__"; // Special key if only creating one record in transaction
     this._addAction('create', key, {
       'path': path,
-      'data': obj
+      'record': record
     })
   }
   flush() {
     return this._postActionSets(this.action_sets)
-    .then(json => {
+    .then(data => {
       //contains revision, read, create, edit, delete
-      let data = json.data
-      this.revision = data.revision
-      if (data.hasOwnProperty('create') && Object.keys(data.create).length == 0) {
+      if (data.hasOwnProperty('create') && Object.keys(data.create).length == 1) {
         data.new = data.create["__"]
       }
       this._resetActionSets()

@@ -19,34 +19,24 @@ app.showModal = function(modalClass, props) {
 }
 
 const onLoadCallback = function(data) {
-  c.log(data)
   app.data = data
-  this.data['totals'] = getTotals(app.data.records)
+  app.data['totals'] = getTotals(app.data.records)
+  
   app.putTask({text: 'heyeee'}).then(() => {
-    this.emit('refresh', this.data)
+    app.emit('refresh', app.data)
   });
 }
 api.onLoadCallback = onLoadCallback.bind(app)
 
 app.reloadData = function() {
   api.loadInitialData()
-  /*
-  api.loadInitialData().then((data) => {
-    app.data = data
-    this.data['totals'] = getTotals(app.data.records)
-    c.log(this.data)
-    app.putTask({text: 'heyeee'}).then(() => {
-      this.emit('refresh', this.data)
-    });
-  })
-  */
 }
 
 app.putTask = function(task) {
   api.create('tasks', task) //add key if using multiple
   return api.flush().then(result => {
-    c.log(this.data)
-    this.data.tasks.push(result.new)
+    task.id = result.new
+    this.data.tasks.push(task)
     this.emit('refresh', this.data)
   })
 }

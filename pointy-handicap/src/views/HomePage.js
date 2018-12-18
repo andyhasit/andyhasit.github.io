@@ -48,8 +48,8 @@ export default class HomePage extends View {
       s.tasksScroll,
       btnRow
     ]))
-    a.on('refresh', state => {
-      s.drawListView(h,s,state.tasks)
+    a.on('refresh', data => {
+      s.drawListView(h,s,data.tasks)
       s.colourExpired(h,v,a,p,k,s)
     })
   }
