@@ -117,7 +117,7 @@ body {
   border-radius: 10px;
   display: inline-block;
   font-size: 12px;
-  padding: 5px;
+  padding: 3px 7px;
   margin-top: 3px;
 }
 
@@ -271,14 +271,10 @@ body {
 .task-scroll {
   overflow: scroll;
   position: fixed;
-  top: 60px;
+  top: 50px;
   left: 0;
   right: 0;
   bottom: 60px;
-}
-
-.task-row {
-  width: 100%;
 }
 
 .task-scroll .expired{
@@ -289,32 +285,29 @@ body {
   color: black;
 }
 
-.task-row div {
-  display: inline-block;
-  padding: 5px 4px;
-  /*
-  vertical-align: middle;
-  */
+.task-row {
+  width: 100%;
+  border-bottom: 1px solid grey;
+  height: 40px;
+  padding: 0px;
 }
 
-.task-due {
-
-}
-
-.task-row .task-due-date {
+.task-row .task-datetime {
+  width: 50px;
   font-size: 12px;
   text-align: center;
-  width: 36px;
+  display: inline-block;
 }
 
-.task-row .task-due-time {
-  font-size: 14px;
-  text-align: center;
-  font-weight: bold;
-  width: 36px;
+.task-row .task-datetime div {
+  vertical-align: middle;
 }
 
 .task-row .task-text {
+  display: inline-block;
+  vertical-align: top;
+  padding-top: 5px;
+  height: 40px;
   overflow-wrap: break-word;
 }
 

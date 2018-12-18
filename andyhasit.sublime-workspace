@@ -4,12 +4,56 @@
 		"selected_items":
 		[
 			[
-				"D",
-				"Date"
+				"b",
+				"border\tproperty"
+			],
+			[
+				"pa",
+				"padding\tproperty"
+			],
+			[
+				"in",
+				"inline-block\tdisplay"
+			],
+			[
+				"di",
+				"display\tproperty"
+			],
+			[
+				"p",
+				"padding\tproperty"
+			],
+			[
+				"top",
+				"top-band"
+			],
+			[
+				"h",
+				"height\tproperty"
+			],
+			[
+				"pro",
+				"progressBackground"
 			],
 			[
 				"te",
-				"tempTarget"
+				"text-align\tproperty"
+			],
+			[
+				"to",
+				"total"
+			],
+			[
+				"border-r",
+				"border-radius\tproperty"
+			],
+			[
+				"cat",
+				"category"
+			],
+			[
+				"D",
+				"Date"
 			],
 			[
 				"f",
@@ -28,14 +72,6 @@
 				"getTotals"
 			],
 			[
-				"to",
-				"today"
-			],
-			[
-				"b",
-				"bottom\tproperty"
-			],
-			[
 				"min",
 				"min-width\tproperty"
 			],
@@ -46,14 +82,6 @@
 			[
 				"co",
 				"color\tproperty"
-			],
-			[
-				"top",
-				"top-bar"
-			],
-			[
-				"pa",
-				"padding-top\tproperty"
 			],
 			[
 				"cl",
@@ -140,10 +168,6 @@
 				"__doc__"
 			],
 			[
-				"p",
-				"print"
-			],
-			[
 				"NO",
 				"NotImplementedError\tclass"
 			],
@@ -176,10 +200,6 @@
 				"list_projects\tfunction"
 			],
 			[
-				"pro",
-				"prompt_pick\tfunction"
-			],
-			[
 				"le",
 				"len\tfunction"
 			],
@@ -194,10 +214,6 @@
 			[
 				"it",
 				"items\tparam"
-			],
-			[
-				"in",
-				"insert"
 			],
 			[
 				"k",
@@ -498,40 +514,133 @@
 			[
 				"op",
 				"options\tparam"
-			],
-			[
-				"sc",
-				"schedule"
-			],
-			[
-				"No",
-				"None\tinstance"
-			],
-			[
-				"mig",
-				"migrate_schedules\tfunction"
-			],
-			[
-				"resul",
-				"result_id"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "pointy/src/index.js",
+			"file": "pointy-handicap/src/index.js",
 			"settings":
 			{
-				"buffer_size": 2131,
+				"buffer_size": 1818,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "pointy/src/routes.js",
+			"file": "gulpfile.js",
 			"settings":
 			{
-				"buffer_size": 293,
+				"buffer_size": 2836,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pointy-handicap/src/views/HomePage.js",
+			"settings":
+			{
+				"buffer_size": 1765,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pointy-handicap/src/modals/EditRecordModal.js",
+			"settings":
+			{
+				"buffer_size": 4478,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pointy-handicap/src/modals/EditTaskModal.js",
+			"settings":
+			{
+				"buffer_size": 3133,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pointy-handicap/src/views/TopBarView.js",
+			"settings":
+			{
+				"buffer_size": 2187,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pointy-handicap/src/views/TaskView.js",
+			"settings":
+			{
+				"buffer_size": 2048,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pointy-handicap/style.css",
+			"settings":
+			{
+				"buffer_size": 5543,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pointy-handicap/src/utils.js",
+			"settings":
+			{
+				"buffer_size": 4029,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pointy-handicap/src/schema.js",
+			"settings":
+			{
+				"buffer_size": 1158,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/other/repos/pouch-test/src/pouch-custom-build.js",
+			"settings":
+			{
+				"buffer_size": 194,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/other/repos/pouch-test/gulpfile.js",
+			"settings":
+			{
+				"buffer_size": 396,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/other/repos/pouch-test/dist/bundle.js",
+			"settings":
+			{
+				"buffer_size": 294437,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pointy-handicap/src/routes.js",
+			"settings":
+			{
+				"buffer_size": 234,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		}
@@ -696,10 +805,26 @@
 	},
 	"expanded_folders":
 	[
-		"/other/repos/andyhasit.github.io"
+		"/other/repos/andyhasit.github.io",
+		"/other/repos/andyhasit.github.io/pointy"
 	],
 	"file_history":
 	[
+		"/other/repos/pouch-test/src/index.js",
+		"/other/repos/pouch-test/rollup.config.js",
+		"/home/andrew/projects/time tracker/log_file",
+		"/other/repos/pouch-test/dist/bundle.js",
+		"/other/repos/pouch-test/src/gulpfile.js",
+		"/home/andrew/projects/alias_management/my_aliases.py",
+		"/other/repos/andyhasit.github.io/package-lock.json",
+		"/other/repos/andyhasit.github.io/pointy-handicap/src/modals/EditTaskModal.js",
+		"/other/repos/andyhasit.github.io/pointy-handicap/src/views/TopBarViewOld.js",
+		"/other/repos/andyhasit.github.io/pointy-handicap/gulpfile.js",
+		"/other/repos/andyhasit.github.io/pointy-handicap/src/modals/TaskActionsModal.js",
+		"/other/repos/andyhasit.github.io/pointy/src/index.js",
+		"/other/repos/andyhasit.github.io/pointy/src/routes.js",
+		"/home/andrew/projects/system_x/current/details",
+		"/other/repos/andyhasit.github.io/pointy-handicap/package.json",
 		"/other/repos/andyhasit.github.io/andyhasit.sublime-project",
 		"/other/repos/andyhasit.github.io/andyhasit.sublime-workspace",
 		"/other/repos/novarum/portal_apps/ndx_django_utils/ndx_django_utils/management/commands/rename_app_mysql.py",
@@ -708,13 +833,11 @@
 		"/other/repos/andyhasit.github.io/pointy/src/modals/EditTargetModal.js",
 		"/other/repos/andyhasit.github.io/pointy/src/utils.js",
 		"/other/repos/andyhasit.github.io/pointy/src/views/TargetView.js",
-		"/other/repos/andyhasit.github.io/pointy/src/index.js",
 		"/other/repos/andyhasit.github.io/pointy/style.css",
 		"/other/repos/andyhasit.github.io/pointy/src/schema.js",
 		"/other/repos/andyhasit.github.io/pointy/src/views/RecordsListingPage.js",
 		"/other/repos/andyhasit.github.io/pointy/src/views/MenuView.js",
 		"/other/repos/andyhasit.github.io/pointy/src/views/TopBarView.js",
-		"/other/repos/andyhasit.github.io/pointy/src/routes.js",
 		"/other/repos/andyhasit.github.io/gulpfile.js",
 		"/other/repos/andyhasit.github.io/ratherdry/tests/basic-features.test.js",
 		"/other/repos/andyhasit.github.io/ratherdry/src/ratherdry.js",
@@ -796,7 +919,6 @@
 		"/home/andrew/virtualenvs/nv_dev/lib/python3.5/site-packages/pipeline/compilers/es6.py",
 		"/other/repos/novarum/portal_apps/ndx_result_source/ndx_result_source/static/ndx_result/js/result_list_csv_export.es6",
 		"/home/andrew/virtualenvs/nv_dev/lib/python3.5/site-packages/pipeline/compilers/sass.py",
-		"/home/andrew/projects/system_x/current/details",
 		"/other/repos/novarum/portal_apps/ndx_portal_source/ndx_portal_source/decorators.py",
 		"/other/repos/novarum/portal_apps/ndx_portal_source/ndx_portal_source/celery.py",
 		"/other/repos/novarum/portal_apps/ndx_django_utils/ndx_django_utils/tests/test_location.py",
@@ -815,19 +937,7 @@
 		"/other/repos/novarum/clontech-portal/ndx_result/static/ndx_result/js/result_list_csv_export.es6",
 		"/other/repos/novarum/portal_apps/ndx_result_source/ndx_result_source/static/ndx_result/js/result_graph.es6",
 		"/other/repos/novarum/clontech-portal/ndx_result/static/ndx_result/js/result_graph.es6",
-		"/other/repos/novarum/clontech-portal/ndx_result/tests/test_models.py",
-		"/other/repos/novarum/portal_apps/ndx_result_source/ndx_result_source/tests/test_models.py",
-		"/other/repos/novarum/clontech-portal/ndx_result/tests/__models/test_device_name.py",
-		"/other/repos/novarum/clontech-portal/ndx_result/tests/__models/test_result.py",
-		"/other/repos/novarum/clontech-portal/ndx_result/tests/__models/test_teststrip.py",
-		"/other/repos/novarum/clontech-portal/ndx_result/tests/__init__.py",
-		"/other/repos/novarum/portal_apps/ndx_result/ndx_result/tests/test_result_list_csv_file.py",
-		"/other/repos/novarum/portal_apps/ndx_result/ndx_result/tests/test_serializers_convert.py",
-		"/other/repos/novarum/portal_apps/ndx_result/ndx_result/tests/test_models.py",
-		"/other/repos/novarum/portal_apps/ndx_result_source/ndx_result_source/tests/test_serializers_convert.py",
-		"/other/repos/novarum/clontech-portal/ndx_result/tests/models/test_device_name.py",
-		"/other/repos/novarum/clontech-portal/ndx_result/tests/models/test_result.py",
-		"/other/repos/novarum/portal_apps/ndx_result_source/ndx_result_source/models/result_list_csv_file.py"
+		"/other/repos/novarum/clontech-portal/ndx_result/tests/test_models.py"
 	],
 	"find":
 	{
@@ -845,6 +955,23 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"rollup",
+			"due",
+			"timeDiv",
+			"todo",
+			"done",
+			"Task",
+			"btnAdd",
+			"pointy-handicap/",
+			"pointy",
+			"target",
+			"Target",
+			"target",
+			"Target",
+			"drawTargets",
+			"value",
+			"Target",
+			"target",
 			"_view",
 			"toDatetimeLocal",
 			"value",
@@ -951,6 +1078,21 @@
 		"regex": false,
 		"replace_history":
 		[
+			"start",
+			"startTime",
+			"left",
+			"Record",
+			"btnAddTask",
+			"",
+			"pointy-handicap",
+			"task",
+			"Task",
+			"task",
+			"Task",
+			"drawListView",
+			"score",
+			"Task",
+			"task",
 			"dueDateLabel",
 			"dueDateInput",
 			"valueLabel",
@@ -1009,16 +1151,372 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 10,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "pointy/src/index.js",
+					"file": "pointy-handicap/src/index.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2131,
+						"buffer_size": 1818,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1055,
+								1055
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 294.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "gulpfile.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2836,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								584,
+								584
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/zzz A File Icon zzz/aliases/JavaScript (Gulpfile).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 126.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "pointy-handicap/src/views/HomePage.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1765,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1133,
+								1133
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 84.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "pointy-handicap/src/modals/EditRecordModal.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4478,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								577,
+								577
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 756.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "pointy-handicap/src/modals/EditTaskModal.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3133,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2032,
+								2032
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 546.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "pointy-handicap/src/views/TopBarView.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2187,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1997,
+								1997
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 462.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "pointy-handicap/src/views/TaskView.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2048,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1885,
+								1885
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 630.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "pointy-handicap/style.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5543,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4314,
+								4314
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3931.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "pointy-handicap/src/utils.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4029,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1410,
+								1410
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 336.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "pointy-handicap/src/schema.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1158,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								80,
+								80
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "/other/repos/pouch-test/src/pouch-custom-build.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 194,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								194,
+								194
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "/other/repos/pouch-test/gulpfile.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 396,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								27,
+								27
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/zzz A File Icon zzz/aliases/JavaScript (Gulpfile).sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "/other/repos/pouch-test/dist/bundle.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 294437,
 						"regions":
 						{
 						},
@@ -1039,24 +1537,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "pointy/src/routes.js",
+					"buffer": 13,
+					"file": "pointy-handicap/src/routes.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 293,
+						"buffer_size": 234,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								293,
-								293
+								137,
+								137
 							]
 						],
 						"settings":
@@ -1067,7 +1565,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 13,
 					"type": "text"
 				}
 			]
@@ -1136,7 +1634,7 @@
 		[
 			[
 				"",
-				"/other/repos/novarum/novarum.sublime-project"
+				"/other/repos/healthmatters/healthmatters.sublime-project"
 			]
 		],
 		"width": 380.0

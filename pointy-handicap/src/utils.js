@@ -37,14 +37,25 @@ export function getPrettyTime(date) {
   return pad00(date.getHours()) + ":" + pad00(date.getMinutes())
 }
 
-export function getDisplayDate(task) {
+export function getDisplayDate(task, today) {
   if (task.hasOwnProperty('date')) {
-    return task.date
+    let YYYY, MM, DD;
+    [YYYY, MM, DD] = task.date.split("-").map(e => parseInt(e))
+    // TODO pretty print day of week
+    if (YYYY !== today.getFullYear()) {
+      return `${DD}/${MM}/${YYYY.slice(0,2)}`
+    } else if (MM !== today.getMonth() + 1) {
+      return `${DD}/${MM}`
+    } else if (DD !== today.getDate()) {
+      return `${DD}/${MM}`
+    } else {
+      return 'Today '
+    }
   }
   return ''
 }
 
-export function getDisplayTime(task) {
+export function getDisplayTime(time) {
   if (task.hasOwnProperty('start')) {
     return task.start
     if (task.hasOwnProperty('end')) {

@@ -36,7 +36,7 @@ export default class TaskView extends View {
   _draw(h,v,a,p,k,s) {
     let task = p
     
-    function styleIfExpired(now) {
+    function styleRow(now) {
       /*if (task.due < now) {
         rowDiv.class('task-row expired')
       } else {
@@ -44,27 +44,35 @@ export default class TaskView extends View {
       }*/
     }
 
-    let textDiv = h('span').class('task-text')
-    let dayDiv = h('div').class('task-due-date')
-    let timeDiv = h('div').class('task-due-time')
+    let textDiv = h('div').class('task-text')
+    let dateDiv = h('div').class('task-date')
+    let startTime = h('div').class('task-time')
+    let endTime = h('div').class('task-time')
+    let dateTimeDiv = h('div').class('task-datetime').inner([
+      dateDiv,
+      startTime,
+      endTime
+      ])
     let rowDiv = h('div')
       .class('task-row')
       .on('click', e => TaskClick(task, a))
       .inner([
-        dayDiv,
-        timeDiv,
+        dateTimeDiv,
         textDiv
       ])
     s.wrap(rowDiv)
     s.match('text', text => textDiv.text(text))
     s.match('date', day => {
-      dayDiv.text(`${getDisplayDate(task)}`)
-      styleIfExpired(new Date())
+      dateDiv.text(`${getDisplayDate(task, a.now)}`)
     })
-    s.match('time', time => {
-      timeDiv.text(`${getDisplayTime(task)}`)
-      styleIfExpired(new Date())
+    s.match('start', time => {
+      startTime.text(`${task.start  || ''}`)
+      styleRow(a.now)
     })
-    a.on('tick', styleIfExpired)
+    s.match('end', time => {
+      endTime.text(`${task.end || ''}`)
+      styleRow(a.now)
+    })
+    a.on('tick', styleRow)
   }
 }

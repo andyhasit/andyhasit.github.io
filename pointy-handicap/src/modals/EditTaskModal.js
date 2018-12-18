@@ -1,32 +1,6 @@
 import {Modal, h} from '../../../pillbug/dist/pillbug.js';
 import {toDateTimeStr, modDate} from '../utils.js';
 
-/*
-var someDate = new Date();
-var numberOfDaysToAdd = 6;
-someDate.setDate(someDate.getDate() + numberOfDaysToAdd); 
-Formatting to dd/mm/yyyy :
-
-var dd = someDate.getDate();
-var mm = someDate.getMonth() + 1;
-var y = someDate.getFullYear();
-
-var someFormattedDate = dd + '/'+ mm + '/'+ y;
-
-
-    let today = new Date()
-    new Date(today.getFullYear(), 1, 22);
-
-function getDateSpread() {
-  return [
-    {text: 'Sat', date: ''},
-    {text: 'Sun', date: ''},
-  ]
-}
-
-
-*/
-
 
 export default class EditTaskModal extends Modal {
   overlay(h,v,a,p,k,s) {
@@ -40,11 +14,9 @@ export default class EditTaskModal extends Modal {
     if (p === undefined) {
       mode = 'new'
       let defaultDate = new Date()
-      //date.setHours(date.getHours() + Math.round(date.getMinutes()/60));
-
-      defaultDate.setHours(defaultDate.getHours() + 1);
+      defaultDate.setHours(12);
       defaultDate.setMinutes(0);
-      template = {text: '', value: 10, due: defaultDate}
+      template = {text: ''}
     } else if (Array.isArray(p)) {
       mode = 'clone'
       template = p[0]
@@ -55,25 +27,21 @@ export default class EditTaskModal extends Modal {
 
     tempTask = {
       text: template.text,
-      value: template.value,
-      due: template.due
+      start: template.start,
+      end: template.end,
+      category: template.category,
     }
 
     // LABELS
     function label(text) {
       return h('label').text(text).class('modal-label')
     }
-    let valueLabel = label()
-    let dueDateLabel = label()
+    let startDateLabel = label()
     let descriptionLabel = label('Description:')
-    function setValueLabel() {
-      valueLabel.text(`Value: ${tempTask.value}`)
+    function setStartLabel() {
+      startDateLabel.text(`Due: ${toDateTimeStr(tempTask.start)}`)
     }
-    function setDueDateLabel() {
-      dueDateLabel.text(`Due: ${toDateTimeStr(tempTask.due)}`)
-    }
-    setValueLabel()
-    setDueDateLabel()
+    setStartLabel()
 
     // Description input
     let textInput = h('input')
@@ -93,28 +61,12 @@ export default class EditTaskModal extends Modal {
           btnFn('+', factor, type),
         ])
     }
-
-    // Value Input
-    function incrementValueButton(sign, factor) {
-      return h('button').text(sign).on('click', e => {
-        tempTask.value += factor
-        setValueLabel()
-      })
-    }
-    let valueButtonSets = h('div')
-      .class('value-picker-button-set')
-      .inner([
-        buttonSet('10', incrementValueButton, 10),
-        buttonSet('5', incrementValueButton, 5),
-        buttonSet('1', incrementValueButton, 1),
-      ])
-    let valueInput = h('div').inner([valueLabel, valueButtonSets])
     
     // Date Input
     function incrementDateButton(sign, factor, type) {
       return h('button').text(sign).on('click', e => {
-        modDate(tempTask.due, type, factor)
-        setDueDateLabel()
+        modDate(tempTask.start, type, factor)
+        setStartLabel()
       })
     }
     let dateButtonSets = h('div')
@@ -124,7 +76,7 @@ export default class EditTaskModal extends Modal {
         buttonSet('Hours', incrementDateButton, 1),
         buttonSet('Minutes', incrementDateButton, 5),
       ])
-    let dueDateInput = h('div').inner([dueDateLabel, dateButtonSets])
+    let startDateInput = h('div').inner([startDateLabel, dateButtonSets])
     
     // Return value
     function returnTask() {
@@ -134,11 +86,8 @@ export default class EditTaskModal extends Modal {
       } else if (mode == 'clone') {
         return tempTask
       } else if (mode == 'edit') {
-        console.log(p)
         p.text = tempTask.text
-        p.value = tempTask.value
-        p.due = tempTask.due
-        console.log(p)
+        p.start = tempTask.start
         return p
       }
     }
@@ -148,10 +97,8 @@ export default class EditTaskModal extends Modal {
         descriptionLabel,
         textInput,
         dataList,
-        dueDateLabel,
-        dueDateInput,
-        valueLabel,
-        valueInput,
+        startDateLabel,
+        startDateInput,
       ]),
       h('div').class('modal-buttons').inner([
         h('button').text('OK').on('click', e => s.resolve(returnTask())),

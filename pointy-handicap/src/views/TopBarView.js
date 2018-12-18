@@ -59,10 +59,10 @@ export default class TopBarView extends View {
         h('div').class('top-band').inner([
           'Target: ',
           dayTarget,
-          ' Total: ',
+          ' - Progress: ',
+          percentageProgress,
+          ' - Total: ',
           totalScore,
-          ' Progress: ',
-          percentageProgress
         ]),
         pointsDone,
         pointsLeft,

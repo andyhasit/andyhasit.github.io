@@ -38,6 +38,8 @@ app.refresh = function() {
   })
 }
 
+app.now = new Date() //TODO: change every minute
+
 app.getSuggestions = function() {
   let names = []
   this.state['records'].forEach(i => names.push(i.text))
