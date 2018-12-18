@@ -1,5 +1,6 @@
 import {App, ModalContainer, Router} from '../../pillbug/dist/pillbug.js';
 import {getTotals} from './utils.js';
+import api from './api.js';
 
 
 //import MenuView from './views/MenuView';
@@ -13,16 +14,55 @@ app.router = new Router(app, 'page-container', routes);
 app.modalContainer = new ModalContainer(app, 'modal-container')
 //app.view(MenuView)
 
-app.db.ready().then(() => {  
-  app.refresh()
-  console.log('ok')
-})
-
 app.showModal = function(modalClass, props) {
   return app.modalContainer.showModal(modalClass, props)
 }
 
+const onLoadCallback = function(data) {
+  c.log(data)
+  app.data = data
+  this.data['totals'] = getTotals(app.data.records)
+  app.putTask({text: 'heyeee'}).then(() => {
+    this.emit('refresh', this.data)
+  });
+}
+api.onLoadCallback = onLoadCallback.bind(app)
 
+app.reloadData = function() {
+  api.loadInitialData()
+  /*
+  api.loadInitialData().then((data) => {
+    app.data = data
+    this.data['totals'] = getTotals(app.data.records)
+    c.log(this.data)
+    app.putTask({text: 'heyeee'}).then(() => {
+      this.emit('refresh', this.data)
+    });
+  })
+  */
+}
+
+app.putTask = function(task) {
+  api.create('tasks', task) //add key if using multiple
+  return api.flush().then(result => {
+    c.log(this.data)
+    this.data.tasks.push(result.new)
+    this.emit('refresh', this.data)
+  })
+}
+
+app.archiveTask = function(task, record) {
+  api.delete('tasks', task)
+  api.create('records', record)
+  return api.flush().then(result => {
+    this.data.records.push(result.new)
+    this.emit('refresh', this.data)
+  })
+}
+
+app.reloadData()
+
+/*
 app.refresh = function() {
   this.state = {}
   this.db.getAll('task').then(tasks => {
@@ -37,9 +77,13 @@ app.refresh = function() {
     })
   })
 }
+*/
+
 
 app.now = new Date() //TODO: change every minute
 
+
+/*
 app.getSuggestions = function() {
   let names = []
   this.state['records'].forEach(i => names.push(i.text))
@@ -66,6 +110,15 @@ app.putRecord = function(record) {
 }
 
 app.archiveTask = function(task, record) {
+
+  this.db.putRecord(record).then(record => {
+    this.db.delTask(task).then(e => {
+      this.refresh()
+    })
+  })
+}
+*/
+
   /*let record = {
     text: text,
     date: date,
@@ -73,9 +126,3 @@ app.archiveTask = function(task, record) {
     score: score
   }
   */
-  this.db.putRecord(record).then(record => {
-    this.db.delTask(task).then(e => {
-      this.refresh()
-    })
-  })
-}
