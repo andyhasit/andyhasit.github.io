@@ -8,6 +8,17 @@ import AppDatabase from './schema';
 import routes from './routes';
 
 
+
+Storage.prototype.setObject = function(key, value) {
+  this.setItem(key, JSON.stringify(value));
+}
+
+Storage.prototype.getObject = function(key) {
+  var value = this.getItem(key);
+  return value && JSON.parse(value);
+}
+
+
 const app = new App();
 app.db = AppDatabase;
 app.router = new Router(app, 'page-container', routes);
